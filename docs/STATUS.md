@@ -104,4 +104,4 @@ To look at the 10x city on either computer: `git fetch`, then `git switch experi
 ## Session ritual
 
 - **Start:** `git pull`, read this file, give the user a 3-line recap, and propose the next step.
-- **End:** update this file plus TASTE, IDEAS, GAME and DECISIONS, and save the conversation to `docs/history/`: the user exports the session from the app, then Claude runs `tools/transcript_to_md.py` on the export (usage at the top of the script) and reads the result before committing. It's published to GitHub, so the user decides each time. Then commit and `git push`.
+- **End:** update this file plus TASTE, IDEAS, GAME and DECISIONS, and save the conversation to `docs/history/` with `tools/transcript_to_md.py --chat-only` (usage at the top of the script). The user wants **only the conversation** saved: their messages and Claude's replies, no commands or output. That's what a later session needs to read between the lines. It's published to GitHub, so read the result for anything private before committing. Then commit and `git push`.
