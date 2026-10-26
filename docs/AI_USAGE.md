@@ -5,6 +5,7 @@ Not required for a friends-only game, but cheap to keep (and essential if we eve
 | Asset / content | Tool | Date | Notes (prompt file, license) |
 |---|---|---|---|
 | All code and docs | Claude Code (Claude Opus 5.5) | 2026-10-25 → | Ongoing |
+| Look-test voxel art (city, legs, wasteland) | Claude Code, generated from code (technique C9), no image AI | 2026-10-26 | `prototypes/look_test/main.gd` |
 
 ## Toolkit we have (checked 2026-10-25)
 
