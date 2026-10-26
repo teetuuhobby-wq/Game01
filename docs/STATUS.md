@@ -63,7 +63,7 @@ Propose the **first toy** with default answers, get a yes, then build it in a ne
 
 ## How to run things
 
-- **Look test:** double-click `prototypes/look_test/run.bat` (keys 1–4 camera, Space pause, Esc quit).
+- **Look test:** double-click `prototypes/look_test/run.bat` (keys 1–6 camera, Space pause, Esc quit).
 - **Screenshots for review:** `<godot_console.exe> --path prototypes/look_test -- --shots` saves 4 PNGs to `prototypes/look_test/shots/` and quits.
 - **Screenshot rule:** every `shots/` folder is git-ignored, because they're re-rendered often and would bloat the repo. Copy the ones worth keeping to `docs/screens/`, named `YYYY-MM-DD_topic.png`.
 

@@ -41,6 +41,7 @@ var rng := RandomNumberGenerator.new()
 var noise := FastNoiseLite.new()
 
 var city: Node3D
+var resident: Node3D
 var camera: Camera3D
 var legs := []
 var chimneys := []
@@ -61,6 +62,7 @@ func _ready() -> void:
 	_build_city()
 	_build_legs()
 	_add_smoke()
+	_add_resident()
 	if "--shots" in OS.get_cmdline_user_args():
 		help.visible = false
 		_run_shots()
@@ -140,7 +142,7 @@ func _make_world() -> void:
 
 	var layer := CanvasLayer.new()
 	help = Label.new()
-	help.text = "1-4: camera   Space: pause   Esc: quit"
+	help.text = "1-6: camera   Space: pause   Esc: quit"
 	help.position = Vector2(16, 12)
 	help.add_theme_font_size_override("font_size", 18)
 	layer.add_child(help)
@@ -735,11 +737,53 @@ func _update_camera() -> void:
 		2:
 			pos = c + Vector3(-70, 70, 90)
 			look = c + Vector3(25, -18, 0)
-		_:
+		3:
 			pos = c + Vector3(26, 14, 26)
 			look = c + Vector3(-4, 1, 0)
+		4:
+			# Close third-person: just behind the resident's shoulder
+			var r := resident.global_position
+			pos = r + Vector3(3.0, 1.9, 0.9)
+			look = r + Vector3(-6, 1.0, -0.4)
+		_:
+			# Zoomed-out diorama: the whole town from above, like a model
+			pos = c + Vector3(30, 42, 30)
+			look = c
+	var attr: CameraAttributesPractical = camera.attributes
+	attr.dof_blur_near_enabled = view != 4
+	attr.dof_blur_far_distance = 75.0 if view == 5 else 140.0
+	attr.dof_blur_near_distance = 40.0 if view == 5 else 30.0
+	camera.fov = 28.0 if view == 5 else (65.0 if view == 4 else 50.0)
 	camera.global_position = pos
 	camera.look_at(look)
+
+
+## A tiny voxel resident standing in the plaza, for judging camera views.
+func _add_resident() -> void:
+	resident = Node3D.new()
+	resident.position = Vector3(4.5, 0.5, -1.5)
+	city.add_child(resident)
+	var parts := [
+		[Vector3(0.18, 0.6, 0.18), Vector3(0, 0.3, -0.12), Color(0.30, 0.24, 0.20)],
+		[Vector3(0.18, 0.6, 0.18), Vector3(0, 0.3, 0.12), Color(0.30, 0.24, 0.20)],
+		[Vector3(0.30, 0.6, 0.48), Vector3(0, 0.9, 0), Color(0.16, 0.55, 0.58)],
+		[Vector3(0.14, 0.5, 0.14), Vector3(0, 0.95, -0.32), Color(0.16, 0.55, 0.58)],
+		[Vector3(0.14, 0.5, 0.14), Vector3(0, 0.95, 0.32), Color(0.16, 0.55, 0.58)],
+		[Vector3(0.36, 0.36, 0.36), Vector3(0, 1.42, 0), Color(0.88, 0.70, 0.55)],
+		[Vector3(0.40, 0.14, 0.40), Vector3(0.02, 1.64, 0), Color(0.25, 0.16, 0.10)],
+		[Vector3(0.26, 0.36, 0.40), Vector3(0.22, 0.95, 0), Color(0.55, 0.36, 0.20)],
+	]
+	for p in parts:
+		var mi := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = p[0]
+		var m := StandardMaterial3D.new()
+		m.albedo_color = p[2]
+		m.roughness = 0.9
+		bm.material = m
+		mi.mesh = bm
+		mi.position = p[1]
+		resident.add_child(mi)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -749,13 +793,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_2: view = 1
 			KEY_3: view = 2
 			KEY_4: view = 3
+			KEY_5: view = 4
+			KEY_6: view = 5
 			KEY_SPACE: paused = not paused
 			KEY_ESCAPE: get_tree().quit()
 
 
 func _run_shots() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://shots"))
-	for v in 4:
+	for v in 6:
 		view = v
 		for i in 50:
 			await get_tree().process_frame

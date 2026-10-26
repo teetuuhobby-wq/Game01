@@ -15,7 +15,7 @@ Direction chosen; next up is the **first playable toy**. Details: **[docs/STATUS
 ## Run it
 
 - **Look test:** install [Godot 4.7.2](https://godotengine.org) (`winget install GodotEngine.GodotEngine`), then double-click `prototypes/look_test/run.bat`.
-  Keys: `1`–`4` camera, `Space` pause, `Esc` quit.
+  Keys: `1`–`6` camera, `Space` pause, `Esc` quit.
 
 ## What's where
 
