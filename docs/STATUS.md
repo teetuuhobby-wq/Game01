@@ -2,7 +2,7 @@
 
 **New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/`.
 
-_Last updated: 2026-10-26, end of session 01 (home PC). Next session is likely on the work laptop._
+_Last updated: 2026-10-26, session 02 (work laptop): code review and fixes, hidden test runs. The open questions below are still unasked._
 
 ## Where we are
 
@@ -23,11 +23,16 @@ _Last updated: 2026-10-26, end of session 01 (home PC). Next session is likely o
 
 ## Suggested next step
 
-Propose the **first toy** with default answers, get a yes, then build it in a new Godot project at `game/` (leave `prototypes/look_test/` as reference). A likely scope:
+Propose the **first toy** with default answers, get a yes, then build it in a new Godot project at `game/` (leave `prototypes/look_test_hd/` as reference). A likely scope:
 - one resident you control, walking around the town deck **while the city walks and sways**
 - 3–5 other residents on simple daily loops (the "alive" feeling, done cheaply)
 - one tiny thing to do (e.g. fix the rain-catcher) plus some sound
 - meet the minimum bar in CLAUDE.md (runs, visible player, controls, one challenge, sound, can be won or progressed)
+
+Technical plan for the toy (Claude's recommendations from the session-02 review):
+- **Walking on a swaying deck:** run the player and residents in the city's own coordinates, as if the deck stood still, and add the walk and sway only to what's drawn. This avoids moving-platform physics bugs.
+- **Where you can walk:** the look test's `occ` map (which metre cells are built on) is a ready-made walk map for the player and residents. There is no collision yet.
+- **Drawing the city:** reuse the look test's visible-faces mesher (`Faces`, `_emit_grid`). It's what lets weaker PCs run it, and a bigger city needs it.
 
 ## Important rules learned (don't break these)
 
@@ -35,10 +40,11 @@ Propose the **first toy** with default answers, get a yes, then build it in a ne
 - **Never show the user story spoilers.** The payoff is gameplay-first, with a short story checked by blind critic agents ("predict the twist" and "find the clues" tests). The user judges it only by playing blind.
 - **Living world = the clever fake:** residents with routines and reactions, not deep AI.
 - Don't build Huge things. Ask before paid tools.
+- **Tests run hidden.** The user doesn't want the game popping up or grabbing their mouse and keyboard while Claude tests. Use `tools/godot_offscreen.ps1` (see "How to run things"). Open a visible window only when the user asks to see it.
 
 ## Art status (look test)
 
-**Current best: `prototypes/look_test_hd/`.** The user asked for Town to City-level detail, so this version uses **20 cm blocks (5 per metre)**, and a resident is 9 blocks tall. Houses are built from templates in code: recessed windows with shutters, flower boxes, arched doors, balconies, cornices, hip/gable/flat roofs with tile rows, chimneys, ivy, pergolas, washing lines. The plaza has a fountain, striped parasols and cafe tables, and 18 residents stroll on simple loops. It loads in ~5 s with about 285k visible blocks, fine on the home PC.
+**Current best: `prototypes/look_test_hd/`.** The user asked for Town to City-level detail, so this version uses **20 cm blocks (5 per metre)**, and a resident is 9 blocks tall. Houses are built from templates in code: recessed windows with shutters, flower boxes, arched doors, balconies, cornices, hip/gable/flat roofs with tile rows, chimneys, ivy, pergolas, washing lines. The plaza has a fountain, striped parasols and cafe tables, and 18 residents stroll on simple loops. It is drawn as chunked meshes of only the block faces you can see (about 520k faces), so it starts in ~4 s and runs at ~28 FPS even on the work laptop (11 FPS before that change).
 - Critic: **6/10 appeal, 5/10 closeness to Town to City** (up from 4/10 for the coarse version). After that review, the floating smoke cubes were removed and the grade warmed toward Town to City's amber (not re-scored yet).
 - Critic's remaining list for a later art pass: more variety between houses (heights, tints, more vines and flowers, stalls round the plaza); more mechanical detail on the legs and underside (the knee joints read as plain domes); the close camera still looks like "Minecraft Steve" at this block size, so lock the **diorama** camera or use finer blocks for characters.
 - The coarse version (`prototypes/look_test/`) is kept for comparison.
@@ -49,28 +55,33 @@ Propose the **first toy** with default answers, get a yes, then build it in a ne
 | | Home PC (main) | Work laptop |
 |---|---|---|
 | Use for | Everything: building, running, screenshots, art | Design, docs, code. Running the game may be slow. |
-| GPU | AMD RX 7900 XTX (24 GB) | Much weaker. **Design for the home PC**, as the user asked. |
-| Godot | 4.7.2 via winget: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe` | Install the same version: `winget install GodotEngine.GodotEngine`, then check it's 4.7.2 |
-| Python | `py -3` (plain `python` hits the Microsoft Store stub) | check |
-| Other | Blender 4.5, Krita 5.2, Node, VS Code | Git and Claude Code at minimum |
+| GPU | AMD RX 7900 XTX (24 GB) | Intel Iris Xe, much weaker (HD look test: ~28 FPS). **Design for the home PC**, as the user asked. |
+| Godot | 4.7.2 via winget: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe` | Same version and path (installed) |
+| Python | `py -3` (plain `python` hits the Microsoft Store stub) | `py -3`, with Pillow |
+| Other | Blender 4.5, Krita 5.2, Node, VS Code | Git and Claude Code |
 
 ### Setting up the work laptop (one time)
 
 1. Install **Git for Windows** (it includes Git Credential Manager), **Claude Code** and **Godot 4.7.2**.
 2. Clone: `git clone https://github.com/teetuuhobby-wq/Game01.git`
-3. Inside the repo folder, tell git who you are. Use the **same name and email as the home PC**, so commits match:
-   `git config user.name "<your name>"` and `git config user.email "<your email>"`
-   (On the home PC, `git config user.name` and `git config user.email` show the current values.)
+3. Inside the repo folder, tell git who you are. The repo is public, so use GitHub's private "noreply" address instead of your personal email:
+   `git config user.name "teetu"` and `git config user.email "338372523+teetuuhobby-wq@users.noreply.github.com"`
+   Done on the work laptop in session 02. **Home PC: run the same two commands there too.** Older commits keep the old address; rewriting history isn't worth it.
 4. The first `git push` opens a browser window to sign in to GitHub. Approve it once, and it's remembered after that.
 5. If a push is rejected ("fetch first"), the other computer pushed newer work. Run `git pull`, then push again.
 
-**On the laptop:** if the game is too slow, run Godot with `--rendering-method mobile` for a rough look. Don't redesign for the laptop. Final visual checks happen on the home PC.
+**On the laptop:** `--rendering-method mobile` doesn't help (measured: same FPS). Turning off shadows does, but it changes the look. Don't redesign for the laptop. Final visual checks happen on the home PC.
 
 ## How to run things
 
-- **Look test:** double-click `prototypes/look_test/run.bat` (keys 1–6 camera, Space pause, Esc quit).
-- **Screenshots for review:** `<godot_console.exe> --path prototypes/look_test -- --shots` saves 4 PNGs to `prototypes/look_test/shots/` and quits.
-- **Screenshot rule:** every `shots/` folder is git-ignored, because they're re-rendered often and would bloat the repo. Copy the ones worth keeping to `docs/screens/`, named `YYYY-MM-DD_topic.png`.
+- **Look test:** double-click `prototypes/look_test_hd/run.bat` (keys 1–6 camera, Space pause, Esc quit). The old coarse version is `prototypes/look_test/run.bat`.
+- **Testing (Claude): never pop the game up on the user's screen.** Run it hidden:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot_offscreen.ps1 <project_dir> [godot args] [-- game args]`
+  Godot then runs on a separate, never-shown Windows desktop. It can't cover the screen, take keyboard focus or catch the mouse, and sound is off. Screenshots and FPS match a visible run (checked pixel by pixel in session 02). Add `--fixed-fps 60` to make screenshots repeatable, so before/after images can be compared exactly. For logic-only tests, `--headless` is faster.
+- **Screenshots for review:** `... tools/godot_offscreen.ps1 prototypes/look_test_hd -- --shots` saves 6 PNGs to `prototypes/look_test_hd/shots/` and quits.
+- **Screenshot rule:** every `shots/` folder is git-ignored, because they're re-rendered often and would bloat the repo. Save the ones worth keeping to `docs/screens/` as **JPG** (about 4× smaller), named `YYYY-MM-DD_topic.jpg`:
+  `<godot_console.exe> --headless --script tools/to_jpg.gd -- <shot.png> docs/screens/YYYY-MM-DD_topic.jpg`
+  The older keepers are PNG; leave them.
 
 ## Session ritual
 

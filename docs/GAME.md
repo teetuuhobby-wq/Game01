@@ -21,7 +21,7 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
 - A cozy voxel diorama in the spirit of Town to City: white walls, terracotta roofs, warm golden-hour light, a tilt-shift miniature feel.
 - The wasteland outside is dusty, wide and quietly threatening (bones, wrecks, haze).
 - **The world feels alive:** residents go about their day whether or not you're watching. You're one of them, not the centre of the universe.
-- Art is built from code (voxels), so it stays consistent. Reference: `prototypes/look_test/`.
+- Art is built from code (voxels), so it stays consistent. Reference: `prototypes/look_test_hd/`.
 
 ## Engine
 

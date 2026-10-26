@@ -2,7 +2,7 @@ extends Node3D
 ## LOOK TEST: a voxel walking city crossing a wasteland.
 ## Everything is built from code, with no image or model files.
 ## Throwaway prototype, only here to judge the art style.
-## Keys: 1-4 change camera, Space pauses, Esc quits.
+## Keys: 1-6 change camera, Space pauses, Esc quits.
 ## Run with "-- --shots" to save screenshots to shots/ and quit.
 
 # --- Tuning (safe to tweak) ---

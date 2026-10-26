@@ -1,7 +1,5 @@
 # Game Project — Working Brief
 
-> Rename this file to `CLAUDE.md` and put it at the root of the game's repository, so every session reads it automatically.
-
 ## What this project is
 
 We are making a video game together, with you (the AI) doing most of the design, coding and asset work. I have lots of ideas and no fixed direction yet. Your first job is to help me **find** the game, not just build whatever I say first. Your second job is to build it in small, playable steps.
@@ -177,6 +175,7 @@ My imagination will outrun what we can build. You are allowed, and expected, to 
   - Look at screenshots from the actual in-game camera.
   - Where possible, play the feature yourself with simulated input against a clear pass bar (e.g. "can reach the exit," "can beat this enemy").
   - Show me screenshots or a playable build, not just a description of what you changed.
+  - Run your test builds hidden (`tools/godot_offscreen.ps1`), so the game never pops up on my screen or grabs my mouse and keyboard while I'm doing something else. Open a visible window only when I ask to see it.
 - **Ask before you assume.** Before building something new, ask me a few quick questions, each with your suggested default answer. Any gap I leave should become a question, not a generic guess.
 - **Every playable build meets a minimum bar:**
   - it runs without errors,
