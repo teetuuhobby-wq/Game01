@@ -18,6 +18,10 @@ _Last updated: 2026-10-25 (after Round 4: core desires confirmed, Discover compl
 | 2 | **Everyday life inside that home.** You're a person *living* there, not just a fighter, in a warm place you can shape. | medium | Round 3: picked "everyday life in the city." Round 2: "living his life in one of those cities." You like Town to City's cozy look and world sculpting. |
 | 3 | **A big, earned payoff moment.** The underdog revealed as one of the strongest, shown with spectacle. | medium | Round 1–2: Lucy in Chrono Ark, picked reveal + spectacle + status. **But** in Round 3 you *didn't* pick the hidden-power hero or the flashy fights from Regios. So this may be a *story climax* desire rather than "lots of combat." |
 
+## New signal (Round 5)
+
+- **A living world where you're "merely one of the residents."** Confidence: medium. You said it directly, and it fits desire #2 (everyday life) and your Regios "living his life" line. Guess: you want the town to feel real and bigger than you, which also makes the underdog payoff land harder (an ordinary resident, not the chosen one). Build it the cheap way: residents on daily routines and loops, not deep AI.
+
 ## Other signals
 
 - **Discovery: finding secret places.** low. One pick in Round 1 and nothing since. It would fit naturally (what's out in the wasteland?).

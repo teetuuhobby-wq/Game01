@@ -12,3 +12,7 @@ Every idea goes here, used or not. Nothing gets lost.
 | 2026-10-25 | **Make it as a mod of an existing game (e.g. Town to City), using REA** | 🟡 | Claude pushed back (see DECISIONS). Turning a calm city-builder into a combat game is a Huge total conversion: no source code, unknown engine and mod support, updates could break it, and every friend must own the game. Round 3 showed the real goal: **good-looking content**, not reverse engineering for its own sake. Better answer: pick an art style AI does reliably well (e.g. code-built voxels). |
 | 2026-10-25 | **The city itself walks** (from Regios): the home is a giant walking city crossing a wasteland | 🟢 | Strongest signal so far (core desire #1). |
 | 2026-10-25 | **Everyday life in the city between dangers** (from Regios) | 🟢 | Core desire #2. |
+| 2026-10-26 | **Pitch A, Strider Home: live on the walking city as a resident** | 🟢 | ✅ Chosen direction. |
+| 2026-10-26 | **Pitch B, Strider Nights: city kneels at night, things climb the legs** | 🟢 | Partly chosen. Some elements go into A. |
+| 2026-10-26 | **Pitch C, Heartwalker: you ARE the city** | 🟡 | Parked. Could return as a mini-game (e.g. steering the city during a crisis). |
+| 2026-10-26 | **The world feels alive; you're merely one resident** | 🟢 | Pushback: a truly "alive" town with deep NPCs is **Large**. The clever fake is residents with daily schedules, little loops and reactions to the city's steps, which is **Medium** and grows over time. |
