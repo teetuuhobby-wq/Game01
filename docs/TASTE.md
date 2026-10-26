@@ -37,7 +37,7 @@ _Last updated: 2026-10-26 (session 02: what part of "bigger city" matters)_
 
 ## New signals (after playtest 3)
 
-- **The city still feels very small, even from inside in first person.** This is the 4th time size has come up ("several times bigger", "still small", "10x", now "even 10x may not be big enough"). Confidence that it matters: **high**. **New reason given:** they want the city to hold **many different facilities: shops, a guild, etc.** Claude's read (not yet confirmed): "bigger" isn't really about area. It's about a city full of *places with a purpose*, enough for a whole daily life among them. A guild also hints at ranks and jobs, which could carry the underdog payoff (desire #3).
+- **The city still feels very small, even from inside in first person.** This is the 4th time size has come up ("several times bigger", "still small", "10x", now "even 10x may not be big enough"). Confidence that it matters: **high**. **New reason given:** they want the city to hold **many different facilities: shops, a guild, etc.** Claude's read, **confirmed by the user**: "bigger" isn't really about area. It's about a city full of *places with a purpose*, enough for a whole daily life among them. A guild also hints at ranks and jobs, which could carry the underdog payoff (desire #3).
 
 ## Other signals
 
