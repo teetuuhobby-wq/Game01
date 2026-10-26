@@ -2,13 +2,15 @@
 
 *My interpretation, not your raw words. Updated after every Discover round.*
 
-_Last updated: 2026-10-25 (after Round 3)_
+_Last updated: 2026-10-25 (after Round 4: core desires confirmed, Discover complete)_
 
 ## Hard requirement (not a desire, a deal-breaker)
 
 **It has to look good.** Your past AI game projects stalled on content quality. That's why modding appealed: borrowing art that already looks good. **Confidence: high** (you said so directly, and it explains the modding idea). Pick an art style and asset approach where AI can actually hit a decent bar *consistently*.
 
-## Core desires (proposed — waiting for your OK)
+## Core desires (✅ confirmed by you, Round 4)
+
+*Desire #3 note:* you worry that AI can't write a story good enough to deliver it, and you can't review the story without spoiling it. That's a **delivery risk, not a doubt about the desire.** Plan: let the payoff come through gameplay as much as words, and use blind critic agents plus blind playtests (see DECISIONS).
 
 | # | Desire | Confidence | Evidence |
 |---|---|---|---|
@@ -53,3 +55,5 @@ _Last updated: 2026-10-25 (after Round 3)_
 - You're making it for yourself and friends, on your own computer, and you can code a little.
 - You've tried several AI game projects before, and **all stalled on content quality.**
 - You have REA installed, plus the techniques doc.
+- You want to **play the story blind**, so you don't want to read spoilers. Respect that: keep story reviews spoiler-free for you.
+- You're open to getting more tools if needed (still ask before anything paid).
