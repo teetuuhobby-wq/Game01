@@ -1775,9 +1775,9 @@ func _build_workshop() -> void:
 		var y := 14 + int((z - (z0 - 3)) * 4 / float(z1 - z0 + 5))
 		for x in range(x0 - 1, x1 + 2):
 			sv(x, y, z, P.TERRA if posmod(z, 2) == 0 else P.TERRA2)
-	# A yellow sign board over the front, with an iron cog
-	box3(cx - 4, 10, z0 - 1, cx + 3, 12, z0 - 1, P.AWN1)
-	box3(cx - 1, 10, z0 - 2, cx, 12, z0 - 2, P.IRON)
+	# A yellow sign board over the front, with an iron cog (above head height: 2.2 m up)
+	box3(cx - 4, 11, z0 - 1, cx + 3, 13, z0 - 1, P.AWN1)
+	box3(cx - 1, 11, z0 - 2, cx, 13, z0 - 2, P.IRON)
 	# Workbench along the back, tools on the wall, crates, a lantern
 	box3(x0 + 3, 1, z1 - 4, x1 - 3, 3, z1 - 1, P.WOOD_DARK)
 	box3(x0 + 2, 4, z1 - 5, x1 - 2, 4, z1 - 1, P.WOOD)
@@ -1856,7 +1856,8 @@ func _valve_mesh() -> ArrayMesh:
 # ---------- Walk map: where people can stand ----------
 
 ## For every deck column: the floor height people stand on (blocks; stairs use their
-## step height) and whether there's head room above it (nothing in the next 8 blocks).
+## step height) and whether there's head room above it (nothing in the next 10 blocks,
+## 2 m: a person is 1.8 m, plus a hat).
 func _build_walk_map() -> void:
 	walk_floor.resize(NX * NZ)
 	walk_ok.resize(NX * NZ)
@@ -1869,7 +1870,7 @@ func _build_walk_map() -> void:
 			var f: int = stair_top.get(Vector2i(x, z), LEVELS[l][1])
 			var ok := gv(x, f, z) != 0
 			if ok:
-				for y in range(f + 1, f + 9):
+				for y in range(f + 1, f + 11):
 					if gv(x, y, z) != 0:
 						ok = false
 						break

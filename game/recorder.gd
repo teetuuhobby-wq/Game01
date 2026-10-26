@@ -238,7 +238,7 @@ func _update_overlay(_delta: float) -> void:
 	_overlay.text = "\n".join([
 		"FPS %d" % Engine.get_frames_per_second(),
 		"You: %.1f, %.1f m   floor %d (%s)%s" % [p.x, p.z, f, level, "   STUCK?" if _stuck_noted else ""],
-		"Camera: zoom %.2f   %.1f m away   lift %.0f deg   pulled in to %d%%" % [camera.zoom, camera.distance, rad_to_deg(camera.lift), roundi(camera.pull * 100)],
+		("Camera: FIRST PERSON" if camera.first_person > 0.5 else "Camera: zoom %.2f   %.1f m away   lift %.0f deg   pulled in to %d%%" % [camera.zoom, camera.distance, rad_to_deg(camera.lift), roundi(camera.pull * 100)]),
 		"Errand step %d   F8 flags %d" % [errand.step, _flags],
 		"Recording to %s" % folder.get_file(),
 	])

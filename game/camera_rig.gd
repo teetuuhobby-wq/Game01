@@ -1,11 +1,13 @@
 extends Camera3D
 ## THE CAMERA: follows you. Move the mouse to look around (click in the window first),
 ## or turn with Z and X. The mouse wheel (or + and -) zooms from close behind you out
-## to the whole-town diorama view. It only turns when you turn it.
+## to the whole-town diorama view; scroll all the way in and it glides into your
+## own eyes (first person), scroll out again to come back. It only turns when you turn it.
 ## When a wall or roof gets in the way, it first rises to look over it, and only moves
 ## in closer if that doesn't help. Every change is smoothed, so it never jumps.
 
 const T := preload("res://tuning.gd")
+const FP_ZOOM := -0.1       # zoom below 0 means first person
 
 var target: Node3D          # the player
 var world: Node3D           # world.gd, to see what blocks the view
@@ -16,6 +18,7 @@ var yaw := deg_to_rad(45.0)
 var distance := 0.0         # how far the camera actually is from what it looks at
 var lift := 0.0             # extra tilt (radians) to see over something in the way
 var pull := 1.0             # 1 = full distance; less when it had to move in closer
+var first_person := 0.0     # 0 = behind you, 1 = through your eyes (in between while gliding)
 var _pitch_offset := 0.0    # from the mouse moving up and down
 var _focus := Vector3.ZERO
 var _shake := 0.0
@@ -46,25 +49,37 @@ func _process(delta: float) -> void:
 	_time += delta
 	var sens := T.MOUSE_SENSITIVITY
 	yaw += controls.look.x * sens + controls.turn * T.CAMERA_TURN_SPEED * delta
+	# Looking up and down: a little behind you, much more through your own eyes
+	var fp_goal := zoom_goal < 0.0
 	_pitch_offset = clampf(_pitch_offset + controls.look.y * sens * (-1.0 if T.MOUSE_INVERT_Y else 1.0),
-			deg_to_rad(-12.0), deg_to_rad(30.0))
-	zoom_goal = clampf(zoom_goal + controls.zoom_steps * 0.07, 0.0, 1.0)
+			deg_to_rad(-72.0 if fp_goal else -12.0), deg_to_rad(58.0 if fp_goal else 30.0))
+	var steps: float = controls.zoom_steps
+	if steps < 0.0 and zoom_goal <= 0.001:
+		zoom_goal = FP_ZOOM            # scrolled all the way in: into your own eyes
+	elif steps > 0.0 and zoom_goal < 0.0:
+		zoom_goal = 0.0                # and back out over your shoulder
+		_pitch_offset = clampf(_pitch_offset, deg_to_rad(-12.0), deg_to_rad(30.0))
+	elif zoom_goal >= 0.0:
+		zoom_goal = clampf(zoom_goal + steps * 0.07, 0.0, 1.0)
 	zoom = lerpf(zoom, zoom_goal, 1.0 - exp(-8.0 * delta))
+	first_person = clampf(zoom / FP_ZOOM, 0.0, 1.0)
+	var tz := maxf(zoom, 0.0)
 
 	var goal := target.global_position + Vector3(0, 1.2, 0)
 	if _focus.distance_to(goal) > 40.0:
 		_focus = goal   # the city looped back: jump with it instead of flying across
 	_focus = _focus.lerp(goal, 1.0 - exp(-10.0 * delta))
 
-	var dist := T.CAMERA_NEAR_DISTANCE * pow(T.CAMERA_FAR_DISTANCE / T.CAMERA_NEAR_DISTANCE, zoom)
-	var pitch := clampf(deg_to_rad(lerpf(12.0, 43.0, zoom)) + _pitch_offset, deg_to_rad(4.0), deg_to_rad(80.0))
+	var dist := T.CAMERA_NEAR_DISTANCE * pow(T.CAMERA_FAR_DISTANCE / T.CAMERA_NEAR_DISTANCE, tz)
+	var view_pitch := deg_to_rad(lerpf(12.0, 43.0, tz)) + _pitch_offset   # how far down you look
+	var pitch := clampf(view_pitch, deg_to_rad(4.0), deg_to_rad(80.0))
 
 	# Something in the way? Try looking from a bit higher or lower first (over a wall,
 	# under a parasol); if no angle clears the view, use whichever sees furthest and
 	# slide in to there. Changes are gentle, so the camera never jumps.
 	var want_lift := 0.0
 	var clear := 1.0
-	if zoom < 0.6:
+	if tz < 0.6 and first_person < 0.5:
 		clear = _clear_line(pitch, dist)
 		if clear < 0.97:
 			var best := clear
@@ -96,17 +111,30 @@ func _process(delta: float) -> void:
 	distance = offset.length()
 	_shake = maxf(0.0, _shake - delta * 0.8)
 	var wobble := Vector3(sin(_time * 31.0), sin(_time * 27.0), 0) * _shake
-	global_position = _focus + offset + wobble
-	look_at(_focus)
-	fov = lerpf(62.0, 28.0, zoom)
+	var behind := _focus + offset + wobble
+	if first_person <= 0.0:
+		global_position = behind
+		look_at(_focus)
+	else:
+		# Glide between over-the-shoulder and your eyes, looking where the mouse points
+		var fp := smoothstep(0.0, 1.0, first_person)
+		var eye: Vector3 = target.global_position + Vector3(0, T.EYE_HEIGHT + target.body.position.y, 0) + wobble * 0.5
+		var cp := clampf(view_pitch, deg_to_rad(-60.0), deg_to_rad(70.0))
+		var look_dir := -Vector3(cos(cp) * cos(yaw), sin(cp), cos(cp) * sin(yaw))
+		global_position = behind.lerp(eye, fp)
+		look_at(_focus.lerp(eye + look_dir * 10.0, fp))
+		if first_person > 0.5 and not target.moving:
+			target.face(target.get_parent().global_transform.basis.inverse() * look_dir)
+	target.set_first_person(first_person > 0.5)
+	fov = lerpf(lerpf(62.0, 28.0, tz), T.FIRST_PERSON_FOV, first_person)
 	target.set_ring_scale(maxf(1.0, dist / 20.0))
 
-	# Tilt-shift blur when zoomed out (the miniature look); none when close
-	_dof.dof_blur_near_enabled = zoom > 0.55
+	# Tilt-shift blur when zoomed out (the miniature look); none when close or in first person
+	_dof.dof_blur_near_enabled = tz > 0.55
 	_dof.dof_blur_near_distance = dist * 0.68
 	_dof.dof_blur_near_transition = dist * 0.2
 	_dof.dof_blur_far_enabled = true
-	_dof.dof_blur_far_distance = dist * 1.25 + 10.0
+	_dof.dof_blur_far_distance = lerpf(dist * 1.25 + 10.0, 150.0, first_person)
 	_dof.dof_blur_far_transition = dist * 0.8 + 20.0
 
 

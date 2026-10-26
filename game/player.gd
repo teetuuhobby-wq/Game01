@@ -62,6 +62,21 @@ func _hat() -> MeshInstance3D:
 	return world._mi(world._cubes(pts, cols, vs, true))
 
 
+## In first person you see through your own eyes, so your body and ring are hidden.
+func set_first_person(on: bool) -> void:
+	body.visible = not on
+	_ring.visible = not on
+
+
+## Turn to face a direction on the city (used in first person, so you face where you look).
+func face(d: Vector3) -> void:
+	d.y = 0.0
+	if d.length_squared() < 0.0001:
+		return
+	facing = d.normalized()
+	body.rotation.y = atan2(-facing.z, facing.x)
+
+
 ## Your ring grows when the camera is far away, so you can always find yourself.
 func set_ring_scale(s: float) -> void:
 	_ring.scale = Vector3(s, 1.0, s)

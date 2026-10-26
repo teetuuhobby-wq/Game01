@@ -8,11 +8,10 @@ _Last updated: 2026-10-26, session 02 (work laptop): code review and fixes, hidd
 
 - ✅ **Phase 1: Discover**: done. Three core desires confirmed (see TASTE.md).
 - ✅ **Phase 2: Pick a direction**: done. **"Strider Home"**: you're one ordinary resident of a living walking city crossing a dangerous wasteland, plus the night danger from pitch B. See GAME.md.
-- ➡️ **Phase 3: First playable toy**: built (`game/`) and **playtested twice**. Playtest 2 (recorded, 4 F8 flags) found legs through the streets, the camera in walls, doors too small, and a lamp blocking stairs; all fixed. **Open: the camera.** The user raised first person; see the open questions.
+- ➡️ **Phase 3: First playable toy**: built (`game/`) and **playtested twice**. Playtest 2 (recorded, 4 F8 flags) found legs through the streets, the camera in walls, doors too small, and a lamp blocking stairs; all fixed. **Camera decided: both.** Scroll all the way in for first person (built and tested). Next: the user playtests first person and reviews it.
 
 ## Open questions for the user (ask these first, one or two at a time)
 
-- **Camera (raised in playtest 2):** first person only, a better third person (cutaway roofs), or both (scroll all the way in = first person)? *Claude's lean: both.* The user plays at street level 92% of the time, and first person never clips, while the diorama stays for admiring the town.
 
 0. **City size (raised last thing in session 01):** the user said the HD city "feels a bit small, needs to be several times the current size." **Answered in session 02: (b) more streets and districts matters most; (a) and (c) are liked too. The user picked the terraced city (`prototypes/look_test_terraced/`). They then asked to see 10x: built on branch `experiment/city-10x`, too heavy as is (see DECISIONS). **Look tests are now frozen. The first toy uses the terraced city; revisit size after the user has walked around in it.** Original question was: (a) the awe of a *huge* walking city seen from outside, (b) more streets and districts to live in and wander, or (c) more people and bustle? Then offer options with sizes:
    - **Bigger deck with chunked rendering:** you see one neighbourhood at a time in diorama view. Medium.
@@ -79,7 +78,7 @@ Technical plan for the toy (Claude's recommendations from the session-02 review)
 
 ## How to run things
 
-- **The game (first toy):** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms, Z X turn. F8 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning: `game/tuning.gd`.
+- **The game (first toy):** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms (all the way in = first person), Z X turn. F8 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning: `game/tuning.gd`.
 - **Playtests (recorded automatically):** every normal play session writes `game/playtests/<date_time>/`. It's git-ignored, so it stays on the machine it was played on. The folder holds:
   - `events.csv`: start here. It lists the user's **F8 flags** with their notes and a screenshot (`flag_NN.png`), plus automatic flags: `stuck`, `camera_jump`, `low_fps` and errand steps.
   - `log.csv`: 10 times a second, your position, floor, the camera (zoom, distance, lift, pull, yaw), FPS and errand step.

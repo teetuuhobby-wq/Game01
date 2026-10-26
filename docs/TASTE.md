@@ -29,7 +29,7 @@ _Last updated: 2026-10-26 (session 02: what part of "bigger city" matters)_
 
 ## New signals (playtest 2, session 02)
 
-- **They want to be *in* the city, at human scale.** Confidence: medium–high. They played **92% of the time fully zoomed in** (street level) and asked to discuss a **first-person** camera. They also noticed human-scale details ("the door is smaller than me") and things that break the illusion up close (legs clipping through walls). This fits "merely one resident" and "more streets to wander": the diorama is for admiring, but they *live* at street level.
+- **They want to be *in* the city, at human scale.** Confidence: **high (confirmed by the user: "You are correct about this")**. They played **92% of the time fully zoomed in** (street level) and asked to discuss a **first-person** camera. They also noticed human-scale details ("the door is smaller than me") and things that break the illusion up close (legs clipping through walls). This fits "merely one resident" and "more streets to wander": the diorama is for admiring, but they *live* at street level.
 
 ## Other signals
 

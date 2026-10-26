@@ -12,6 +12,8 @@ const CAMERA_TURN_SPEED := 1.6   # Z and X keys, how fast the camera turns
 const MOUSE_LOOK := true         # click in the window, then move the mouse to look around
 const MOUSE_SENSITIVITY := 0.0035   # how far the camera turns per bit of mouse movement
 const MOUSE_INVERT_Y := false    # true = push the mouse up to look down
+const FIRST_PERSON_FOV := 75.0   # how wide you see through your own eyes (degrees)
+const EYE_HEIGHT := 1.55         # metres; you're 1.8 m tall
 const STOMP_SHAKE := 0.06        # how much the camera shakes when a giant foot lands
 
 # --- The walking city ---
