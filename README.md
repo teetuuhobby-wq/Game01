@@ -4,7 +4,7 @@ You're one ordinary resident of a small **walking city** crossing a dangerous wa
 
 A hobby game for me and my friends, made with Claude Code in **Godot 4.7**.
 
-![The walking city look test](docs/screens/2026-10-26_look-test_wide.png)
+![The walking city look test](docs/screens/2026-10-26_hd_wide.png)
 
 *Early look test: everything here is built from code, with no image files. Not final art.*
 
@@ -14,7 +14,7 @@ Direction chosen; next up is the **first playable toy**. Details: **[docs/STATUS
 
 ## Run it
 
-- **Look test:** install [Godot 4.7.2](https://godotengine.org) (`winget install GodotEngine.GodotEngine`), then double-click `prototypes/look_test/run.bat`.
+- **Look test:** install [Godot 4.7.2](https://godotengine.org) (`winget install GodotEngine.GodotEngine`), then double-click `prototypes/look_test_hd/run.bat` (older coarse version: `prototypes/look_test/`).
   Keys: `1`–`6` camera, `Space` pause, `Esc` quit.
 
 ## What's where

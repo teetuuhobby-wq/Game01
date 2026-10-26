@@ -12,7 +12,7 @@ _Last updated: 2026-10-26, end of session 01 (home PC)_
 
 ## Open questions for the user (ask these first, one or two at a time)
 
-1. **Camera for the first toy (and the game):** a close third-person view behind the resident, or a zoomed-out diorama view? Compare `docs/screens/2026-10-26_camera_*.png`. *Claude's default changed after seeing them: **diorama**. It looks far better with today's art and shows the whole living town; close-up exposes the coarse voxels and would need much more art work. Possible middle ground: diorama with a zoom-in.*
+1. **Camera for the first toy (and the game):** a close third-person view behind the resident, or a zoomed-out diorama view? Compare `docs/screens/2026-10-26_hd_diorama.png` and `2026-10-26_hd_close.png`. *Claude's default changed after seeing them: **diorama**. It looks far better with today's art and shows the whole living town; close-up exposes the coarse voxels and would need much more art work. Possible middle ground: diorama with a zoom-in.*
 2. **Which pitch-B elements?** Claude suggested: the city kneels at night and things climb the legs. Not confirmed yet.
 3. **Nano Banana Pro access:** the Gemini app or website (Claude writes prompts, the user pastes images back) or an API key (Claude generates directly, with a cost estimate first)? Only matters once we do concept art.
 
@@ -33,11 +33,11 @@ Propose the **first toy** with default answers, get a yes, then build it in a ne
 
 ## Art status (look test)
 
-`prototypes/look_test/` is a code-built voxel walking city (Godot 4.7). A critic scored the first pass 4/10 appeal. After one fix pass it's promising, but not at the Town to City bar yet. Known gaps for a later art pass:
-- buildings are plain boxes: use finer voxels and hand-designed building templates (doors, balconies, arches, stairs, washing lines)
-- the wasteland scrub cubes are too big and too many
-- the wide-shot sky is still a flat warm band
-- idea: Nano Banana Pro concept art → Claude rebuilds it in code (technique C8)
+**Current best: `prototypes/look_test_hd/`.** The user asked for Town to City-level detail, so this version uses **20 cm blocks (5 per metre)**, and a resident is 9 blocks tall. Houses are built from templates in code: recessed windows with shutters, flower boxes, arched doors, balconies, cornices, hip/gable/flat roofs with tile rows, chimneys, ivy, pergolas, washing lines. The plaza has a fountain, striped parasols and cafe tables, and 18 residents stroll on simple loops. It loads in ~5 s with about 285k visible blocks, fine on the home PC.
+- Critic: **6/10 appeal, 5/10 closeness to Town to City** (up from 4/10 for the coarse version). After that review, the floating smoke cubes were removed and the grade warmed toward Town to City's amber (not re-scored yet).
+- Critic's remaining list for a later art pass: more variety between houses (heights, tints, more vines and flowers, stalls round the plaza); more mechanical detail on the legs and underside (the knee joints read as plain domes); the close camera still looks like "Minecraft Steve" at this block size, so lock the **diorama** camera or use finer blocks for characters.
+- The coarse version (`prototypes/look_test/`) is kept for comparison.
+- Idea for later: Nano Banana Pro concept art → Claude rebuilds it in code (technique C8).
 
 ## Machines
 
