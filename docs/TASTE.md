@@ -39,6 +39,8 @@ _Last updated: 2026-10-26 (session 02: what part of "bigger city" matters)_
 
 - **The city still feels very small, even from inside in first person.** This is the 4th time size has come up ("several times bigger", "still small", "10x", now "even 10x may not be big enough"). Confidence that it matters: **high**. **New reason given:** they want the city to hold **many different facilities: shops, a guild, etc.** Claude's read, **confirmed by the user**: "bigger" isn't really about area. It's about a city full of *places with a purpose*, enough for a whole daily life among them. A guild also hints at ranks and jobs, which could carry the underdog payoff (desire #3).
 
+- **Going out with people you know.** For expeditions they picture a party of **neighbours or guild members as AI companions**. Read: they want bonds with the town's people to carry into the adventure, not just a lone hero. Confidence: medium (fits desire #2, and the earlier soft signal of "clever plans with friends").
+
 ## Other signals
 
 - **Discovery: finding secret places.** low. One pick in Round 1 and nothing since. It would fit naturally (what's out in the wasteland?).
