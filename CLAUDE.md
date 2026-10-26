@@ -201,8 +201,8 @@ My imagination will outrun what we can build. You are allowed, and expected, to 
 
 ## Every session
 
-- **At the start:** read `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md`. Give me a 3-line recap of where we are and propose the next step.
-- **At the end:** update the docs, commit, and tell me in a few lines:
+- **At the start:** `git pull` (I switch between my home PC and a work laptop), then read `docs/STATUS.md` (where we left off, open questions, machine notes), `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md`. Give me a 3-line recap of where we are and propose the next step.
+- **At the end:** update the docs (including `docs/STATUS.md`), save the conversation to `docs/history/` (see STATUS.md), commit, `git push`, and tell me in a few lines:
   - what we did,
   - what you learned about what I like,
   - what you suggest next time.
