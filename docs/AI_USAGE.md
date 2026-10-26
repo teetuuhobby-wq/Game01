@@ -19,4 +19,5 @@ Not required for a friends-only game, but cheap to keep (and essential if we eve
 | **AMD RX 7900 XTX (24 GB)** | Local GPU | Plenty for Godot/Blender. Local image AI (ComfyUI) is possible on AMD + Windows, but setup is fiddlier than on NVIDIA. Only try it if we need it. |
 | **Python 3.14, Node.js, Git, VS Code** | Scripts, pipelines, web builds | |
 | **REA** | Reverse engineering | Not needed for the main game; available for side experiments |
-| *Audio* | — | Nothing yet. Free first: code-synthesized SFX, CC0 sound packs. Ask before any paid audio tool. |
+| *Audio* | `game/sfx.gd` | All sounds are made from code (footsteps, stomps, wind, chime, clunk, bell); no sound files. Ask before any paid audio tool. |
+

@@ -8,7 +8,7 @@ _Last updated: 2026-10-26, session 02 (work laptop): code review and fixes, hidd
 
 - ✅ **Phase 1: Discover**: done. Three core desires confirmed (see TASTE.md).
 - ✅ **Phase 2: Pick a direction**: done. **"Strider Home"**: you're one ordinary resident of a living walking city crossing a dangerous wasteland, plus the night danger from pitch B. See GAME.md.
-- ➡️ **Phase 3: First playable toy**: **next.** Nothing built yet except a throwaway art test.
+- ➡️ **Phase 3: First playable toy**: **built, waiting for the user to play it** (`game/`, double-click `game/run.bat`). Scope is in GAME.md. Next: the user plays it; their complaints are the next to-do list.
 
 ## Open questions for the user (ask these first, one or two at a time)
 
@@ -76,6 +76,12 @@ Technical plan for the toy (Claude's recommendations from the session-02 review)
 **On the laptop:** `--rendering-method mobile` doesn't help (measured: same FPS). Turning off shadows does, but it changes the look. Don't redesign for the laptop. Final visual checks happen on the home PC.
 
 ## How to run things
+
+- **The game (first toy):** double-click `game/run.bat`. Keys: WASD or arrows walk, Shift runs, E uses, mouse wheel or + - zooms, right-drag or Z X turns the camera, Esc quits. Tuning: `game/tuning.gd`.
+- **Game tests (Claude):**
+  - Logic, headless (seconds): `<godot_console.exe> --headless --fixed-fps 30 --path game -- --autoplay`. A bot plays the whole errand along the shortest route; exit code 0 = done (2 stuck, 3 no route, 4 too slow). Last result: done in 43 s of play.
+  - With pictures, hidden: `... tools/godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots` saves the in-game camera's views at the start and at each step to `game/shots/`.
+  - Performance on the laptop: ~20 FPS.
 
 - **Look test:** double-click `prototypes/look_test_hd/run.bat` (keys 1–6 camera, Space pause, Esc quit). The old coarse version is `prototypes/look_test/run.bat`.
 - **Testing (Claude): never pop the game up on the user's screen.** Run it hidden:

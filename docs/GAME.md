@@ -1,7 +1,7 @@
 # GAME — the current game in one page
 
 **Working title:** Strider Home *(placeholder)*
-**Status:** Direction chosen (2026-10-26). Next up: **Phase 3, first playable toy.**
+**Status:** Phase 3. The **first playable toy** is built (`game/`) and waiting for the user to play it.
 
 ## Pitch (one sentence)
 
@@ -27,7 +27,14 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
 
 **Godot 4.7** (already installed). It's strong at 3D voxel looks, runs great on your PC, and I can launch it and take screenshots myself. Friends get a zipped Windows build. A web build is possible later but limited.
 
-## Current milestone: Phase 3, first toy
+## Current milestone: Phase 3, first toy: "Walk your town while it walks" (scope locked 2026-10-26)
 
-- **In:** TBD (agreeing on it now)
-- **Out:** everything else until the toy feels good
+- **In:**
+  - You, walking the terraced city's streets and stairs (WASD, Shift to run). You can't pass through houses or walls, or off the edge.
+  - The city walks and sways under you, forever: the desert repeats seamlessly.
+  - 50 neighbours on their routes, who stop and look at you as you pass.
+  - One errand: Mira asks you to fetch a spare valve from Bram's workshop and fit it on the rain-catcher. A gold marker, an edge arrow and a goal line show the way.
+  - A follow camera: the mouse wheel zooms from close behind you out to the diorama; right-drag or Z/X turns it.
+  - Sounds made from code: footsteps, giant stomps, wind, chime, clunk, bell.
+  - `game/tuning.gd` for speeds, sway, camera and volumes.
+- **Out (until the toy feels good):** night and the climbing creatures, trips down to the desert, building, inventory, real dialogue, saving, a bigger city, and the art polish list.

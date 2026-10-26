@@ -14,6 +14,7 @@ Direction chosen; next up is the **first playable toy**. Details: **[docs/STATUS
 
 ## Run it
 
+- **The first playable toy:** double-click `game/run.bat`. WASD or arrows walk, Shift runs, E uses, mouse wheel zooms, right-drag turns the camera, Esc quits.
 - **Look test:** install [Godot 4.7.2](https://godotengine.org) (`winget install GodotEngine.GodotEngine`), then double-click `prototypes/look_test_hd/run.bat` (older coarse version: `prototypes/look_test/`).
   Keys: `1`–`6` camera, `Space` pause, `Esc` quit.
 
@@ -30,5 +31,6 @@ Direction chosen; next up is the **first playable toy**. Details: **[docs/STATUS
 | `docs/PITCHES.md` | The three concepts we chose between |
 | `docs/history/` | Past conversations, kept for context |
 | `docs/screens/` | Screenshots worth keeping |
-| `prototypes/` | Throwaway experiments |
+| `game/` | **The game** (first playable toy). Tuning numbers: `game/tuning.gd` |
+| `prototypes/` | Throwaway experiments (look tests) |
 | `tools/` | Helper scripts |
