@@ -22,6 +22,11 @@ _Last updated: 2026-10-25 (after Round 4: core desires confirmed, Discover compl
 
 - **A living world where you're "merely one of the residents."** Confidence: medium. You said it directly, and it fits desire #2 (everyday life) and your Regios "living his life" line. Guess: you want the town to feel real and bigger than you, which also makes the underdog payoff land harder (an ordinary resident, not the chosen one). Build it the cheap way: residents on daily routines and loops, not deep AI.
 
+## New signals (Round 6, end of session 01)
+
+- **Detail matters.** You asked for Town to City-level resolution, and the finer blocks were "definitely better." Confidence: high. This backs up the "has to look good" requirement.
+- **Scale: "the city feels a bit small, several times bigger."** Confidence: low–medium (one statement, but it fits Regios, whose walking cities are huge). Guess: you want the city to feel like a *place* you could get lost in, and big enough that "merely one resident" is true. Ask what part before building.
+
 ## Other signals
 
 - **Discovery: finding secret places.** low. One pick in Round 1 and nothing since. It would fit naturally (what's out in the wasteland?).

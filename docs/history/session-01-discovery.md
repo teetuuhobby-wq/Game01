@@ -1,6 +1,6 @@
-# Session 01: Discovery → direction chosen (2026-10-25 / 26)
+# Session 01: Discovery → direction → HD look test (2026-10-25 / 26)
 
-Cleaned transcript of the first Claude Code session: your messages and Claude's replies.
+Cleaned transcript of a Claude Code session: the user's messages and Claude's replies.
 Tool calls are shown as one-line notes; hidden reasoning, tool output and system text are left out.
 Read it for *how the user thinks*: what they reacted to, what they picked, what they pushed back on.
 
@@ -387,3 +387,244 @@ https://github.com/teetuuhobby-wq/Game01.git
 ### 🤖 Claude
 
 > _[Bash] Check repo visibility, contents and git credentials_
+> _[mcp__ccd_session_mgmt__export_transcript] _
+> _[Bash] Unzip the transcript export into the scratchpad_
+> _[Bash] Inspect the transcript format_
+> _[Bash] Convert transcript to clean markdown and scan for secrets_
+I've turned our chat into a clean, readable history file. Reading it through before anything goes to GitHub.
+
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\history\session-01-discovery.md_
+The history reads well and has no secrets or personal details. Now I'm writing the handoff doc a new session will start from.
+
+> _[Bash] Copy the transcript converter into the repo_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\tools\transcript_to_md.py_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\tools\transcript_to_md.py_
+> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+Now I'm adding one line to your CLAUDE.md so every new session finds STATUS.md, plus a line-ending fix so the two computers don't fight over files.
+
+> _[Grep] _
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\CLAUDE.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\CLAUDE.md_
+> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\.gitattributes_
+> _[Bash] Commit handoff files and push to GitHub_
+> _[Bash] Confirm the push landed and tree is clean_
+Everything is on GitHub at **teetuuhobby-wq/Game01**. The repo is private, and I confirmed GitHub has exactly what's on this PC.
+
+## What a new session gets
+
+- **[docs/STATUS.md](docs/STATUS.md): the "start here" file.** It covers where we are (Phase 3 next), the 3 open questions to ask you first (with my defaults), the suggested first toy, the rules not to break, art notes, and notes on both machines.
+- **[CLAUDE.md](CLAUDE.md):** I changed one bullet in your brief's "Every session" part. New sessions now `git pull` and read STATUS.md first. At the end they update it, save the chat and push.
+- **[docs/history/session-01-discovery.md](docs/history/session-01-discovery.md):** our whole conversation as a readable file, with every message you wrote and every reply. I left out hidden reasoning and raw tool output, and checked that it has no passwords, keys or email address.
+- **[tools/transcript_to_md.py](tools/transcript_to_md.py):** a script that turns each future session into a history file the same way.
+- **Line-ending fix:** without it, Windows and git can flag every file as "changed" when you switch computers.
+
+The full raw export, images included, is also at `C:\Users\teetu\Downloads\session-export-1792995946765.zip` on this PC. I didn't upload it.
+
+## Setting up the work laptop (one time)
+
+1. Install **Git**, **Claude Code** and **Godot 4.7.2**. Use the same Godot version as home: `winget install GodotEngine.GodotEngine`, then check the version.
+2. Clone the repo:
+```bash
+git clone https://github.com/teetuuhobby-wq/Game01.git
+```
+3. Open the folder in Claude Code and say "let's continue." It will pull, read STATUS.md and recap.
+
+**About the laptop:** as you asked, I'm designing for this PC. The laptop is fine for design, docs and code work. If the game runs slowly there, STATUS.md has a low-graphics mode. Final visual checks happen at home.
+
+**One habit to keep:** finish each session with "wrap up and push," or the other computer won't see the latest work.
+
+When you're ready, the first open question is waiting: a **close third-person camera** (feel the deck sway) or a **zoomed-out diorama** view?
+
+
+---
+
+## 🧑 User
+
+Do you have any other suggestions for the GitHub before we move on?
+
+
+### 🤖 Claude
+
+Yes, a few. Three are worth doing now (about 5 minutes), and the rest can wait until they matter.
+
+## Worth doing now
+
+**1. A README for the repo's front page.** Right now GitHub shows a bare file list. I'd add a one-paragraph pitch, a screenshot of the walking city, "how to run it," and a pointer to STATUS.md. It's handy for you, and it's the first thing friends see if you ever invite them.
+
+**2. Laptop sign-in notes.** This one actually matters. Your git name and email are saved only on *this* PC, not in the repo. On the laptop, commits would fail or show up unnamed, and git will also ask you to sign in to GitHub the first time you push. I'd add the exact steps to STATUS.md so it's painless.
+
+**3. A screenshot rule to keep the repo small.** Every time I re-render the look test, git saves a new ~3 MB copy of the screenshots forever, and that adds up fast. The fix is to keep the automatic screenshots out of git and save only the "keepers" we want to remember in a `docs/screens/` folder.
+
+## Later, when they matter
+
+- **Builds for friends:** once there's something playable, upload zipped builds to **GitHub Releases** or a private **itch.io** page so friends can just download and play. *(When the first toy works.)*
+- **Big asset storage (Git LFS):** a special mode for large files like music and 3D models. *(Only if we start adding lots of big files. Code-built art doesn't need it.)*
+- **Automatic builds:** GitHub could build the game every time we push. That's nice to have, but it's over-engineering for now, so I'd skip it.
+
+**Keep the repo private.** Your conversation history is in there, and it's your thinking out loud. If you ever want it public, we'd remove `docs/history/` first.
+
+
+---
+
+## 🧑 User
+
+Yes, do all three quick GitHub fixes now: README, laptop git sign-in notes, and the screenshot rule.
+
+
+### 🤖 Claude
+
+> _[Bash] Save keeper screenshots and stop tracking auto-shots_
+> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\README.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Bash] Commit the three fixes and push_
+All three fixes are done and pushed, and GitHub matches this PC exactly. ✅
+
+1. **README:** the repo's front page now shows a one-line pitch, the walking-city screenshot, how to run it, and a "what's where" map that points to STATUS.md. → [README.md](README.md)
+2. **Laptop sign-in notes:** STATUS.md has 5 steps: install, clone, set your git name and email (with how to look them up on this PC), the one-time browser sign-in on first push, and what to do if a push gets rejected because the other computer pushed first. I didn't write your email into the file, just the command that shows it.
+3. **Screenshot rule:** auto-rendered `shots/` folders are no longer saved in git. I kept three look-test screenshots in [docs/screens/](docs/screens/) with dated names, and STATUS.md explains the rule so future sessions follow it.
+
+The old screenshots are still in the repo's history (git keeps the past), but from now on the repo won't grow every time I re-render.
+
+Now we can get back to the game. 🦿🏙️ The first toy's camera is up to you.
+
+
+---
+
+## 🧑 User
+
+What do you mean by Camera for the first toy? What is first toy and are you talking about the camera for the game?
+
+
+### 🤖 Claude
+
+Good question. I jumped ahead with jargon there. Rather than describe the two options, I'll show them: I'm adding a little resident to the look test and rendering both camera views.
+
+> _[Grep] _
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Bash] Render all six camera views_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_4.png_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_5.png_
+The diorama view came out really well. The close view put the camera inside a house wall, so I'm moving the resident and re-rendering.
+
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Bash] Re-render with the resident moved_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_4.png_
+> _[Bash] Save camera screenshots, commit and push_
+> _[Bash] Find the camera default line in STATUS_
+> _[Bash] Update the camera default in STATUS and push_
+> _[SendUserFile] _
+Sorry, that was jargon. Here's what I meant:
+
+**"First toy"** is Phase 3 in your CLAUDE.md: the **smallest playable version of the game**. It's not the whole game, just one character and one or two things to do, so we can check that moving around *feels* good before building anything bigger. For us, that might be walking your resident around the deck while the city sways and other residents go about their day.
+
+**"Camera"** means how you *see* the game while playing: where the viewpoint sits and what's on screen. So yes, it's the camera for the game. We'd decide it in the toy because that's where it's cheapest to try out and change.
+
+To make it concrete, I put a little resident in the plaza and rendered both options (images above):
+
+- **Option 1, close third-person:** the camera sits right behind your resident, as in *Zelda* or *A Short Hike*. You feel like you're *there*. **But** up close, the art shows its weakness: big flat blocks and a bare floor. Getting this view to look good would take a lot more art work.
+- **Option 2, diorama:** the camera looks down at the whole town like a model on a table, as in *Town to City*. Your resident is the tiny figure next to the red-striped stall. Honestly, this is the best image we've made so far. You see the town *living* around you, which fits "I'm merely one of the residents."
+
+**I've changed my recommendation to the diorama.** I first leaned toward close third-person, but seeing them side by side, the diorama looks much better with today's art and plays to your #1 rule (it has to look good). A middle ground is possible later: diorama by default, with a scroll-wheel zoom for when you want to get closer.
+
+You can also try both live: double-click `prototypes/look_test/run.bat`, then press **5** for close-up and **6** for diorama.
+
+
+---
+
+## 🧑 User
+
+What if we up the resolution a tad bit more? Take a look at Town to City. Maybe about that much?
+
+
+### 🤖 Claude
+
+> _[Skill] _
+> _[mcp__Claude_Browser__preview_start] _
+> _[mcp__Claude_Browser__find] Town to City_
+> _[mcp__Claude_Browser__computer] _
+> _[mcp__Claude_Browser__javascript_tool] _
+I'm on Town to City's Steam page, looking for full-size screenshots to judge how small their blocks are.
+
+> _[mcp__Claude_Browser__javascript_tool] _
+> _[mcp__Claude_Browser__browser_batch] _
+> _[Bash] Create the HD look test project folder_
+> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Bash] Run the HD look test and save screenshots_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_5.png_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_4.png_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Bash] Re-render with denser houses and fixed close camera_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_5.png_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_4.png_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_0.png_
+> _[Agent] Critique HD voxel look test_
+> _[Bash] Save HD keeper screenshots_
+I've saved the screenshots worth keeping. Waiting on the critic's verdict before I update the docs.
+
+The critic gave the HD version 6/10 appeal (up from 4) and 5/10 on closeness to Town to City. The two biggest problems are quick fixes: the floating white cubes (chimney smoke) and the flat grey-beige color grading. Fixing those now.
+
+> _[Bash] Remove smoke cubes, warm up the grade, re-render_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_5.png_
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_0.png_
+> _[Bash] Update keeper screenshots and README to the HD version_
+> _[Grep] _
+> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\DECISIONS.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_USAGE.md_
+> _[Bash] Commit and push the HD look test_
+> _[SendUserFile] _
+Good call. More resolution made a huge difference. 🏙️✨
+
+## What I did
+
+I looked at Town to City's own Steam screenshots. Their blocks are tiny: a person is about 8–10 blocks tall. Ours were about 2. So I rebuilt the city with **20 cm blocks (5 per metre)**, which makes our residents 9 blocks tall, about the same as theirs.
+
+At that size, houses can have real details, all still generated from code:
+- recessed windows with **blue and teal shutters**, flower boxes, arched doors with a little lamp above
+- **balconies** with iron railings and pots, stone bands between floors
+- three roof types: **tiled hip roofs, gable roofs and flat terraces** (with pergolas, potted plants and washing lines)
+- chimneys, ivy, olive and cypress trees, and bushes with flowers
+- a plaza with a **fountain, striped parasols and cafe tables**
+- **18 residents strolling** around, the first small taste of "the world feels alive"
+
+## Honest scorecard
+
+- The critic scored it **6/10 appeal**, up from **4/10**: "clearly better, reads as real architecture."
+- **Closeness to Town to City: 5/10.** The critic's biggest complaints were floating white cubes (chimney smoke) and a flat, grey-beige grade. I removed the smoke and warmed the light toward Town to City's amber glow, which is what you see above. That last fix hasn't been re-scored yet.
+- **Still to do in a later art pass:** more variety between houses, more mechanical detail on the legs (the knees look like plain domes), and more flowers and stalls.
+- **The close-up still looks like Minecraft.** At this block size, the diorama view is clearly the winner, which matches my recommendation from before.
+
+It loads in about 5 seconds and runs fine on your PC. Try it yourself: double-click `prototypes/look_test_hd/run.bat`. Press **6** for the diorama, **1** for the walking city, **5** for the close-up. The old coarse version is still there for comparison, and everything is pushed to GitHub.
+
+
+---
+
+## 🧑 User
+
+It definitely looks better, but the city feels a bit small. I'm thinking that it needs to be several times the current size. However let's wrap things up for tonight. It's getting late for me. Can you tell me your thoughts and also make sure the GitHub is up to date so that the laptop can continue where we leave off at?
+
+
+### 🤖 Claude
+
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\IDEAS.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[mcp__ccd_session_mgmt__export_transcript] _
+
+_(History saved here. Claude's final wrap-up for the night is summarised in docs/STATUS.md: open question 0 about city size comes first next session.)_

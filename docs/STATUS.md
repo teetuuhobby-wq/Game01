@@ -2,7 +2,7 @@
 
 **New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/`.
 
-_Last updated: 2026-10-26, end of session 01 (home PC)_
+_Last updated: 2026-10-26, end of session 01 (home PC). Next session is likely on the work laptop._
 
 ## Where we are
 
@@ -12,6 +12,11 @@ _Last updated: 2026-10-26, end of session 01 (home PC)_
 
 ## Open questions for the user (ask these first, one or two at a time)
 
+0. **City size (raised last thing in session 01):** the user said the HD city "feels a bit small, needs to be several times the current size." Ask **what part** first: (a) the awe of a *huge* walking city seen from outside, (b) more streets and districts to live in and wander, or (c) more people and bustle? Then offer options with sizes:
+   - **Bigger deck with chunked rendering:** you see one neighbourhood at a time in diorama view. Medium.
+   - **Terraced, multi-level city** (stacked districts climbing a central hill or spire): feels much bigger for less area, and gives great silhouettes. Medium.
+   - **The clever fake:** the near districts are detailed, the far ones are lower-detail blocks. Small–Medium.
+   *Claude's lean: terraced and bigger, tested as a quick look-test change first.* Bigger also means legs and hull scale up.
 1. **Camera for the first toy (and the game):** a close third-person view behind the resident, or a zoomed-out diorama view? Compare `docs/screens/2026-10-26_hd_diorama.png` and `2026-10-26_hd_close.png`. *Claude's default changed after seeing them: **diorama**. It looks far better with today's art and shows the whole living town; close-up exposes the coarse voxels and would need much more art work. Possible middle ground: diorama with a zoom-in.*
 2. **Which pitch-B elements?** Claude suggested: the city kneels at night and things climb the legs. Not confirmed yet.
 3. **Nano Banana Pro access:** the Gemini app or website (Claude writes prompts, the user pastes images back) or an API key (Claude generates directly, with a cost estimate first)? Only matters once we do concept art.
