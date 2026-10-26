@@ -23,11 +23,11 @@ Let's start! Ask me something fun.
 > _[Bash] List project files and check git is installed_
 > _[Bash] Initialize git repo and check identity is configured_
 > _[Bash] Set a repo-local git identity_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\IDEAS.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\GAME.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\DECISIONS.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_USAGE.md_
+> _[Write] docs\TASTE.md_
+> _[Write] docs\IDEAS.md_
+> _[Write] docs\GAME.md_
+> _[Write] docs\DECISIONS.md_
+> _[Write] docs\AI_USAGE.md_
 > _[Bash] Add a gitignore and make the first commit_
 I'm all set up, so let's go! 🎮
 
@@ -65,7 +65,7 @@ On another note I have a vague idea already about the game kind of I want.
 
 ### 🤖 Claude
 
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
+> _[Write] docs\TASTE.md_
 > _[Bash] Commit the updated taste notes_
 Called it on A and C! 😄 And the Lucy moment is a GREAT one to start from.
 
@@ -97,9 +97,9 @@ I've written that into `docs/TASTE.md` as a first guess.
 ### 🤖 Claude
 
 > _[WebSearch] Town to City Galaxy Grove game engine Unity modding_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\IDEAS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\DECISIONS.md_
+> _[Write] docs\TASTE.md_
+> _[Write] docs\IDEAS.md_
+> _[Edit] docs\DECISIONS.md_
 > _[Bash] Commit the round 2 docs update_
 Ooh, this is coming together fast! 🔥
 
@@ -156,12 +156,12 @@ Sources:
 ### 🤖 Claude
 
 > _[Grep] _
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_GAMEDEV_TECHNIQUES.md_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_GAMEDEV_TECHNIQUES.md_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_GAMEDEV_TECHNIQUES.md_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_GAMEDEV_TECHNIQUES.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\IDEAS.md_
+> _[Read] docs\AI_GAMEDEV_TECHNIQUES.md_
+> _[Read] docs\AI_GAMEDEV_TECHNIQUES.md_
+> _[Read] docs\AI_GAMEDEV_TECHNIQUES.md_
+> _[Read] docs\AI_GAMEDEV_TECHNIQUES.md_
+> _[Write] docs\TASTE.md_
+> _[Edit] docs\IDEAS.md_
 > _[Bash] Commit the round 3 docs update_
 > _[Bash] Commit the round 3 docs update_
 That's a really important answer. 💡 You don't want to mod for its own sake. **You want the game to look good**, because that's what sank your past projects. I've written that down as a **hard requirement**, ahead of every wish.
@@ -212,11 +212,11 @@ Once those are settled, we're out of Discover. 🎉 Next I'll pitch **3 differen
 
 > _[PowerShell] List installed dev, art and AI tools, GPU, and API key variable names_
 > _[PowerShell] Find Godot and Blender versions and look for relevant Steam games_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_USAGE.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\DECISIONS.md_
+> _[Edit] docs\TASTE.md_
+> _[Edit] docs\TASTE.md_
+> _[Edit] docs\TASTE.md_
+> _[Write] docs\AI_USAGE.md_
+> _[Edit] docs\DECISIONS.md_
 > _[Bash] Commit the round 4 docs update_
 🎉 **Discover is done!** You confirmed all three desires. That's our foundation.
 
@@ -261,51 +261,51 @@ Let's go with C: the payoff comes through gameplay, carried by a short story che
 
 ### 🤖 Claude
 
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\DECISIONS.md_
+> _[Edit] docs\DECISIONS.md_
 > _[PowerShell] Find the Godot executable_
 > _[Bash] List Godot executable full paths_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\project.godot_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.tscn_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Write] prototypes\look_test\project.godot_
+> _[Write] prototypes\look_test\main.tscn_
+> _[Write] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
 > _[Bash] Run the look test and save screenshots_
 The look test ran cleanly on your RX 7900 XTX. Now I'm checking the screenshots.
 
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_0.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_1.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_2.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_3.png_
+> _[Read] prototypes\look_test\shots\view_0.png_
+> _[Read] prototypes\look_test\shots\view_1.png_
+> _[Read] prototypes\look_test\shots\view_2.png_
+> _[Read] prototypes\look_test\shots\view_3.png_
 The first render works, but I can see real problems before showing you: the legs look like table legs, trees are drowning the houses, and the world's edge is visible. Fixing those now.
 
 > _[Bash] Apply tuning fixes for legs, density and horizon_
 > _[Bash] Find a working Python interpreter_
 > _[Bash] Apply tuning fixes and re-render screenshots_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_0.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_1.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_3.png_
+> _[Read] prototypes\look_test\shots\view_0.png_
+> _[Read] prototypes\look_test\shots\view_1.png_
+> _[Read] prototypes\look_test\shots\view_3.png_
 Much better: the city reads as a little Mediterranean town now. The legs still look like stilts, though, so I'm reshaping them to bend like a spider's.
 
 > _[Bash] Reshape legs, thin the haze, re-render_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_0.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_1.png_
+> _[Read] prototypes\look_test\shots\view_0.png_
+> _[Read] prototypes\look_test\shots\view_1.png_
 Now it reads as a giant strider. Next I'm getting a separate critic to judge the look, as your brief asks, while I write the pitches.
 
 > _[Agent] Critique voxel look test screenshots_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\PITCHES.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\run.bat_
+> _[Write] docs\PITCHES.md_
+> _[Write] prototypes\look_test\run.bat_
 The pitches are written. I'm waiting for the critic's verdict on the look test, then I'll apply its top fixes.
 
 The critic was harsh (4/10 appeal), but every point is fixable in code. I'm doing one quick pass on the biggest problems: muddy fog, crackers-looking joints, the noisy hull and the blown-out lamps.
 
 > _[Bash] Apply critic fixes and re-render_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_0.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_1.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_3.png_
+> _[Read] prototypes\look_test\shots\view_0.png_
+> _[Read] prototypes\look_test\shots\view_1.png_
+> _[Read] prototypes\look_test\shots\view_3.png_
 Better: the close shot now has a tilt-shift "diorama" feel, and the wide shot is warmer. I'm stopping the polishing here so you can react. Committing now.
 
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\DECISIONS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_USAGE.md_
+> _[Edit] docs\DECISIONS.md_
+> _[Edit] docs\AI_USAGE.md_
 > _[Bash] Commit look test, pitches and docs_
 > _[SendUserFile] _
 I logged option C for the payoff: it comes through gameplay, carried by a short story that's tested blind. You'll never see spoilers. Then I moved into **Phase 2**.
@@ -343,10 +343,10 @@ I say mostly A with a few elements from B. I want the world to feel alive and I 
 
 ### 🤖 Claude
 
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\GAME.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\DECISIONS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\IDEAS.md_
+> _[Write] docs\GAME.md_
+> _[Edit] docs\DECISIONS.md_
+> _[Edit] docs\TASTE.md_
+> _[Edit] docs\IDEAS.md_
 > _[Bash] Commit the chosen direction_
 🎉 **The direction is locked: Strider Home, mostly A with a few B elements.** It's written up in `docs/GAME.md`, with the choice in `docs/DECISIONS.md`.
 
@@ -393,19 +393,19 @@ https://github.com/teetuuhobby-wq/Game01.git
 > _[Bash] Convert transcript to clean markdown and scan for secrets_
 I've turned our chat into a clean, readable history file. Reading it through before anything goes to GitHub.
 
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\history\session-01-discovery.md_
+> _[Read] docs\history\session-01-discovery.md_
 The history reads well and has no secrets or personal details. Now I'm writing the handoff doc a new session will start from.
 
 > _[Bash] Copy the transcript converter into the repo_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\tools\transcript_to_md.py_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\tools\transcript_to_md.py_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Read] tools\transcript_to_md.py_
+> _[Edit] tools\transcript_to_md.py_
+> _[Write] docs\STATUS.md_
 Now I'm adding one line to your CLAUDE.md so every new session finds STATUS.md, plus a line-ending fix so the two computers don't fight over files.
 
 > _[Grep] _
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\CLAUDE.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\CLAUDE.md_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\.gitattributes_
+> _[Read] CLAUDE.md_
+> _[Edit] CLAUDE.md_
+> _[Write] .gitattributes_
 > _[Bash] Commit handoff files and push to GitHub_
 > _[Bash] Confirm the push landed and tree is clean_
 Everything is on GitHub at **teetuuhobby-wq/Game01**. The repo is private, and I confirmed GitHub has exactly what's on this PC.
@@ -418,7 +418,7 @@ Everything is on GitHub at **teetuuhobby-wq/Game01**. The repo is private, and I
 - **[tools/transcript_to_md.py](tools/transcript_to_md.py):** a script that turns each future session into a history file the same way.
 - **Line-ending fix:** without it, Windows and git can flag every file as "changed" when you switch computers.
 
-The full raw export, images included, is also at `C:\Users\teetu\Downloads\session-export-1792995946765.zip` on this PC. I didn't upload it.
+The full raw export, images included, is also at `~\Downloads\session-export-1792995946765.zip` on this PC. I didn't upload it.
 
 ## Setting up the work laptop (one time)
 
@@ -474,9 +474,9 @@ Yes, do all three quick GitHub fixes now: README, laptop git sign-in notes, and 
 ### 🤖 Claude
 
 > _[Bash] Save keeper screenshots and stop tracking auto-shots_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\README.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Write] README.md_
+> _[Edit] docs\STATUS.md_
+> _[Edit] docs\STATUS.md_
 > _[Bash] Commit the three fixes and push_
 All three fixes are done and pushed, and GitHub matches this PC exactly. ✅
 
@@ -501,22 +501,22 @@ What do you mean by Camera for the first toy? What is first toy and are you talk
 Good question. I jumped ahead with jargon there. Rather than describe the two options, I'll show them: I'm adding a little resident to the look test and rendering both camera views.
 
 > _[Grep] _
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Read] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
 > _[Bash] Render all six camera views_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_4.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_5.png_
+> _[Read] prototypes\look_test\shots\view_4.png_
+> _[Read] prototypes\look_test\shots\view_5.png_
 The diorama view came out really well. The close view put the camera inside a house wall, so I'm moving the resident and re-rendering.
 
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
+> _[Edit] prototypes\look_test\main.gd_
 > _[Bash] Re-render with the resident moved_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test\shots\view_4.png_
+> _[Read] prototypes\look_test\shots\view_4.png_
 > _[Bash] Save camera screenshots, commit and push_
 > _[Bash] Find the camera default line in STATUS_
 > _[Bash] Update the camera default in STATUS and push_
@@ -556,20 +556,20 @@ I'm on Town to City's Steam page, looking for full-size screenshots to judge how
 > _[mcp__Claude_Browser__javascript_tool] _
 > _[mcp__Claude_Browser__browser_batch] _
 > _[Bash] Create the HD look test project folder_
-> _[Write] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Write] prototypes\look_test_hd\main.gd_
+> _[Edit] prototypes\look_test_hd\main.gd_
+> _[Edit] prototypes\look_test_hd\main.gd_
+> _[Edit] prototypes\look_test_hd\main.gd_
 > _[Bash] Run the HD look test and save screenshots_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_5.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_4.png_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\main.gd_
+> _[Read] prototypes\look_test_hd\shots\view_5.png_
+> _[Read] prototypes\look_test_hd\shots\view_4.png_
+> _[Edit] prototypes\look_test_hd\main.gd_
+> _[Edit] prototypes\look_test_hd\main.gd_
+> _[Edit] prototypes\look_test_hd\main.gd_
 > _[Bash] Re-render with denser houses and fixed close camera_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_5.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_4.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_0.png_
+> _[Read] prototypes\look_test_hd\shots\view_5.png_
+> _[Read] prototypes\look_test_hd\shots\view_4.png_
+> _[Read] prototypes\look_test_hd\shots\view_0.png_
 > _[Agent] Critique HD voxel look test_
 > _[Bash] Save HD keeper screenshots_
 I've saved the screenshots worth keeping. Waiting on the critic's verdict before I update the docs.
@@ -577,15 +577,15 @@ I've saved the screenshots worth keeping. Waiting on the critic's verdict before
 The critic gave the HD version 6/10 appeal (up from 4) and 5/10 on closeness to Town to City. The two biggest problems are quick fixes: the floating white cubes (chimney smoke) and the flat grey-beige color grading. Fixing those now.
 
 > _[Bash] Remove smoke cubes, warm up the grade, re-render_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_5.png_
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\prototypes\look_test_hd\shots\view_0.png_
+> _[Read] prototypes\look_test_hd\shots\view_5.png_
+> _[Read] prototypes\look_test_hd\shots\view_0.png_
 > _[Bash] Update keeper screenshots and README to the HD version_
 > _[Grep] _
-> _[Read] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\DECISIONS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\AI_USAGE.md_
+> _[Read] docs\STATUS.md_
+> _[Edit] docs\STATUS.md_
+> _[Edit] docs\STATUS.md_
+> _[Edit] docs\DECISIONS.md_
+> _[Edit] docs\AI_USAGE.md_
 > _[Bash] Commit and push the HD look test_
 > _[SendUserFile] _
 Good call. More resolution made a huge difference. 🏙️✨
@@ -621,10 +621,10 @@ It definitely looks better, but the city feels a bit small. I'm thinking that it
 
 ### 🤖 Claude
 
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\IDEAS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\TASTE.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
-> _[Edit] C:\Users\teetu\Downloads\Claude_AI\Game_01\docs\STATUS.md_
+> _[Edit] docs\IDEAS.md_
+> _[Edit] docs\TASTE.md_
+> _[Edit] docs\STATUS.md_
+> _[Edit] docs\STATUS.md_
 > _[mcp__ccd_session_mgmt__export_transcript] _
 
 _(History saved here. Claude's final wrap-up for the night is summarised in docs/STATUS.md: open question 0 about city size comes first next session.)_
