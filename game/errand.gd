@@ -245,6 +245,8 @@ func _update_marker() -> void:
 	_marker.scale = Vector3.ONE * maxf(1.0, dist / 18.0)
 	# Off-screen? Show a gold arrow at the screen edge pointing the way.
 	var size := get_viewport().get_visible_rect().size
+	if size.x < 200.0 or size.y < 200.0:
+		return
 	var behind := camera.is_position_behind(_marker.global_position)
 	var sp := camera.unproject_position(_marker.global_position)
 	if behind or not Rect2(Vector2.ZERO, size).grow(-40.0).has_point(sp):

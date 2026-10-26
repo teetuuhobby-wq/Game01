@@ -81,10 +81,10 @@ func _process(delta: float) -> void:
 			_step_timer = 0.42
 			stepped.emit()
 	body.position.y = absf(sin(_walk_phase)) * 0.05 if moving else 0.0
-	# Glide up and down stairs instead of snapping
+	# Glide up and down stairs instead of snapping, fast enough to keep up when running
 	var f: int = world.floor_at(position)
 	if f >= 0:
-		position.y = lerpf(position.y, (f + 0.5) * world.VS, minf(1.0, 14.0 * delta))
+		position.y = move_toward(position.y, (f + 0.5) * world.VS, 9.0 * delta)
 
 
 ## Which way to walk, on the city, from the keys (relative to the camera) or the bot.
@@ -107,21 +107,30 @@ func _input_dir() -> Vector3:
 
 
 ## Moves by step if there's room; slides along walls by trying each axis on its own.
+## Long steps (running, or a low frame rate) are cut into small slices, so stairs
+## behave the same at any speed.
 func _move(step: Vector3) -> void:
-	var f0: int = world.floor_at(position)
-	for s in [step, Vector3(step.x, 0, 0), Vector3(0, 0, step.z)]:
-		if _fits(position + s, f0):
-			position.x += s.x
-			position.z += s.z
-			return
+	var slices := maxi(1, ceili(step.length() / 0.08))
+	var s := step / slices
+	for i in slices:
+		var f0: int = world.floor_at(position)
+		for d in [s, Vector3(s.x, 0, 0), Vector3(0, 0, s.z)]:
+			if _fits(position + d, f0):
+				position.x += d.x
+				position.z += d.z
+				break
 
 
-## True if you can stand at p: your middle and four corners are on floor no more
-## than 2 blocks above or below where you are now.
+## True if you can stand at p: the floor there is at most 2 blocks (40 cm) above or
+## below where you are now, and under each of your four corners it's at most 2
+## blocks from that, so you can't hang over a drop or half into a wall.
 func _fits(p: Vector3, from_floor: int) -> bool:
-	for o in [Vector3.ZERO, Vector3(RADIUS, 0, RADIUS), Vector3(RADIUS, 0, -RADIUS),
+	var f: int = world.floor_at(p)
+	if f < 0 or (from_floor >= 0 and absi(f - from_floor) > 2):
+		return false
+	for o in [Vector3(RADIUS, 0, RADIUS), Vector3(RADIUS, 0, -RADIUS),
 			Vector3(-RADIUS, 0, RADIUS), Vector3(-RADIUS, 0, -RADIUS)]:
-		var f: int = world.floor_at(p + o)
-		if f < 0 or (from_floor >= 0 and absi(f - from_floor) > 2):
+		var fc: int = world.floor_at(p + o)
+		if fc < 0 or absi(fc - f) > 2:
 			return false
 	return true

@@ -58,19 +58,27 @@ func _process(delta: float) -> void:
 		_focus = goal   # the city looped back: jump with it instead of flying across
 	_focus = _focus.lerp(goal, 1.0 - exp(-10.0 * delta))
 
-	# Close in, swing round behind you as you walk
+	# Close in, swing round behind you as you walk away from the camera. (Not when you
+	# walk toward it: swinging round would flip your controls and send you in circles.)
 	if zoom < 0.3 and target.moving:
 		var d: Vector3 = target.get_parent().global_transform.basis * target.facing
-		yaw = lerp_angle(yaw, atan2(-d.z, -d.x), 1.0 - exp(-2.0 * delta))
+		var cam_fwd := Vector3(-cos(yaw), 0, -sin(yaw))
+		if d.dot(cam_fwd) > 0.3:
+			yaw = lerp_angle(yaw, atan2(-d.z, -d.x), 1.0 - exp(-2.0 * delta))
 
 	var dist := T.CAMERA_NEAR_DISTANCE * pow(T.CAMERA_FAR_DISTANCE / T.CAMERA_NEAR_DISTANCE, zoom)
 	var pitch := deg_to_rad(lerpf(12.0, 43.0, zoom))
 	var offset := Vector3(cos(pitch) * cos(yaw), sin(pitch), cos(pitch) * sin(yaw)) * dist
-	# Slide in when something blocks the view (snap in fast, ease back out)
+	# Slide in when something blocks the view: glide in quickly, ease back out slowly.
+	# Three lines side by side, and only move in if all three are blocked, so thin
+	# things like lamp posts and poles don't make the camera jump.
 	var clear := 1.0
 	if zoom < 0.6:
-		clear = world.first_hit(world.city.to_local(_focus), world.city.to_local(_focus + offset))
-	_pull = clear if clear < _pull else lerpf(_pull, clear, 1.0 - exp(-3.0 * delta))
+		var a: Vector3 = world.city.to_local(_focus)
+		var b: Vector3 = world.city.to_local(_focus + offset)
+		var side := Vector3(-offset.z, 0, offset.x).normalized() * 0.35
+		clear = maxf(world.first_hit(a, b), maxf(world.first_hit(a + side, b + side), world.first_hit(a - side, b - side)))
+	_pull = lerpf(_pull, clear, 1.0 - exp(-(18.0 if clear < _pull else 3.0) * delta))
 	_shake = maxf(0.0, _shake - delta * 0.8)
 	var wobble := Vector3(sin(Time.get_ticks_msec() * 0.031), sin(Time.get_ticks_msec() * 0.027), 0) * _shake
 	global_position = _focus + offset * maxf(_pull, 0.08) + wobble

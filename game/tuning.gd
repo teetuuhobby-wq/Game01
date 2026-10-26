@@ -9,7 +9,7 @@ const CAMERA_ZOOM_START := 0.4   # 0 = close behind you, 1 = the whole-town dior
 const CAMERA_NEAR_DISTANCE := 4.5   # metres, fully zoomed in
 const CAMERA_FAR_DISTANCE := 95.0   # metres, fully zoomed out
 const CAMERA_TURN_SPEED := 1.6   # Z and X keys, how fast the camera turns
-const STOMP_SHAKE := 0.12        # how much the camera shakes when a giant foot lands
+const STOMP_SHAKE := 0.06        # how much the camera shakes when a giant foot lands
 
 # --- The walking city ---
 const CITY_SPEED := 4.0          # metres per second
@@ -24,6 +24,6 @@ const FIX_TIME := 1.5            # seconds to hold E to fit the valve
 
 # --- Sound (decibels: 0 = full volume, -6 = about half as loud) ---
 const FOOTSTEP_DB := -10.0
-const STOMP_DB := -2.0
+const STOMP_DB := -11.0          # the city's footsteps (was -2: too loud, playtest 1)
 const WIND_DB := -20.0
 const EFFECTS_DB := -4.0
