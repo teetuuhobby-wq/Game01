@@ -44,7 +44,7 @@ Technical plan for the toy (Claude's recommendations from the session-02 review)
 
 ## Art status (look test)
 
-**Current best: `prototypes/look_test_hd/`.** The user asked for Town to City-level detail, so this version uses **20 cm blocks (5 per metre)**, and a resident is 9 blocks tall. Houses are built from templates in code: recessed windows with shutters, flower boxes, arched doors, balconies, cornices, hip/gable/flat roofs with tile rows, chimneys, ivy, pergolas, washing lines. The plaza has a fountain, striped parasols and cafe tables, and 18 residents stroll on simple loops. It is drawn as chunked meshes of only the block faces you can see (about 520k faces), so it starts in ~4 s and runs at ~28 FPS even on the work laptop (11 FPS before that change).
+**Current best: `prototypes/look_test_hd/`.** The user asked for Town to City-level detail, so this version uses **20 cm blocks (5 per metre)**, and a resident is 9 blocks tall. Houses are built from templates in code: recessed windows with shutters, flower boxes, arched doors, balconies, cornices, hip/gable/flat roofs with tile rows, chimneys, ivy, pergolas, washing lines. The plaza has a fountain, striped parasols and cafe tables, and 18 residents stroll on simple loops. It is drawn as chunked meshes of only the block faces you can see (about 520k faces), so it starts in ~4 s and runs at 25–28 FPS even on the work laptop (11 FPS before that change).
 - Critic: **6/10 appeal, 5/10 closeness to Town to City** (up from 4/10 for the coarse version). After that review, the floating smoke cubes were removed and the grade warmed toward Town to City's amber (not re-scored yet).
 - Critic's remaining list for a later art pass: more variety between houses (heights, tints, more vines and flowers, stalls round the plaza); more mechanical detail on the legs and underside (the knee joints read as plain domes); the close camera still looks like "Minecraft Steve" at this block size, so lock the **diorama** camera or use finer blocks for characters.
 - The coarse version (`prototypes/look_test/`) is kept for comparison.
@@ -55,7 +55,7 @@ Technical plan for the toy (Claude's recommendations from the session-02 review)
 | | Home PC (main) | Work laptop |
 |---|---|---|
 | Use for | Everything: building, running, screenshots, art | Design, docs, code. Running the game may be slow. |
-| GPU | AMD RX 7900 XTX (24 GB) | Intel Iris Xe, much weaker (HD look test: ~28 FPS). **Design for the home PC**, as the user asked. |
+| GPU | AMD RX 7900 XTX (24 GB) | Intel Iris Xe, much weaker (HD look test: 25–28 FPS). **Design for the home PC**, as the user asked. |
 | Godot | 4.7.2 via winget: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe` | Same version and path (installed) |
 | Python | `py -3` (plain `python` hits the Microsoft Store stub) | `py -3`, with Pillow |
 | Other | Blender 4.5, Krita 5.2, Node, VS Code | Git and Claude Code |
