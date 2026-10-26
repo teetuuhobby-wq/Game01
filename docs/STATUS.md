@@ -92,7 +92,16 @@ Technical plan for the toy (Claude's recommendations from the session-02 review)
   `<godot_console.exe> --headless --script tools/to_jpg.gd -- <shot.png> docs/screens/YYYY-MM-DD_topic.jpg`
   The older keepers are PNG; leave them.
 
+## Branches
+
+| Branch | What it is | Status |
+|---|---|---|
+| `main` | The project. Always work here. | Active |
+| `experiment/city-10x` | **Look only, don't merge.** The terraced city at 10x its area (265 x 177 m, 4 terraces, 736 houses), built in session 02 because the user asked to *see* the real scale. Code: `prototypes/look_test_10x/`. Too heavy as is: 6 FPS and a 33 s start on the laptop, 2.7 GB of memory. Result and screenshots are already on main (DECISIONS, `docs/screens/2026-10-26_city_scale_comparison.jpg`). | Parked. Keep it as a reference for a later city-size decision; a playable big city needs chunk streaming and distinct districts (Large). |
+
+To look at the 10x city on either computer: `git fetch`, then `git switch experiment/city-10x`, double-click `prototypes/look_test_10x/run.bat`, and `git switch main` when done. Commit or stash any work first, because switching branches changes the files in the folder.
+
 ## Session ritual
 
 - **Start:** `git pull`, read this file, give the user a 3-line recap, and propose the next step.
-- **End:** update this file plus TASTE, IDEAS, GAME and DECISIONS, and save the conversation to `docs/history/`: export the session from the app, then run `tools/transcript_to_md.py` (usage at the top of the script) and read the result before committing. Then commit and `git push`.
+- **End:** update this file plus TASTE, IDEAS, GAME and DECISIONS, and save the conversation to `docs/history/`. Run `tools/transcript_to_md.py` (usage at the top of the script) on the session's transcript. Claude can read it directly from `~/.claude/projects/<project folder>/<session id>.jsonl` (the newest file there), so no app export is needed. Read the result for anything private before committing; it's published to GitHub. Then commit and `git push`.
