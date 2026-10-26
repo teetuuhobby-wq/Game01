@@ -16,3 +16,6 @@ Thumbs.db
 node_modules/
 dist/
 build/
+
+# Auto-generated screenshots (re-rendered often). Copy keepers to docs/screens/ instead.
+shots/

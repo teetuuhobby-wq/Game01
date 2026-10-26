@@ -49,12 +49,23 @@ Propose the **first toy** with default answers, get a yes, then build it in a ne
 | Python | `py -3` (plain `python` hits the Microsoft Store stub) | check |
 | Other | Blender 4.5, Krita 5.2, Node, VS Code | Git and Claude Code at minimum |
 
+### Setting up the work laptop (one time)
+
+1. Install **Git for Windows** (it includes Git Credential Manager), **Claude Code** and **Godot 4.7.2**.
+2. Clone: `git clone https://github.com/teetuuhobby-wq/Game01.git`
+3. Inside the repo folder, tell git who you are. Use the **same name and email as the home PC**, so commits match:
+   `git config user.name "<your name>"` and `git config user.email "<your email>"`
+   (On the home PC, `git config user.name` and `git config user.email` show the current values.)
+4. The first `git push` opens a browser window to sign in to GitHub. Approve it once, and it's remembered after that.
+5. If a push is rejected ("fetch first"), the other computer pushed newer work. Run `git pull`, then push again.
+
 **On the laptop:** if the game is too slow, run Godot with `--rendering-method mobile` for a rough look. Don't redesign for the laptop. Final visual checks happen on the home PC.
 
 ## How to run things
 
 - **Look test:** double-click `prototypes/look_test/run.bat` (keys 1–4 camera, Space pause, Esc quit).
 - **Screenshots for review:** `<godot_console.exe> --path prototypes/look_test -- --shots` saves 4 PNGs to `prototypes/look_test/shots/` and quits.
+- **Screenshot rule:** every `shots/` folder is git-ignored, because they're re-rendered often and would bloat the repo. Copy the ones worth keeping to `docs/screens/`, named `YYYY-MM-DD_topic.png`.
 
 ## Session ritual
 
