@@ -42,7 +42,6 @@ var occ := {}               # metre cells already used on the deck
 
 var mat_voxel: StandardMaterial3D
 var mat_glow: StandardMaterial3D
-var box: BoxMesh
 var rng := RandomNumberGenerator.new()
 var noise := FastNoiseLite.new()
 
@@ -126,8 +125,6 @@ func _init_palette() -> void:
 
 
 func _make_materials() -> void:
-	box = BoxMesh.new()
-	box.size = Vector3.ONE
 	mat_voxel = StandardMaterial3D.new()
 	mat_voxel.vertex_color_use_as_albedo = true
 	mat_voxel.vertex_color_is_srgb = true
@@ -204,7 +201,7 @@ func _make_world() -> void:
 	add_child(layer)
 
 
-# ---------- MultiMesh helpers ----------
+# ---------- Mesh helpers ----------
 
 func jitter(c: Color, amt := 0.04) -> Color:
 	var j := rng.randf_range(-amt, amt)
@@ -218,52 +215,95 @@ func _h(x: int, y: int, z: int) -> float:
 	return float(n & 1023) / 1023.0
 
 
-## Writes one instance (row-major 3x4 transform, then colour) into a MultiMesh buffer.
-func _put(buf: PackedFloat32Array, i: int, b: Basis, o: Vector3, c: Color) -> void:
-	var k := i * 16
-	buf[k] = b.x.x
-	buf[k + 1] = b.y.x
-	buf[k + 2] = b.z.x
-	buf[k + 3] = o.x
-	buf[k + 4] = b.x.y
-	buf[k + 5] = b.y.y
-	buf[k + 6] = b.z.y
-	buf[k + 7] = o.y
-	buf[k + 8] = b.x.z
-	buf[k + 9] = b.y.z
-	buf[k + 10] = b.z.z
-	buf[k + 11] = o.z
-	buf[k + 12] = c.r
-	buf[k + 13] = c.g
-	buf[k + 14] = c.b
-	buf[k + 15] = 1.0
+## Collects square faces for one mesh surface. Blocks are drawn as meshes holding
+## only the faces you can see, which is far fewer triangles than a box per block.
+class Faces:
+	## Face directions: +x, -x, +y, -y, +z, -z.
+	const DIRS: Array[Vector3i] = [Vector3i(1, 0, 0), Vector3i(-1, 0, 0), Vector3i(0, 1, 0),
+			Vector3i(0, -1, 0), Vector3i(0, 0, 1), Vector3i(0, 0, -1)]
+	## Corners of each face of a unit box centred on zero, clockwise seen from outside.
+	static var corners := _make_corners()
+	static var indices := PackedInt32Array()
+
+	var verts := PackedVector3Array()
+	var norms := PackedVector3Array()
+	var cols := PackedColorArray()
+
+	static func _make_corners() -> Array[PackedVector3Array]:
+		var out: Array[PackedVector3Array] = []
+		for n in DIRS:
+			var nv := Vector3(n)
+			var u := Vector3(0, 1, 0) if n.x != 0 else Vector3(1, 0, 0)
+			var v := Vector3(0, 1, 0) if n.z != 0 else Vector3(0, 0, 1)
+			var q := PackedVector3Array([(nv - u - v) * 0.5, (nv - u + v) * 0.5, (nv + u + v) * 0.5, (nv + u - v) * 0.5])
+			if (q[1] - q[0]).cross(q[2] - q[0]).dot(nv) > 0.0:
+				q.reverse()  # Godot draws the clockwise side
+			out.append(q)
+		return out
+
+	## One face (direction d) of a box with centre c and the given size.
+	func box_face(c: Vector3, size: Vector3, d: int, col: Color) -> void:
+		var q := corners[d]
+		var n := Vector3(DIRS[d])
+		for k in 4:
+			verts.append(c + q[k] * size)
+			norms.append(n)
+			cols.append(col)
+
+	func count() -> int:
+		return verts.size() / 4
+
+	## Adds the collected faces to a mesh as one surface with the given material.
+	func add_to(mesh: ArrayMesh, mat: Material) -> void:
+		var n := count()
+		if n == 0:
+			return
+		if indices.size() < n * 6:
+			var have := indices.size() / 6
+			indices.resize(n * 6)
+			for f in range(have, n):
+				var k := f * 4
+				var j := f * 6
+				indices[j] = k
+				indices[j + 1] = k + 1
+				indices[j + 2] = k + 2
+				indices[j + 3] = k
+				indices[j + 4] = k + 2
+				indices[j + 5] = k + 3
+		var arrays := []
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX] = verts
+		arrays[Mesh.ARRAY_NORMAL] = norms
+		arrays[Mesh.ARRAY_COLOR] = cols
+		arrays[Mesh.ARRAY_INDEX] = indices.slice(0, n * 6)
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		mesh.surface_set_material(mesh.get_surface_count() - 1, mat)
 
 
-func _mm_buf(buf: PackedFloat32Array) -> MultiMesh:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.mesh = box
-	mm.instance_count = buf.size() / 16
-	if buf.size() > 0:
-		mm.buffer = buf
-	return mm
-
-
-func _mm_lists(pts: PackedVector3Array, cols: PackedColorArray, size: float) -> MultiMesh:
-	var buf := PackedFloat32Array()
-	buf.resize(pts.size() * 16)
-	var b := Basis().scaled(Vector3.ONE * size)
+## A mesh from a list of equal cubes (centres and colours). With cull on, faces
+## pressed against a neighbouring cube are left out; only use that when the cubes
+## sit on a grid of their own size.
+func _cubes(pts: PackedVector3Array, cols: PackedColorArray, size: float, cull := false) -> ArrayMesh:
+	var cells := {}
+	if cull:
+		for p in pts:
+			cells[Vector3i((p * (2.0 / size)).round())] = true
+	var f := Faces.new()
+	var sz := Vector3.ONE * size
 	for i in pts.size():
-		_put(buf, i, b, pts[i], cols[i])
-	return _mm_buf(buf)
+		var key := Vector3i((pts[i] * (2.0 / size)).round())
+		for d in 6:
+			if not (cull and cells.has(key + Faces.DIRS[d] * 2)):
+				f.box_face(pts[i], sz, d, cols[i])
+	var mesh := ArrayMesh.new()
+	f.add_to(mesh, mat_voxel)
+	return mesh
 
 
-func _mmi(mm: MultiMesh, mat: Material) -> MultiMeshInstance3D:
-	var mmi := MultiMeshInstance3D.new()
-	mmi.multimesh = mm
-	mmi.material_override = mat
-	return mmi
+func _mi(mesh: Mesh) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	return mi
 
 
 # ---------- Block grid ----------
@@ -314,28 +354,28 @@ func _sides(x0: int, z0: int, x1: int, z1: int) -> Array:
 	]
 
 
-## Turns the grid into two MultiMeshes (normal + glowing), skipping hidden blocks.
+## Turns the grid into meshes holding only the faces you can see (a face pressed
+## against another block is left out), cut into chunks the camera can skip.
 func _emit_grid() -> void:
-	var buf := PackedFloat32Array()
-	buf.resize(filled.size() * 16)
-	var gbuf := PackedFloat32Array()
-	var b := Basis().scaled(Vector3.ONE * VS)
+	const CHUNK := 64
+	var nzc := ceili(NZ / float(CHUNK))
+	var solid := {}   # chunk number -> Faces
+	var glow := {}
 	var sz := NX
 	var sy := NX * NZ
-	var n := 0
-	var g := 0
+	var size := Vector3.ONE * VS
+	# A block that was cleared and filled again is listed twice; sorting puts the copies together.
+	filled.sort()
+	var prev := -1
 	for i in filled:
 		var p: int = grid[i]
-		if p == 0:
+		if p == 0 or i == prev:
 			continue
+		prev = i
 		var x := i % NX
 		var r := i / NX
 		var z := r % NZ
 		var y := r / NZ
-		if x > 0 and x < NX - 1 and z > 0 and z < NZ - 1 and y > 0 and y < NY - 1:
-			if grid[i + 1] != 0 and grid[i - 1] != 0 and grid[i + sz] != 0 and grid[i - sz] != 0 \
-					and grid[i + sy] != 0 and grid[i - sy] != 0:
-				continue
 		var bx := x + GX0
 		var by := y + GY0
 		var bz := z + GZ0
@@ -343,17 +383,31 @@ func _emit_grid() -> void:
 		var s := 0.93 + 0.12 * _h(bx, by, bz)
 		c = Color(c.r * s, c.g * s, c.b * s)
 		var o := Vector3(bx * VS, by * VS, bz * VS)
-		if p >= P.GLOW:
-			gbuf.resize((g + 1) * 16)
-			_put(gbuf, g, b, o, c)
-			g += 1
-		else:
-			_put(buf, n, b, o, c)
-			n += 1
-	buf.resize(n * 16)
-	city.add_child(_mmi(_mm_buf(buf), mat_voxel))
-	city.add_child(_mmi(_mm_buf(gbuf), mat_glow))
-	print("city blocks drawn: ", n + g, " (of ", filled.size(), " placed)")
+		var bucket := glow if p >= P.GLOW else solid
+		var key := (x / CHUNK) * nzc + z / CHUNK
+		if not bucket.has(key):
+			bucket[key] = Faces.new()
+		var f: Faces = bucket[key]
+		if x == NX - 1 or grid[i + 1] == 0: f.box_face(o, size, 0, c)
+		if x == 0 or grid[i - 1] == 0: f.box_face(o, size, 1, c)
+		if y == NY - 1 or grid[i + sy] == 0: f.box_face(o, size, 2, c)
+		if y == 0 or grid[i - sy] == 0: f.box_face(o, size, 3, c)
+		if z == NZ - 1 or grid[i + sz] == 0: f.box_face(o, size, 4, c)
+		if z == 0 or grid[i - sz] == 0: f.box_face(o, size, 5, c)
+	var keys := solid.keys()
+	for k in glow.keys():
+		if not solid.has(k):
+			keys.append(k)
+	var faces := 0
+	for k in keys:
+		var mesh := ArrayMesh.new()
+		for pair in [[solid, mat_voxel], [glow, mat_glow]]:
+			if pair[0].has(k):
+				var f: Faces = pair[0][k]
+				f.add_to(mesh, pair[1])
+				faces += f.count()
+		city.add_child(_mi(mesh))
+	print("city faces drawn: ", faces, " in ", keys.size(), " chunks")
 
 
 # ---------- Ground ----------
@@ -383,38 +437,93 @@ func _ground_color(h: float) -> Color:
 	return Color(0.48, 0.40, 0.34)
 
 
+## A ground column's colour: banded by height, with a little noise.
+func _ground_tone(x: float, z: float, h: float) -> Color:
+	var c := _ground_color(h)
+	var tint := noise.get_noise_2d(x * 2.0 + 900.0, z * 2.0) * 0.05
+	var k := 0.96 + 0.08 * _h(int(x * 2.0), 0, int(z * 2.0))
+	return Color((c.r + tint) * k, (c.g + tint) * k, (c.b + tint) * k)
+
+
+## Ground columns of one size on a regular grid: heights (0 = no column) and colours.
+class Columns:
+	var x0: float
+	var z0: float
+	var s: float
+	var nx: int
+	var nz: int
+	var h := PackedFloat32Array()
+	var col := PackedColorArray()
+
+	func _init(x_start: float, z_start: float, size: float, count_x: int, count_z: int) -> void:
+		x0 = x_start
+		z0 = z_start
+		s = size
+		nx = count_x
+		nz = count_z
+		h.resize(nx * nz)
+		col.resize(nx * nz)
+
+	func height(ix: int, iz: int) -> float:
+		if ix < 0 or ix >= nx or iz < 0 or iz >= nz:
+			return 0.0
+		return h[ix * nz + iz]
+
+	## Top face plus the parts of each side that stand above the neighbour.
+	## Bottoms are left out: the camera never looks up at the ground.
+	func add_faces(chunks: Array, chunk_len: float) -> void:
+		var sides := [[0, 1, 0], [1, -1, 0], [4, 0, 1], [5, 0, -1]]
+		for ix in nx:
+			var x := x0 + ix * s
+			var f: Faces = chunks[int((x - x0) / chunk_len)]
+			for iz in nz:
+				var top := h[ix * nz + iz]
+				if top <= 0.0:
+					continue
+				var z := z0 + iz * s
+				var c := col[ix * nz + iz]
+				f.box_face(Vector3(x, top * 0.5, z), Vector3(s, top, s), 2, c)
+				for sd in sides:
+					var nh := height(ix + sd[1], iz + sd[2])
+					if nh < top:
+						f.box_face(Vector3(x, (top + nh) * 0.5, z), Vector3(s, top - nh, s), sd[0], c)
+
+
 func _build_ground() -> void:
-	var cols := []
-	# Half-metre blocks near the city's path, whole-metre blocks further out.
-	var x := -80.0
-	while x <= 300.0:
-		var z := -50.0
-		while z <= 50.0:
-			cols.append(Vector3(x, z, 0.5))
-			z += 0.5
-		x += 0.5
-	for xi in range(-80, 301):
-		for zi in range(-150, 151):
-			if absi(zi) > 50:
-				cols.append(Vector3(xi, zi, 1.0))
-	var buf := PackedFloat32Array()
-	buf.resize(cols.size() * 16)
+	# Half-metre columns near the city's path, whole-metre columns further out.
+	var half := Columns.new(-80.0, -50.0, 0.5, 761, 201)
+	var whole := Columns.new(-80.0, -150.0, 1.0, 381, 301)
 	var deco_p := PackedVector3Array()
 	var deco_c := PackedColorArray()
-	for i in cols.size():
-		var cv: Vector3 = cols[i]
-		var s := cv.z
-		var h := maxf(s, roundf(ground_hf(cv.x, cv.y) / s) * s)
-		var c := _ground_color(h)
-		var tint := noise.get_noise_2d(cv.x * 2.0 + 900.0, cv.y * 2.0) * 0.05
-		var k := 0.96 + 0.08 * _h(int(cv.x * 2.0), 0, int(cv.y * 2.0))
-		c = Color((c.r + tint) * k, (c.g + tint) * k, (c.b + tint) * k)
-		_put(buf, i, Basis().scaled(Vector3(s, h, s)), Vector3(cv.x, h * 0.5, cv.y), c)
-		if s < 1.0 and rng.randf() < 0.02:
-			deco_p.append(Vector3(cv.x, h + 0.2, cv.y))
-			deco_c.append(jitter(Color(0.55, 0.62, 0.45), 0.05) if rng.randf() < 0.7 else jitter(Color(0.36, 0.31, 0.28), 0.03))
-	add_child(_mmi(_mm_buf(buf), mat_voxel))
-	add_child(_mmi(_mm_lists(deco_p, deco_c, 0.4), mat_voxel))
+	for ix in half.nx:
+		for iz in half.nz:
+			var x := half.x0 + ix * 0.5
+			var z := half.z0 + iz * 0.5
+			var h := maxf(0.5, roundf(ground_hf(x, z) / 0.5) * 0.5)
+			half.h[ix * half.nz + iz] = h
+			half.col[ix * half.nz + iz] = _ground_tone(x, z, h)
+			if rng.randf() < 0.02:
+				deco_p.append(Vector3(x, h + 0.2, z))
+				deco_c.append(jitter(Color(0.55, 0.62, 0.45), 0.05) if rng.randf() < 0.7 else jitter(Color(0.36, 0.31, 0.28), 0.03))
+	for ix in whole.nx:
+		for iz in whole.nz:
+			var zi := iz - 150
+			if absi(zi) <= 50:
+				continue
+			var x := whole.x0 + ix
+			var h := maxf(1.0, roundf(ground_hf(x, zi)))
+			whole.h[ix * whole.nz + iz] = h
+			whole.col[ix * whole.nz + iz] = _ground_tone(x, zi, h)
+	var chunks := []
+	for i in 10:
+		chunks.append(Faces.new())
+	half.add_faces(chunks, 40.0)
+	whole.add_faces(chunks, 40.0)
+	for f: Faces in chunks:
+		var mesh := ArrayMesh.new()
+		f.add_to(mesh, mat_voxel)
+		add_child(_mi(mesh))
+	add_child(_mi(_cubes(deco_p, deco_c, 0.4)))
 
 	# Story props: a giant ribcage and a dead walker's leg, hinting at danger.
 	var pp := PackedVector3Array()
@@ -440,7 +549,7 @@ func _build_ground() -> void:
 			for oz in range(-2, 3):
 				pp.append(c + Vector3(ox * 0.5, 0, oz * 0.5))
 				pc.append(jitter(Color(0.45, 0.25, 0.15), 0.05))
-	add_child(_mmi(_mm_lists(pp, pc, 0.5), mat_voxel))
+	add_child(_mi(_cubes(pp, pc, 0.5)))
 
 
 # ---------- City ----------
@@ -1079,7 +1188,7 @@ func _hip_positions() -> Array:
 
 
 ## A hollow square leg segment built along local -Y, with brass bands and rivets.
-func _segment_mm(length_m: float, thick: int, base: Color, piston: bool) -> MultiMesh:
+func _segment_mesh(length_m: float, thick: int, base: Color, piston: bool) -> ArrayMesh:
 	var pts := PackedVector3Array()
 	var cols := PackedColorArray()
 	var L := int(length_m * RES)
@@ -1104,12 +1213,12 @@ func _segment_mm(length_m: float, thick: int, base: Color, piston: bool) -> Mult
 				for b in 2:
 					pts.append(Vector3((thick * 0.5 + 1 + a) * VS, -(i + 0.5) * VS, (b - 0.5) * VS))
 					cols.append(PAL[P.BRASS] if i % 12 < 2 else Color(0.62, 0.62, 0.60))
-	return _mm_lists(pts, cols, VS)
+	return _cubes(pts, cols, VS, true)
 
 
 func _build_legs() -> void:
-	var thigh_mm := _segment_mm(THIGH_LEN, 16, Color(0.28, 0.25, 0.24), false)
-	var shin_mm := _segment_mm(SHIN_LEN, 12, Color(0.24, 0.22, 0.21), true)
+	var thigh_mesh := _segment_mesh(THIGH_LEN, 16, Color(0.28, 0.25, 0.24), false)
+	var shin_mesh := _segment_mesh(SHIN_LEN, 12, Color(0.24, 0.22, 0.21), true)
 	var jp := PackedVector3Array()
 	var jc := PackedColorArray()
 	for dx in range(-13, 14):
@@ -1119,7 +1228,7 @@ func _build_legs() -> void:
 				if d <= 13.0 and d > 11.0:
 					jp.append(Vector3(dx, dy, dz) * VS)
 					jc.append(jitter(PAL[P.BRASS] if absi(dy) <= 1 else PAL[P.HULL], 0.02))
-	var joint_mm := _mm_lists(jp, jc, VS)
+	var joint_mesh := _cubes(jp, jc, VS, true)
 	var fp_ := PackedVector3Array()
 	var fc := PackedColorArray()
 	for dx in range(-15, 16):
@@ -1135,7 +1244,7 @@ func _build_legs() -> void:
 					if r > 7.5 or dy == 9:
 						fp_.append(Vector3(dx, dy + 0.5, dz) * VS)
 						fc.append(jitter(PAL[P.HULL], 0.02))
-	var foot_mm := _mm_lists(fp_, fc, VS)
+	var foot_mesh := _cubes(fp_, fc, VS, true)
 
 	var dust_mat := StandardMaterial3D.new()
 	dust_mat.albedo_color = Color(0.80, 0.68, 0.52)
@@ -1151,10 +1260,10 @@ func _build_legs() -> void:
 			"hip": hips[i],
 			"offset": tripod[i],
 			"side": signf(hips[i].z),
-			"thigh": _mmi(thigh_mm, mat_voxel),
-			"shin": _mmi(shin_mm, mat_voxel),
-			"knee": _mmi(joint_mm, mat_voxel),
-			"foot": _mmi(foot_mm, mat_voxel),
+			"thigh": _mi(thigh_mesh),
+			"shin": _mi(shin_mesh),
+			"knee": _mi(joint_mesh),
+			"foot": _mi(foot_mesh),
 			"dust": _make_dust(dust_mesh),
 			"prev_p": 0.0,
 		}
@@ -1218,7 +1327,7 @@ func _add_smoke() -> void:
 
 # ---------- Residents ----------
 
-func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color) -> MultiMeshInstance3D:
+func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color) -> MeshInstance3D:
 	var pts := []    # plain Arrays: lambdas would copy packed arrays
 	var cols := []
 	var add := func(x: int, y: int, z: int, c: Color) -> void:
@@ -1243,10 +1352,10 @@ func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color) -> Multi
 				elif y == 7 and x == 1 and z != 0:
 					c = Color(0.15, 0.12, 0.10)
 				add.call(x, y, z, c)
-	return _mmi(_mm_lists(PackedVector3Array(pts), PackedColorArray(cols), VS), mat_voxel)
+	return _mi(_cubes(PackedVector3Array(pts), PackedColorArray(cols), VS, true))
 
 
-func _random_person() -> MultiMeshInstance3D:
+func _random_person() -> MeshInstance3D:
 	var shirts := [Color(0.16, 0.55, 0.58), Color(0.82, 0.30, 0.26), Color(0.94, 0.80, 0.40),
 			Color(0.96, 0.95, 0.90), Color(0.40, 0.52, 0.78), Color(0.55, 0.70, 0.40)]
 	var pants := [Color(0.30, 0.24, 0.20), Color(0.24, 0.28, 0.38), Color(0.55, 0.48, 0.38)]
