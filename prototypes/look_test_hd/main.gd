@@ -28,6 +28,10 @@ const NX := 301
 const NZ := 211
 const NY := 185
 
+# --- Plaza layout ---
+const PARASOL_A0 := 0.3      # angle of the first of six parasols round the fountain
+const YOUR_GAP := 4          # the gap between parasols where you stand
+
 enum P { EMPTY, PAVE, PAVE2, PLAZA, MORTAR, STONE, STONE2, HULL, HULL2, BRASS, WOOD, WOOD_DARK,
 		TERRA, TERRA2, TERRA3, WALL0, WALL1, WALL2, WALL3, WALL4, SHUTTER0, SHUTTER1, GLASS,
 		LEAF, LEAF2, CYPRESS, TRUNK, WATER, RED, PINK, PURPLE, AWN0, AWN1, AWN2, WHITE,
@@ -50,7 +54,6 @@ var camera: Camera3D
 var resident: Node3D
 var walkers := []
 var legs := []
-var chimneys := []
 var t := 2.0
 var paused := false
 var view := 5
@@ -328,6 +331,12 @@ func box3(x0: int, y0: int, z0: int, x1: int, y1: int, z1: int, p: int) -> void:
 		for z in range(z0, z1 + 1):
 			for x in range(x0, x1 + 1):
 				sv(x, y, z, p)
+
+
+## The metre cell (as used by occ) holding block coordinate b. Rounds down, so
+## negative coordinates land in the right cell too (plain / rounds toward zero).
+func _cell(b: int) -> int:
+	return floori(b / float(RES))
 
 
 func svv(v: Vector3i, p: int) -> void:
@@ -649,7 +658,7 @@ func _build_wall_ring() -> void:
 		box3(lx - 1, 13, lz - 1, lx + 1, 13, lz + 1, P.IRON)
 		box3(lx, 14, lz, lx, 15, lz, P.GLOW)
 		box3(lx - 1, 16, lz - 1, lx + 1, 16, lz + 1, P.IRON)
-		occ[Vector2i(lx / RES, lz / RES)] = true
+		occ[Vector2i(_cell(lx), _cell(lz))] = true
 
 
 func _build_plaza() -> void:
@@ -681,7 +690,7 @@ func _build_plaza() -> void:
 	# Parasols, tables and chairs round the plaza
 	var cols := [P.AWN0, P.AWN1, P.AWN2]
 	for i in 6:
-		var a := TAU * i / 6.0 + 0.3
+		var a := PARASOL_A0 + TAU * i / 6.0
 		_parasol(int(cos(a) * 27.0), int(sin(a) * 27.0), cols[i % 3])
 	# Flower beds round the plaza edge
 	for i in 90:
@@ -725,8 +734,8 @@ func _build_tower(x0: int, z0: int) -> void:
 	var h := 80
 	var x1 := x0 + s - 1
 	var z1 := z0 + s - 1
-	for x in range(x0 / RES - 2, x1 / RES + 2):
-		for z in range(z0 / RES - 2, z1 / RES + 2):
+	for x in range(_cell(x0) - 2, _cell(x1) + 2):
+		for z in range(_cell(z0) - 2, _cell(z1) + 2):
 			occ[Vector2i(x, z)] = true
 	for y in range(1, h + 1):
 		for x in range(x0, x1 + 1):
@@ -1041,7 +1050,6 @@ func _chimney(x: int, z: int, top: int, roof_h: int) -> void:
 	var ch := top + roof_h + 3
 	box3(x, top + 1, z, x + 2, ch, z + 2, P.STONE)
 	box3(x - 1, ch + 1, z - 1, x + 3, ch + 1, z + 3, P.STONE2)
-	chimneys.append(Vector3((x + 1) * VS, (ch + 2) * VS, (z + 1) * VS))
 
 
 func _flat_roof(x0: int, z0: int, x1: int, z1: int, top: int, wall: int) -> void:
@@ -1111,7 +1119,7 @@ func _place_trees() -> void:
 		var a := rng.randf() * TAU
 		var bx := int(cos(a) * RXV * 0.85)
 		var bz := int(sin(a) * RZV * 0.85)
-		if occ.has(Vector2i(bx / RES, bz / RES)):
+		if occ.has(Vector2i(_cell(bx), _cell(bz))):
 			continue
 		for dx in range(-3, 4):
 			for dy in range(0, 4):
@@ -1298,33 +1306,6 @@ func _make_dust(mesh: Mesh) -> CPUParticles3D:
 	return p
 
 
-func _add_smoke() -> void:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.86, 0.84, 0.82)
-	mat.roughness = 1.0
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3.ONE * 0.3
-	mesh.material = mat
-	var cu := Curve.new()
-	cu.add_point(Vector2(0, 0.4))
-	cu.add_point(Vector2(0.3, 1.0))
-	cu.add_point(Vector2(1, 0))
-	for c in chimneys:
-		var p := CPUParticles3D.new()
-		p.mesh = mesh
-		p.amount = 8
-		p.lifetime = 3.0
-		p.local_coords = false
-		p.direction = Vector3.UP
-		p.spread = 12.0
-		p.initial_velocity_min = 0.8
-		p.initial_velocity_max = 1.2
-		p.gravity = Vector3(0, 0.5, 0)
-		p.scale_amount_curve = cu
-		p.position = c
-		city.add_child(p)
-
-
 # ---------- Residents ----------
 
 func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color) -> MeshInstance3D:
@@ -1367,14 +1348,27 @@ func _random_person() -> MeshInstance3D:
 
 func _ring_radius() -> float:
 	# Two walking rings in the plaza (metres): inside the parasols, or outside them.
-	return rng.randf_range(3.1, 3.7) if rng.randf() < 0.5 else rng.randf_range(6.6, 7.4)
+	return rng.randf_range(3.1, 3.6) if rng.randf() < 0.5 else rng.randf_range(6.8, 7.4)
+
+
+## Where to cross between the two rings: the gap between parasols nearest to
+## angle a (leaving out your gap). Returned close to a, so walkers take the short way.
+func _crossing_near(a: float) -> float:
+	var best := INF
+	for g in 6:
+		if g == YOUR_GAP:
+			continue
+		var d := wrapf(PARASOL_A0 + TAU * (g + 0.5) / 6.0 - a, -PI, PI)
+		if absf(d) < absf(best):
+			best = d
+	return a + best
 
 
 func _add_residents() -> void:
 	# You: standing in the plaza (used by the close camera)
 	resident = Node3D.new()
 	# Between two parasols, facing out from the fountain toward the houses
-	var ra := 5.01
+	var ra := PARASOL_A0 + TAU * (YOUR_GAP + 0.5) / 6.0
 	resident.position = Vector3(cos(ra) * 5.0, VS * 0.5, sin(ra) * 5.0)
 	resident.rotation.y = -ra
 	resident.add_child(_make_person(Color(0.16, 0.55, 0.58), Color(0.30, 0.24, 0.20),
@@ -1385,7 +1379,10 @@ func _add_residents() -> void:
 		node.add_child(_random_person())
 		city.add_child(node)
 		var r := _ring_radius()
-		walkers.append({"node": node, "a": rng.randf() * TAU, "r": r, "ta": rng.randf() * TAU,
+		var a := rng.randf() * TAU
+		node.position = Vector3(cos(a) * r, VS * 0.5, sin(a) * r)
+		node.rotation.y = -a - PI * 0.5
+		walkers.append({"node": node, "a": a, "r": r, "ta": rng.randf() * TAU,
 				"tr": r, "wait": rng.randf() * 3.0, "speed": rng.randf_range(0.9, 1.4)})
 
 
@@ -1402,18 +1399,27 @@ func _update_walkers(delta: float) -> void:
 		var step: float = w["speed"] * delta / maxf(r, 1.0)
 		if absf(da) < 0.02 and absf(dr) < 0.05:
 			w["wait"] = rng.randf_range(1.0, 5.0)
-			w["ta"] = w["a"] + rng.randf_range(-1.6, 1.6)
-			w["tr"] = _ring_radius() if rng.randf() < 0.3 else r
+			var new_r := _ring_radius() if rng.randf() < 0.3 else r
+			if (new_r < 5.0) != (r < 5.0):
+				# Changing ring: walk round to a gap between parasols first.
+				w["ta"] = _crossing_near(w["a"])
+			else:
+				w["ta"] = w["a"] + rng.randf_range(-1.6, 1.6)
+			w["tr"] = new_r
 			continue
-		var dir := signf(da)
 		w["a"] += clampf(da, -step, step)
-		w["r"] += clampf(dr, -0.6 * delta, 0.6 * delta)
+		# Only step across between the rings once at the gap, so nobody walks through the tables.
+		var crossing: bool = (w["tr"] < 5.0) != (r < 5.0)
+		if not crossing or absf(da) < 0.05:
+			w["r"] += clampf(dr, -0.6 * delta, 0.6 * delta)
 		var a: float = w["a"]
 		r = w["r"]
-		node.position = Vector3(cos(a) * r, VS * 0.5 + absf(sin(t * 9.0 + a * 5.0)) * 0.05, sin(a) * r)
+		var pos := Vector3(cos(a) * r, VS * 0.5 + absf(sin(t * 9.0 + a * 5.0)) * 0.05, sin(a) * r)
+		var move := Vector3(pos.x - node.position.x, 0, pos.z - node.position.z)
+		node.position = pos
 		# Face the way they walk (person mesh faces +x)
-		var tangent := Vector3(-sin(a), 0, cos(a)) * dir + Vector3(cos(a), 0, sin(a)) * signf(dr) * 0.3
-		node.rotation.y = atan2(-tangent.z, tangent.x)
+		if move.length_squared() > 1e-10:
+			node.rotation.y = atan2(-move.z, move.x)
 
 
 # ---------- Leg maths ----------
@@ -1443,11 +1449,12 @@ func _process(delta: float) -> void:
 	if not paused:
 		t += delta
 		_update_walkers(delta)
+	var period := 2.0 * STEP_LENGTH / CITY_SPEED
 	var body_x := CITY_SPEED * t
 	if body_x > 230.0:
-		t -= 220.0 / CITY_SPEED
+		# Loop back a whole number of strides, so the legs carry on without a hitch.
+		t -= floorf(220.0 / (CITY_SPEED * period)) * period
 		body_x = CITY_SPEED * t
-	var period := 2.0 * STEP_LENGTH / CITY_SPEED
 	var bob := -0.6 * absf(sin(TAU * t / period))
 	city.position = Vector3(body_x, CITY_HEIGHT + bob, 0)
 	city.rotation.x = 0.012 * sin(TAU * t / period)
