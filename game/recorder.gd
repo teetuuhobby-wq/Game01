@@ -56,6 +56,7 @@ func start() -> void:
 	info.store_line("Graphics: %s (%s)" % [RenderingServer.get_video_adapter_name(), RenderingServer.get_video_adapter_vendor()])
 	info.store_line("Window: %s" % str(get_viewport().get_visible_rect().size))
 	info.store_line("Godot: %s" % Engine.get_version_info()["string"])
+	info.store_line("Game version (git commit): %s" % _git_commit())
 	info.store_line("Tuning:")
 	var tuning: Script = T
 	var consts: Dictionary = tuning.get_script_constant_map()
@@ -143,6 +144,16 @@ func _auto_flags(delta: float) -> void:
 			_event("low_fps", "under 15 FPS for 2 s")
 	else:
 		_slow_time = 0.0
+
+
+## The git commit the game is running from, so a replay can use the same version.
+func _git_commit() -> String:
+	var git := ProjectSettings.globalize_path("res://").path_join("../.git")
+	var head := FileAccess.get_file_as_string(git.path_join("HEAD")).strip_edges()
+	if head.begins_with("ref: "):
+		var ref := FileAccess.get_file_as_string(git.path_join(head.substr(5))).strip_edges()
+		return ref if ref != "" else head.substr(5)
+	return head if head != "" else "unknown"
 
 
 # ---------- F8: "that felt off" ----------

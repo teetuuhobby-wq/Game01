@@ -87,7 +87,12 @@ func _process(delta: float) -> void:
 	pull = lerpf(pull, clear, 1.0 - exp(-(5.0 if clear < pull else 2.5) * delta))
 
 	var p := pitch + lift
-	var offset := Vector3(cos(p) * cos(yaw), sin(p), cos(p) * sin(yaw)) * dist * maxf(pull, 0.08)
+	var dir := Vector3(cos(p) * cos(yaw), sin(p), cos(p) * sin(yaw))
+	var reach := dist * maxf(pull, 0.08)
+	# Never sit inside a wall: if the spot itself is too close to blocks, move in until it isn't
+	while reach > 0.6 and not _room_at(world.city.to_local(_focus + dir * reach)):
+		reach -= 0.2
+	var offset := dir * reach
 	distance = offset.length()
 	_shake = maxf(0.0, _shake - delta * 0.8)
 	var wobble := Vector3(sin(_time * 31.0), sin(_time * 27.0), 0) * _shake
@@ -105,11 +110,26 @@ func _process(delta: float) -> void:
 	_dof.dof_blur_far_transition = dist * 0.8 + 20.0
 
 
-## How much of the view line at this tilt is clear (0..1). Three lines side by side,
-## and the clearest one counts, so thin things like lamp posts don't matter.
+## How much of the view line at this tilt is clear (0..1), keeping the camera 45 cm
+## back from whatever it would hit. Three lines side by side and the middle result
+## counts: a thin post blocks only one line (ignored), but a wall or a building's
+## corner blocks two (not ignored; playtest 2: "my camera clips through the buildings").
 func _clear_line(p: float, dist: float) -> float:
 	var off := Vector3(cos(p) * cos(yaw), sin(p), cos(p) * sin(yaw)) * dist
 	var a: Vector3 = world.city.to_local(_focus)
 	var b: Vector3 = world.city.to_local(_focus + off)
 	var side := Vector3(-off.z, 0, off.x).normalized() * 0.35
-	return maxf(world.first_hit(a, b), maxf(world.first_hit(a + side, b + side), world.first_hit(a - side, b - side)))
+	var hits := [world.first_hit(a, b), world.first_hit(a + side, b + side), world.first_hit(a - side, b - side)]
+	hits.sort()
+	var h: float = hits[1]
+	return 1.0 if h >= 1.0 else clampf((h * dist - 0.45) / dist, 0.0, 1.0)
+
+
+## True if the camera at this spot (on the city) has no block within 30 cm of it.
+func _room_at(p: Vector3) -> bool:
+	for o in [Vector3.ZERO, Vector3(0.3, 0, 0), Vector3(-0.3, 0, 0), Vector3(0, 0.3, 0),
+			Vector3(0, -0.3, 0), Vector3(0, 0, 0.3), Vector3(0, 0, -0.3)]:
+		var q: Vector3 = p + o
+		if world.gv(roundi(q.x / world.VS), roundi(q.y / world.VS), roundi(q.z / world.VS)) != 0:
+			return false
+	return true

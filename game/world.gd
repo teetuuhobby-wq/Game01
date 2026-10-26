@@ -27,11 +27,11 @@ const RES := 5
 const VS := 1.0 / RES
 const RXV := 210             # deck half-length (42 m)
 const RZV := 140             # deck half-width (28 m)
-const GX0 := -225
-const GZ0 := -155
+const GX0 := -240
+const GZ0 := -175
 const GY0 := -60
-const NX := 451
-const NZ := 311
+const NX := 481
+const NZ := 351
 const NY := 290
 
 # --- Terraces: [how far out the terrace reaches (1 = deck edge), floor height in blocks] ---
@@ -657,6 +657,7 @@ func _build_city() -> void:
 	for hip in _hip_positions():
 		var hb := Vector3i(hip * RES)
 		_sphere(hb.x, hb.y, hb.z, 11.0, P.HULL, P.BRASS)
+	_build_struts()
 	_emit_grid()
 
 
@@ -728,7 +729,7 @@ func _build_wall_ring() -> void:
 					sv(x, y, z, _stone(x, y, z))
 	# Lamps along the inside of the wall
 	for i in 32:
-		var a := TAU * i / 32.0
+		var a := TAU * (i + 0.5) / 32.0   # between the main streets, not on them
 		var lx := int(cos(a) * RXV * 0.88)
 		var lz := int(sin(a) * RZV * 0.88)
 		_lamp(lx, lz)
@@ -1100,21 +1101,22 @@ func _window(o: Vector3i, a: Vector3i, n: Vector3i, u0: int, y0: int, shutter: i
 			svv(fp(o, a, n, u, y, 0), shutter)
 
 
+## A door 2.4 m tall and 1 m wide (people are 1.8 m), with a rounded top, a stone
+## frame, a step, and a lamp above.
 func _door(o: Vector3i, a: Vector3i, n: Vector3i, uc: int) -> void:
-	for u in range(uc - 2, uc + 2):
-		for y in range(1, 10):
-			if y == 9 and (u == uc - 2 or u == uc + 1):
+	for u in range(uc - 2, uc + 3):
+		for y in range(1, 13):
+			if y == 12 and (u == uc - 2 or u == uc + 2):
 				continue
 			clv(fp(o, a, n, u, y, 0))
 			svv(fp(o, a, n, u, y, -1), P.WOOD)
-	for y in range(1, 11):
+	for y in range(1, 14):
 		svv(fp(o, a, n, uc - 3, y, 0), P.STONE)
-		svv(fp(o, a, n, uc + 2, y, 0), P.STONE)
-	for u in range(uc - 3, uc + 3):
-		svv(fp(o, a, n, u, 10, 0), P.STONE)
+		svv(fp(o, a, n, uc + 3, y, 0), P.STONE)
+	for u in range(uc - 3, uc + 4):
+		svv(fp(o, a, n, u, 13, 0), P.STONE)
 		svv(fp(o, a, n, u, 1, 1), P.STONE2)
-	svv(fp(o, a, n, uc, 12, 1), P.GLOW)
-	svv(fp(o, a, n, uc, 13, 1), P.IRON)
+	svv(fp(o, a, n, uc, 14, 1), P.GLOW)
 
 
 func _balcony(o: Vector3i, a: Vector3i, n: Vector3i, uc: int, y: int) -> void:
@@ -1360,8 +1362,27 @@ func _build_underside() -> void:
 # ---------- Legs ----------
 
 func _hip_positions() -> Array:
-	return [Vector3(26, -2, 18), Vector3(0, -2, 24), Vector3(-26, -2, 18),
-			Vector3(26, -2, -18), Vector3(0, -2, -24), Vector3(-26, -2, -18)]
+	# Just outside the deck's edge, so a leg swinging up to its knee never passes
+	# through the streets (playtest 2: "the city legs clip through the walls")
+	return [Vector3(30, -2, 24), Vector3(0, -2, 31), Vector3(-30, -2, 24),
+			Vector3(30, -2, -24), Vector3(0, -2, -31), Vector3(-30, -2, -24)]
+
+
+## A thick beam under the deck from each hip in toward the middle, holding the leg on.
+func _build_struts() -> void:
+	for hip in _hip_positions():
+		var h := Vector3(hip) * RES
+		var dir := -Vector3(h.x, 0, h.z).normalized()
+		var side := Vector3(-dir.z, 0, dir.x)
+		var t := 0
+		while _e(h.x + dir.x * t, h.z + dir.z * t) > 0.75:
+			var c := h + dir * t
+			for a in range(-4, 5):
+				for b in range(-4, 5):
+					var p := c + side * a + Vector3(0, b, 0)
+					var band := posmod(t, 12) < 2
+					sv(roundi(p.x), roundi(p.y), roundi(p.z), P.BRASS if band and absi(b) == 4 else P.HULL)
+			t += 1
 
 
 ## A hollow square leg segment built along local -Y, with brass bands and rivets.

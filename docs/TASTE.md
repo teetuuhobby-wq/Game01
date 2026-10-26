@@ -27,6 +27,10 @@ _Last updated: 2026-10-26 (session 02: what part of "bigger city" matters)_
 - **Detail matters.** You asked for Town to City-level resolution, and the finer blocks were "definitely better." Confidence: high. This backs up the "has to look good" requirement.
 - **Scale: "the city feels a bit small, several times bigger."** Confidence: low–medium (one statement, but it fits Regios, whose walking cities are huge). Guess: you want the city to feel like a *place* you could get lost in, and big enough that "merely one resident" is true. **Session 02 answer:** the part that matters most is **more streets and districts to live in and wander** (confidence now medium–high: you picked it straight away, matching my guess). The awe of a huge city seen from outside, and more people and bustle, are also liked, but they come second.
 
+## New signals (playtest 2, session 02)
+
+- **They want to be *in* the city, at human scale.** Confidence: medium–high. They played **92% of the time fully zoomed in** (street level) and asked to discuss a **first-person** camera. They also noticed human-scale details ("the door is smaller than me") and things that break the illusion up close (legs clipping through walls). This fits "merely one resident" and "more streets to wander": the diorama is for admiring, but they *live* at street level.
+
 ## Other signals
 
 - **Discovery: finding secret places.** low. One pick in Round 1 and nothing since. It would fit naturally (what's out in the wasteland?).
