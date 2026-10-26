@@ -65,7 +65,7 @@ _Last updated: 2026-10-26 (session 02: what part of "bigger city" matters)_
 
 ## Contradictions to resolve
 
-- **How much fighting?** Chrono Ark's best moment was a fight, but you skipped Regios's fights. Theory: one or two *huge* moments matter more than constant combat. Test this in the concept pitches.
+- ~~**How much fighting?**~~ **Resolved (session 02, the user's own words): expeditions into the desert should be dangerous, and combat should almost always be a given.** The town is for everyday life; the desert is where you fight. The earlier theory ("one or two huge moments") still holds for the city itself: night attacks on the city are rare, big events. Still open: *what kind* of combat (action, turn-based tactics, or party commands).
 - **Cozy builder look vs. epic climax.** Probably a feature: a peaceful home makes the dangerous outside and the big moment hit harder.
 
 ## Retired preferences
