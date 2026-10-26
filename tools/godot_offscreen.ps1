@@ -91,8 +91,26 @@ $cmd = (@($exe, "--audio-driver", "Dummy", "--log-file", $log, "--path", $projec
 $desk = [HiddenDesktop]::Create($desktopName)
 try {
 	$proc = [HiddenDesktop]::Start($cmd, $desktopName)
-	$timedOut = [HiddenDesktop]::WaitForSingleObject($proc, [uint32]($TimeoutSec * 1000)) -ne 0
-	if ($timedOut) { [void][HiddenDesktop]::TerminateProcess($proc, 124); [void][HiddenDesktop]::WaitForSingleObject($proc, 5000) }
+	# Wait for Godot to finish. A script that fails to load leaves Godot running an
+	# empty scene forever, so watch the log for that and stop early.
+	$deadline = (Get-Date).AddSeconds($TimeoutSec)
+	$timedOut = $false
+	$scriptBroken = $false
+	while ([HiddenDesktop]::WaitForSingleObject($proc, 500) -ne 0) {
+		$text = ""
+		try {
+			$fs = [System.IO.File]::Open($log, "Open", "Read", "ReadWrite")
+			$text = (New-Object System.IO.StreamReader($fs)).ReadToEnd()
+			$fs.Close()
+		} catch {}
+		$scriptBroken = $text -match "Parse Error|Failed to load script"
+		$timedOut = (Get-Date) -gt $deadline
+		if ($scriptBroken -or $timedOut) {
+			[void][HiddenDesktop]::TerminateProcess($proc, 1)
+			[void][HiddenDesktop]::WaitForSingleObject($proc, 5000)
+			break
+		}
+	}
 	$code = [uint32]0
 	[void][HiddenDesktop]::GetExitCodeProcess($proc, [ref]$code)
 	[void][HiddenDesktop]::CloseHandle($proc)
@@ -100,5 +118,6 @@ try {
 	[void][HiddenDesktop]::CloseDesktop($desk)
 }
 if (Test-Path $log) { Get-Content $log; Remove-Item $log -ErrorAction SilentlyContinue }
+if ($scriptBroken) { Write-Output "godot_offscreen: a script failed to load, stopped Godot"; exit 1 }
 if ($timedOut) { Write-Output "godot_offscreen: timed out after $TimeoutSec s, stopped it"; exit 124 }
 exit [int]$code
