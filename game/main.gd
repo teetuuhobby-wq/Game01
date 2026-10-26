@@ -61,7 +61,7 @@ func _ready() -> void:
 		rp.finished.connect(func() -> void: get_tree().quit())   # before add_child: it may finish straight away
 		add_child(rp)
 		return
-	if not "--autoplay" in args:
+	if not "--autoplay" in args and not "--no-record" in args:   # tests pass --no-record
 		recorder = preload("res://recorder.gd").new()
 		recorder.world = world
 		recorder.player = player

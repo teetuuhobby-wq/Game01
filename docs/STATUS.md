@@ -1,116 +1,103 @@
 # STATUS: start here
 
-**New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/`.
+**New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 02 is the latest).
 
-_Last updated: 2026-10-26, session 02 (work laptop): code review and fixes, hidden test runs. The open questions below are still unasked._
+_Last updated: 2026-10-26, end of session 02 (work laptop). The next session may be on the home PC: see "First time on the home PC after session 02" below._
 
 ## Where we are
 
 - ✅ **Phase 1: Discover**: done. Three core desires confirmed (see TASTE.md).
-- ✅ **Phase 2: Pick a direction**: done. **"Strider Home"**: you're one ordinary resident of a living walking city crossing a dangerous wasteland, plus the night danger from pitch B. See GAME.md.
-- ➡️ **Phase 3: First playable toy**: built (`game/`) and **playtested twice**. Playtest 2 (recorded, 4 F8 flags) found legs through the streets, the camera in walls, doors too small, and a lamp blocking stairs; all fixed. **Camera: both** (first person by scrolling all the way in). Playtest 3: 69% of the time in first person, errand done in 57 s; got stuck at the plaza's flower ring, which is now wade-through. Next: the user's call (another playtest, or the next thing to add).
+- ✅ **Phase 2: Pick a direction**: done. **"Strider Home"**: you're one resident of a walking city crossing a dangerous wasteland.
+- ✅ **Phase 3: First playable toy**: done. `game/` is the terraced city: you walk it (first person or behind you), it walks and sways, there are 50 neighbours, and Mira's errand (valve from Bram's workshop to the rain-catcher). Playtested 3 times, with fixes after each.
+- ➡️ **Phase 4: Grow it**: the user reshaped the core loop (see GAME.md): day in town (shops, guild, requests), dangerous night expeditions with combat, then race home at dawn. **The next milestone isn't locked: it waits on the combat-style decision.**
 
-## Open questions for the user (ask these first, one or two at a time)
+### What session 02 did (short)
+Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x faster mesher; the terraced city; a 10x experiment (branch `experiment/city-10x`, parked); the first playable toy; playtest tools (recorder, F8, exact replay, F3); 3 playtests; first person.
 
+## Open questions for the user (ask one or two at a time)
 
-0. **City size (raised last thing in session 01):** the user said the HD city "feels a bit small, needs to be several times the current size." **Answered in session 02: (b) more streets and districts matters most; (a) and (c) are liked too. The user picked the terraced city (`prototypes/look_test_terraced/`). They then asked to see 10x: built on branch `experiment/city-10x`, too heavy as is (see DECISIONS). **Look tests are now frozen. The first toy uses the terraced city; revisit size after the user has walked around in it.** Original question was: (a) the awe of a *huge* walking city seen from outside, (b) more streets and districts to live in and wander, or (c) more people and bustle? Then offer options with sizes:
-   - **Bigger deck with chunked rendering:** you see one neighbourhood at a time in diorama view. Medium.
-   - **Terraced, multi-level city** (stacked districts climbing a central hill or spire): feels much bigger for less area, and gives great silhouettes. Medium.
-   - **The clever fake:** the near districts are detailed, the far ones are lower-detail blocks. Small–Medium.
-   *Claude's lean: terraced and bigger, tested as a quick look-test change first.* Bigger also means legs and hull scale up.
-1. **Camera for the first toy (and the game):** a close third-person view behind the resident, or a zoomed-out diorama view? Compare `docs/screens/2026-10-26_hd_diorama.png` and `2026-10-26_hd_close.png`. *Claude's default changed after seeing them: **diorama**. It looks far better with today's art and shows the whole living town; close-up exposes the coarse voxels and would need much more art work. Possible middle ground: diorama with a zoom-in.*
-2. **Which pitch-B elements?** Claude suggested: the city kneels at night and things climb the legs. Not confirmed yet.
-3. **Nano Banana Pro access:** the Gemini app or website (Claude writes prompts, the user pastes images back) or an API key (Claude generates directly, with a cost estimate first)? Only matters once we do concept art.
+1. **What kind of combat?** The user postponed this at the end of session 02. Options: (a) action, real time; (b) turn-based tactics like Chrono Ark (a game they love; it makes AI companions easy); (c) real time with pause to order the party. Ask "what part?" (the rush of reflexes, a clever plan, or the party's spectacle). *Claude's suggestion: two tiny combat toys on a branch (an afternoon each), one action and one turn-based, against the same desert creature. Let the user play both and react.*
+2. **Companions:** the user wants a party of AI companions (neighbours, guild members). *Claude's lean: the first expedition solo, then one simple companion who follows, talks, carries and warns at dawn (no fighting), and fighting companions once combat exists.* Not confirmed.
+3. **Fail state when stranded:** the user said "catch up on a vehicle, or game over and reload." *Claude suggested softer (a caravan rescues you, you lose your haul) and no vehicles in the first version (a sprint on foot after the rising city).* Not confirmed.
+4. **Which facilities first** (shops, guild, tavern, workshop…) and how the city grows to hold them (district by district).
+5. *(Low priority)* **Nano Banana Pro access** for concept art: the Gemini app or an API key? Only matters once we do concept art.
 
 ## Suggested next step
 
-Propose the **first toy** with default answers, get a yes, then build it in a new Godot project at `game/` (leave `prototypes/look_test_hd/` as reference). A likely scope:
-- one resident you control, walking around the town deck **while the city walks and sways**
-- 3–5 other residents on simple daily loops (the "alive" feeling, done cheaply)
-- one tiny thing to do (e.g. fix the rain-catcher) plus some sound
-- meet the minimum bar in CLAUDE.md (runs, visible player, controls, one challenge, sound, can be won or progressed)
-
-Technical plan for the toy (Claude's recommendations from the session-02 review):
-- **Walking on a swaying deck:** run the player and residents in the city's own coordinates, as if the deck stood still, and add the walk and sway only to what's drawn. This avoids moving-platform physics bugs.
-- **Where you can walk:** the look test's `occ` map (which metre cells are built on) is a ready-made walk map for the player and residents. There is no collision yet.
-- **Drawing the city:** reuse the look test's visible-faces mesher (`Faces`, `_emit_grid`). It's what lets weaker PCs run it, and a bigger city needs it.
+Settle question 1 (combat style). Then propose the first Phase 4 milestone with defaults. Claude's draft is **"One night out"**: a guild request at dusk → the city kneels → ride the cargo lift down → a dangerous desert night with combat → race home as dawn breaks and the legs rise. Keep it one request and one area, and add facilities and companions after.
 
 ## Important rules learned (don't break these)
 
 - **It has to look good.** That's the user's #1 fear from past projects. Keep art code-built and consistent, and use screenshots plus a **separate critic** pass on visuals.
+- **The user lives at street level.** They play in first person most of the time (69% in playtest 3). Judge things at human scale: door sizes, things in the way, what you see from your own eyes.
+- **"Bigger city" means more places with a purpose** (confirmed), not more area. Never grow the city by repeating the same houses.
 - **Never show the user story spoilers.** The payoff is gameplay-first, with a short story checked by blind critic agents ("predict the twist" and "find the clues" tests). The user judges it only by playing blind.
 - **Living world = the clever fake:** residents with routines and reactions, not deep AI.
 - Don't build Huge things. Ask before paid tools.
-- **Tests run hidden.** The user doesn't want the game popping up or grabbing their mouse and keyboard while Claude tests. Use `tools/godot_offscreen.ps1` (see "How to run things"). Open a visible window only when the user asks to see it.
+- **Tests run hidden.** The game must never pop up on the user's screen or grab their mouse and keyboard while Claude tests. Use `tools/godot_offscreen.ps1`, or `--headless` for logic. Open a visible window only when the user asks to see it.
+- **After every change to `game/`, run `tools/run_tests.ps1`.** When a test fails after a change, check whether the test or the game is wrong before "fixing" either.
+- **Playtests are the main feedback loop.** The user plays and presses F8; Claude reads the logs, replays the session to see the flagged moments, fixes, and proves the fix with a test that reproduces the user's exact situation.
+- **Save only the conversation to `docs/history/`** (`--chat-only`): the user wants later sessions to read between the lines, not the commands.
 
-## Art status (look test)
+## Art status
 
-**Current best: `prototypes/look_test_hd/`.** The user asked for Town to City-level detail, so this version uses **20 cm blocks (5 per metre)**, and a resident is 9 blocks tall. Houses are built from templates in code: recessed windows with shutters, flower boxes, arched doors, balconies, cornices, hip/gable/flat roofs with tile rows, chimneys, ivy, pergolas, washing lines. The plaza has a fountain, striped parasols and cafe tables, and 18 residents stroll on simple loops. It is drawn as chunked meshes of only the block faces you can see (about 520k faces), so it starts in ~4 s and runs at 25–28 FPS even on the work laptop (11 FPS before that change).
-- Critic: **6/10 appeal, 5/10 closeness to Town to City** (up from 4/10 for the coarse version). After that review, the floating smoke cubes were removed and the grade warmed toward Town to City's amber (not re-scored yet).
-- Critic's remaining list for a later art pass: more variety between houses (heights, tints, more vines and flowers, stalls round the plaza); more mechanical detail on the legs and underside (the knee joints read as plain domes); the close camera still looks like "Minecraft Steve" at this block size, so lock the **diorama** camera or use finer blocks for characters.
-- The coarse version (`prototypes/look_test/`) is kept for comparison.
-- **Terraced test (session 02): `prototypes/look_test_terraced/`.** The deck is 1.5x wider and longer (2.25x the area). It has two raised terraces (6 m and 12 m) shaped like rounded rectangles, because straight walls read better in blocks than curves. Each terrace has stone retaining walls with a ledge, balustrades, lamps, hanging vines, and stairs on the four main streets. The plaza and a taller bell tower sit on top. There are 50 residents (18 at the plaza, 32 strolling along the terrace edges); a headless test found no collisions. It runs at ~21 FPS on the laptop and starts in ~5 s. Screens: `docs/screens/2026-10-26_flat_vs_terraced.jpg`, `..._terraced_diorama.jpg`, `..._terraced_outside.jpg`, `..._terraced_plaza.jpg`.
-  - Critic (terraced vs flat): appeal 7 vs 8, Town to City look 6 vs 8, streets to wander 6 vs 4, awe from outside 7.5 vs 5.5, bustle 6.5 vs 4.5. This was a different critic from the 6/10 one, so compare within this pair only.
-  - Critic's fix list, if the user keeps it: denser rows of houses with shared walls and smaller gaps (the biggest loss vs flat); 2–3 lanes cutting up through the terraces with arch gates in the walls; walls with buttresses, niches and windows; small buildings or stalls lining the plaza edge; taller 4–5 storey blocks on the lower terrace stepping up toward the tower; a less bare tower; something on the plain hull underside.
+- **The game (`game/world.gd`) is now the reference for the look.** It's the terraced city from the look test, plus: legs attached outside the deck on struts, 2.4 m doors, lamps off the main streets, wade-through plaza flowers, Bram's workshop and the rain-catcher.
+- **Look tests (frozen, for comparison):** `prototypes/look_test_hd/` (flat, 20 cm blocks), `prototypes/look_test_terraced/`, `prototypes/look_test/` (coarse). Critic scores (terraced vs flat): appeal 7 vs 8, Town to City look 6 vs 8, streets to wander 6 vs 4, awe from outside 7.5 vs 5.5, bustle 6.5 vs 4.5.
+- **Art polish list for later** (from critics): denser rows of houses with shared walls; lanes and arched gates through the terraces; walls with buttresses, niches and windows; stalls round the plaza; taller blocks stepping up to the tower; more detail on the legs and the hull underside.
+- **Screens worth a look:** `docs/screens/2026-10-26_toy_fp_*.jpg` (first person), `..._toy_*.jpg`, `..._city_scale_comparison.jpg`, `..._flat_vs_terraced.jpg`.
 - Idea for later: Nano Banana Pro concept art → Claude rebuilds it in code (technique C8).
 
 ## Machines
 
 | | Home PC (main) | Work laptop |
 |---|---|---|
-| Use for | Everything: building, running, screenshots, art | Design, docs, code. Running the game may be slow. |
-| GPU | AMD RX 7900 XTX (24 GB) | Intel Iris Xe, much weaker (HD look test: 25–28 FPS). **Design for the home PC**, as the user asked. |
+| Use for | Everything: building, running, screenshots, art | Session 02 happened here. Design, docs, code, tests, playtests. |
+| GPU | AMD RX 7900 XTX (24 GB) | Intel Iris Xe, much weaker: the game runs at ~20–28 FPS. **Design for the home PC**, as the user asked. |
 | Godot | 4.7.2 via winget: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe` | Same version and path (installed) |
 | Python | `py -3` (plain `python` hits the Microsoft Store stub) | `py -3`, with Pillow |
 | Other | Blender 4.5, Krita 5.2, Node, VS Code | Git and Claude Code |
 
-### Setting up the work laptop (one time)
+### First time on the home PC after session 02
 
-1. Install **Git for Windows** (it includes Git Credential Manager), **Claude Code** and **Godot 4.7.2**.
+1. `git pull`.
+2. Set git to use the private GitHub address (the repo is public): `git config user.name "teetu"` and `git config user.email "338372523+teetuuhobby-wq@users.noreply.github.com"`.
+3. Run `tools/run_tests.ps1` once. Everything should pass. It's the first run on the AMD card, so also check `tools/godot_offscreen.ps1` works there (e.g. `... godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots`).
+4. Have the user play `game/run.bat` once and say how it runs on the home PC.
+
+### Setting up another machine (one time)
+
+1. Install **Git for Windows** (it includes Git Credential Manager), **Claude Code** and **Godot 4.7.2** (`winget install GodotEngine.GodotEngine`).
 2. Clone: `git clone https://github.com/teetuuhobby-wq/Game01.git`
-3. Inside the repo folder, tell git who you are. The repo is public, so use GitHub's private "noreply" address instead of your personal email:
-   `git config user.name "teetu"` and `git config user.email "338372523+teetuuhobby-wq@users.noreply.github.com"`
-   Done on the work laptop in session 02. **Home PC: run the same two commands there too.** Older commits keep the old address; rewriting history isn't worth it.
+3. Set the git name and email as in step 2 above. Older commits keep the old address; rewriting history isn't worth it.
 4. The first `git push` opens a browser window to sign in to GitHub. Approve it once, and it's remembered after that.
 5. If a push is rejected ("fetch first"), the other computer pushed newer work. Run `git pull`, then push again.
 
-**On the laptop:** `--rendering-method mobile` doesn't help (measured: same FPS). Turning off shadows does, but it changes the look. Don't redesign for the laptop. Final visual checks happen on the home PC.
-
 ## How to run things
 
-- **The game (first toy):** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms (all the way in = first person), Z X turn. F8 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning: `game/tuning.gd`.
-- **Playtests (recorded automatically):** every normal play session writes `game/playtests/<date_time>/`. It's git-ignored, so it stays on the machine it was played on. The folder holds:
-  - `events.csv`: start here. It lists the user's **F8 flags** with their notes and a screenshot (`flag_NN.png`), plus automatic flags: `stuck`, `camera_jump`, `low_fps` and errand steps.
-  - `log.csv`: 10 times a second, your position, floor, the camera (zoom, distance, lift, pull, yaw), FPS and errand step.
-  - `inputs.csv`: every frame's keys and mouse, used for replay.
-  - `session.txt`: the machine and the tuning values used.
-- **After a playtest (Claude):** read the newest `events.csv` and `log.csv`, then replay it hidden to *see* the flagged moments:
-  `... tools/godot_offscreen.ps1 game --fixed-fps 60 -- --replay playtests/<folder> --shots`
-  This saves the view just before and at each event to `<folder>/replay/`. Replay is exact: it drifted less than 1 mm in tests.
-- **Game tests (Claude):**
-  - Logic, headless (seconds): `<godot_console.exe> --headless --fixed-fps 30 --path game -- --autoplay`. A bot plays the whole errand along the shortest route; exit code 0 = done (2 stuck, 3 no route, 4 too slow). Last result: done in 43 s of play.
-  - With pictures, hidden: `... tools/godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots` saves the in-game camera's views at the start and at each step to `game/shots/`.
-  - Performance on the laptop: ~20 FPS.
-
-- **Look test:** double-click `prototypes/look_test_hd/run.bat` (keys 1–6 camera, Space pause, Esc quit). The old coarse version is `prototypes/look_test/run.bat`.
-- **Testing (Claude): never pop the game up on the user's screen.** Run it hidden:
-  `powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot_offscreen.ps1 <project_dir> [godot args] [-- game args]`
-  Godot then runs on a separate, never-shown Windows desktop. It can't cover the screen, take keyboard focus or catch the mouse, and sound is off. Screenshots and FPS match a visible run (checked pixel by pixel in session 02). Add `--fixed-fps 60` to make screenshots repeatable, so before/after images can be compared exactly. For logic-only tests, `--headless` is faster.
-- **Screenshots for review:** `... tools/godot_offscreen.ps1 prototypes/look_test_hd -- --shots` saves 6 PNGs to `prototypes/look_test_hd/shots/` and quits.
-- **Screenshot rule:** every `shots/` folder is git-ignored, because they're re-rendered often and would bloat the repo. Save the ones worth keeping to `docs/screens/` as **JPG** (about 4× smaller), named `YYYY-MM-DD_topic.jpg`:
-  `<godot_console.exe> --headless --script tools/to_jpg.gd -- <shot.png> docs/screens/YYYY-MM-DD_topic.jpg`
-  The older keepers are PNG; leave them.
+- **Play the game:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms (all the way in = first person), Z X turn. F8 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning numbers: `game/tuning.gd`.
+- **All tests (Claude, after every change):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/run_tests.ps1`. Headless, about 35 s. It runs the bot errand plus key, stairs, first-person and flower tests (`game/tests/`). Exit code 0 = all passed.
+- **Hidden runs with pictures:** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot_offscreen.ps1 <project_dir> [godot args] [-- game args]`. Godot runs on a separate, never-shown Windows desktop with sound off; screenshots and FPS match a visible run. Add `--fixed-fps 60` for repeatable screenshots. It stops at once if a script fails to load.
+  - Bot errand with screenshots: `... godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots` (into `game/shots/`).
+- **Playtests (recorded automatically):** every normal play session writes `game/playtests/<date_time>/`. It's git-ignored, so it stays on the machine it was played on.
+  - `events.csv`: start here. The user's **F8 flags** with notes and a screenshot (`flag_NN.png`), plus automatic flags: `stuck`, `camera_jump`, `low_fps`, errand steps.
+  - `log.csv`: 10 times a second: position, floor, camera (zoom; negative = first person), FPS, errand step.
+  - `inputs.csv`: every frame's keys and mouse, for replay.
+  - `session.txt`: machine, tuning values, and the **game version (git commit)**.
+- **After a playtest (Claude):** read `events.csv` and `log.csv`, then replay hidden to *see* the flagged moments:
+  `... godot_offscreen.ps1 game --fixed-fps 60 -- --replay playtests/<folder> --shots` (shots into `<folder>/replay/`). Replays only match the game version they were recorded on. If the code has changed since, replay from a copy of that commit: `git archive <commit> game`, extract it, copy the playtest folder into its `game/playtests/`, and run from there.
+- **Look tests:** `prototypes/*/run.bat` (keys 1–6 camera). Screenshots: `... godot_offscreen.ps1 prototypes/look_test_hd -- --shots`.
+- **Screenshot rule:** every `shots/` folder is git-ignored. Save keepers to `docs/screens/` as **JPG**: `<godot_console.exe> --headless --script tools/to_jpg.gd -- <shot.png> docs/screens/YYYY-MM-DD_topic.jpg`.
 
 ## Branches
 
 | Branch | What it is | Status |
 |---|---|---|
 | `main` | The project. Always work here. | Active |
-| `experiment/city-10x` | **Look only, don't merge.** The terraced city at 10x its area (265 x 177 m, 4 terraces, 736 houses), built in session 02 because the user asked to *see* the real scale. Code: `prototypes/look_test_10x/`. Too heavy as is: 6 FPS and a 33 s start on the laptop, 2.7 GB of memory. Result and screenshots are already on main (DECISIONS, `docs/screens/2026-10-26_city_scale_comparison.jpg`). | Parked. Keep it as a reference for a later city-size decision; a playable big city needs chunk streaming and distinct districts (Large). |
+| `experiment/city-10x` | **Look only, don't merge.** The terraced city at 10x its area (265 x 177 m, 4 terraces, 736 houses), built because the user asked to *see* the real scale. Code: `prototypes/look_test_10x/`. 6 FPS and a 33 s start on the laptop, 2.7 GB of memory. | Parked. The user later said even 10x may not be big enough, but what they mean is more *places with a purpose* (see TASTE). |
 
-To look at the 10x city on either computer: `git fetch`, then `git switch experiment/city-10x`, double-click `prototypes/look_test_10x/run.bat`, and `git switch main` when done. Commit or stash any work first, because switching branches changes the files in the folder.
+To look at the 10x city: `git fetch`, `git switch experiment/city-10x`, double-click `prototypes/look_test_10x/run.bat`, then `git switch main`. Commit or stash any work first.
 
 ## Session ritual
 
 - **Start:** `git pull`, read this file, give the user a 3-line recap, and propose the next step.
-- **End:** update this file plus TASTE, IDEAS, GAME and DECISIONS, and save the conversation to `docs/history/` with `tools/transcript_to_md.py --chat-only` (usage at the top of the script). The user wants **only the conversation** saved: their messages and Claude's replies, no commands or output. That's what a later session needs to read between the lines. It's published to GitHub, so read the result for anything private before committing. Then commit and `git push`.
+- **End:** update this file plus TASTE, IDEAS, GAME and DECISIONS, and save the conversation to `docs/history/` with `tools/transcript_to_md.py --chat-only` (usage at the top of the script). The user wants **only the conversation** saved: their messages and Claude's replies, no commands or output. It's published to GitHub, so read the result for anything private before committing. Then run the tests, commit and `git push`.

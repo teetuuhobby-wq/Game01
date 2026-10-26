@@ -10,7 +10,7 @@ A hobby game for me and my friends, made with Claude Code in **Godot 4.7**.
 
 ## Status
 
-Direction chosen; next up is the **first playable toy**. Details: **[docs/STATUS.md](docs/STATUS.md)**.
+The **first playable toy** is done: walk the terraced city in first person while it walks, with neighbours and one errand. Next: dangerous night expeditions (the combat style is still to be decided). Details: **[docs/STATUS.md](docs/STATUS.md)**.
 
 ## Run it
 
@@ -33,4 +33,4 @@ Direction chosen; next up is the **first playable toy**. Details: **[docs/STATUS
 | `docs/screens/` | Screenshots worth keeping |
 | `game/` | **The game** (first playable toy). Tuning numbers: `game/tuning.gd` |
 | `prototypes/` | Throwaway experiments (look tests) |
-| `tools/` | Helper scripts |
+| `tools/` | Helper scripts: `run_tests.ps1` (all tests), `godot_offscreen.ps1` (hidden runs), `to_jpg.gd`, `transcript_to_md.py` |

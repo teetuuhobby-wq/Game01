@@ -176,6 +176,7 @@ My imagination will outrun what we can build. You are allowed, and expected, to 
   - Where possible, play the feature yourself with simulated input against a clear pass bar (e.g. "can reach the exit," "can beat this enemy").
   - Show me screenshots or a playable build, not just a description of what you changed.
   - Run your test builds hidden (`tools/godot_offscreen.ps1`), so the game never pops up on my screen or grabs my mouse and keyboard while I'm doing something else. Open a visible window only when I ask to see it.
+  - Run all the tests (`tools/run_tests.ps1`) after every change to the game.
 - **Ask before you assume.** Before building something new, ask me a few quick questions, each with your suggested default answer. Any gap I leave should become a question, not a generic guess.
 - **Every playable build meets a minimum bar:**
   - it runs without errors,

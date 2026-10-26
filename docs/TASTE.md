@@ -2,7 +2,7 @@
 
 *My interpretation, not your raw words. Updated after every Discover round.*
 
-_Last updated: 2026-10-26 (session 02: what part of "bigger city" matters)_
+_Last updated: 2026-10-26 (end of session 02: street level, first person, facilities, the user's loop, combat in expeditions, AI companions)_
 
 ## Hard requirement (not a desire, a deal-breaker)
 
