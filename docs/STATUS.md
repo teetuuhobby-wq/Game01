@@ -12,7 +12,7 @@ _Last updated: 2026-10-26, end of session 01 (home PC)_
 
 ## Open questions for the user (ask these first, one or two at a time)
 
-1. **Camera for the first toy:** a close third-person view behind the resident (feel the deck sway) or a zoomed-out diorama view (see the whole town)? *Claude's default: close third-person, because it sells "I'm one of the residents" and the swaying deck.*
+1. **Camera for the first toy (and the game):** a close third-person view behind the resident, or a zoomed-out diorama view? Compare `docs/screens/2026-10-26_camera_*.png`. *Claude's default changed after seeing them: **diorama**. It looks far better with today's art and shows the whole living town; close-up exposes the coarse voxels and would need much more art work. Possible middle ground: diorama with a zoom-in.*
 2. **Which pitch-B elements?** Claude suggested: the city kneels at night and things climb the legs. Not confirmed yet.
 3. **Nano Banana Pro access:** the Gemini app or website (Claude writes prompts, the user pastes images back) or an API key (Claude generates directly, with a cost estimate first)? Only matters once we do concept art.
 
