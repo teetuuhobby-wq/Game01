@@ -9,6 +9,9 @@ const CAMERA_ZOOM_START := 0.4   # 0 = close behind you, 1 = the whole-town dior
 const CAMERA_NEAR_DISTANCE := 4.5   # metres, fully zoomed in
 const CAMERA_FAR_DISTANCE := 95.0   # metres, fully zoomed out
 const CAMERA_TURN_SPEED := 1.6   # Z and X keys, how fast the camera turns
+const MOUSE_LOOK := true         # click in the window, then move the mouse to look around
+const MOUSE_SENSITIVITY := 0.0035   # how far the camera turns per bit of mouse movement
+const MOUSE_INVERT_Y := false    # true = push the mouse up to look down
 const STOMP_SHAKE := 0.06        # how much the camera shakes when a giant foot lands
 
 # --- The walking city ---

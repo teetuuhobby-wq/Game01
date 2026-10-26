@@ -14,6 +14,7 @@ var world: Node3D      # world.gd
 var player: Node3D     # player.gd
 var sfx: Node          # sfx.gd
 var camera: Camera3D
+var controls: Node     # controls.gd
 var bot_use := false   # the test bot "holds E"
 
 var _goal: Label
@@ -30,7 +31,8 @@ var _tick_time := 0.0
 var _t := 0.0
 
 
-func setup(w: Node3D, p: Node3D, s: Node, cam: Camera3D) -> void:
+func setup(w: Node3D, p: Node3D, s: Node, cam: Camera3D, c: Node) -> void:
+	controls = c
 	world = w
 	player = p
 	sfx = s
@@ -43,13 +45,13 @@ func setup(w: Node3D, p: Node3D, s: Node, cam: Camera3D) -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
-	var using := Input.is_action_pressed("interact") or bot_use
+	var using: bool = controls.use_held or bot_use
 	var near := _near()
 	match step:
 		Step.GET_VALVE:
 			_goal.text = "Fetch the spare valve from Bram's workshop  (%s)" % _where(world.workshop_use)
 			_prompt.text = "Press E to pick up the valve" if near else ""
-			if near and (Input.is_action_just_pressed("interact") or bot_use):
+			if near and (controls.use_pressed or bot_use):
 				_pick_up()
 		Step.FIT_VALVE:
 			_goal.text = "Fit the valve on the rain-catcher  (%s)" % _where(world.catcher_use)
@@ -167,7 +169,7 @@ func _make_hud() -> void:
 	keys.anchor_top = 1.0
 	keys.anchor_bottom = 1.0
 	keys.offset_top = -34
-	keys.text = "WASD / arrows: walk    Shift: run    E: use    Mouse wheel or + -: zoom    Right-drag or Z X: turn camera    Esc: quit"
+	keys.text = "Click, then mouse: look    WASD / arrows: walk    Shift: run    E: use    Wheel or + -: zoom    Z X: turn    F8: something felt off    F3: info    Esc: free mouse / quit"
 	_bar = ProgressBar.new()
 	_bar.max_value = 1.0
 	_bar.show_percentage = false

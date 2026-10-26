@@ -14,7 +14,7 @@ Direction chosen; next up is the **first playable toy**. Details: **[docs/STATUS
 
 ## Run it
 
-- **The first playable toy:** double-click `game/run.bat`. WASD or arrows walk, Shift runs, E uses, mouse wheel zooms, right-drag turns the camera, Esc quits.
+- **The first playable toy:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel zooms. F8 flags something that felt off, F3 shows debug info, and Esc frees the mouse (press it again to quit). Every play session is recorded to `game/playtests/` for Claude to study.
 - **Look test:** install [Godot 4.7.2](https://godotengine.org) (`winget install GodotEngine.GodotEngine`), then double-click `prototypes/look_test_hd/run.bat` (older coarse version: `prototypes/look_test/`).
   Keys: `1`–`6` camera, `Space` pause, `Esc` quit.
 

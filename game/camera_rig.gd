@@ -1,19 +1,26 @@
 extends Camera3D
-## THE CAMERA: follows you. The mouse wheel (or + and -) zooms from close behind you
-## out to the whole-town diorama view. Turn it by dragging with the right mouse
-## button, or with Z and X. Fully zoomed in, it swings round behind you as you walk.
-## When a wall or roof gets between it and you, it slides in closer.
+## THE CAMERA: follows you. Move the mouse to look around (click in the window first),
+## or turn with Z and X. The mouse wheel (or + and -) zooms from close behind you out
+## to the whole-town diorama view. It only turns when you turn it.
+## When a wall or roof gets in the way, it first rises to look over it, and only moves
+## in closer if that doesn't help. Every change is smoothed, so it never jumps.
 
 const T := preload("res://tuning.gd")
 
 var target: Node3D          # the player
 var world: Node3D           # world.gd, to see what blocks the view
+var controls: Node          # controls.gd
 var zoom := T.CAMERA_ZOOM_START
 var zoom_goal := T.CAMERA_ZOOM_START
 var yaw := deg_to_rad(45.0)
+var distance := 0.0         # how far the camera actually is from what it looks at
+var lift := 0.0             # extra tilt (radians) to see over something in the way
+var pull := 1.0             # 1 = full distance; less when it had to move in closer
+var _pitch_offset := 0.0    # from the mouse moving up and down
 var _focus := Vector3.ZERO
 var _shake := 0.0
-var _pull := 1.0            # 1 = full distance; less when something is in the way
+var _time := 0.0
+var _first := true
 var _dof: CameraAttributesPractical
 
 
@@ -22,17 +29,7 @@ func _ready() -> void:
 	_dof = CameraAttributesPractical.new()
 	_dof.dof_blur_amount = 0.12
 	attributes = _dof
-	_focus = target.global_position
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			zoom_goal = clampf(zoom_goal - 0.07, 0.0, 1.0)
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			zoom_goal = clampf(zoom_goal + 0.07, 0.0, 1.0)
-	elif event is InputEventMouseMotion and event.button_mask & MOUSE_BUTTON_MASK_RIGHT:
-		yaw += event.relative.x * 0.006
+	_focus = target.global_position + Vector3(0, 1.2, 0)
 
 
 ## Jump straight to a zoom level (used for screenshots).
@@ -46,11 +43,12 @@ func add_shake(amount: float) -> void:
 
 
 func _process(delta: float) -> void:
-	if Input.is_action_pressed("zoom_in"):
-		zoom_goal = clampf(zoom_goal - delta * 0.6, 0.0, 1.0)
-	if Input.is_action_pressed("zoom_out"):
-		zoom_goal = clampf(zoom_goal + delta * 0.6, 0.0, 1.0)
-	yaw += (Input.get_action_strength("turn_right") - Input.get_action_strength("turn_left")) * T.CAMERA_TURN_SPEED * delta
+	_time += delta
+	var sens := T.MOUSE_SENSITIVITY
+	yaw += controls.look.x * sens + controls.turn * T.CAMERA_TURN_SPEED * delta
+	_pitch_offset = clampf(_pitch_offset + controls.look.y * sens * (-1.0 if T.MOUSE_INVERT_Y else 1.0),
+			deg_to_rad(-12.0), deg_to_rad(30.0))
+	zoom_goal = clampf(zoom_goal + controls.zoom_steps * 0.07, 0.0, 1.0)
 	zoom = lerpf(zoom, zoom_goal, 1.0 - exp(-8.0 * delta))
 
 	var goal := target.global_position + Vector3(0, 1.2, 0)
@@ -58,30 +56,42 @@ func _process(delta: float) -> void:
 		_focus = goal   # the city looped back: jump with it instead of flying across
 	_focus = _focus.lerp(goal, 1.0 - exp(-10.0 * delta))
 
-	# Close in, swing round behind you as you walk away from the camera. (Not when you
-	# walk toward it: swinging round would flip your controls and send you in circles.)
-	if zoom < 0.3 and target.moving:
-		var d: Vector3 = target.get_parent().global_transform.basis * target.facing
-		var cam_fwd := Vector3(-cos(yaw), 0, -sin(yaw))
-		if d.dot(cam_fwd) > 0.3:
-			yaw = lerp_angle(yaw, atan2(-d.z, -d.x), 1.0 - exp(-2.0 * delta))
-
 	var dist := T.CAMERA_NEAR_DISTANCE * pow(T.CAMERA_FAR_DISTANCE / T.CAMERA_NEAR_DISTANCE, zoom)
-	var pitch := deg_to_rad(lerpf(12.0, 43.0, zoom))
-	var offset := Vector3(cos(pitch) * cos(yaw), sin(pitch), cos(pitch) * sin(yaw)) * dist
-	# Slide in when something blocks the view: glide in quickly, ease back out slowly.
-	# Three lines side by side, and only move in if all three are blocked, so thin
-	# things like lamp posts and poles don't make the camera jump.
+	var pitch := clampf(deg_to_rad(lerpf(12.0, 43.0, zoom)) + _pitch_offset, deg_to_rad(4.0), deg_to_rad(80.0))
+
+	# Something in the way? Try looking from a bit higher or lower first (over a wall,
+	# under a parasol); if no angle clears the view, use whichever sees furthest and
+	# slide in to there. Changes are gentle, so the camera never jumps.
+	var want_lift := 0.0
 	var clear := 1.0
 	if zoom < 0.6:
-		var a: Vector3 = world.city.to_local(_focus)
-		var b: Vector3 = world.city.to_local(_focus + offset)
-		var side := Vector3(-offset.z, 0, offset.x).normalized() * 0.35
-		clear = maxf(world.first_hit(a, b), maxf(world.first_hit(a + side, b + side), world.first_hit(a - side, b - side)))
-	_pull = lerpf(_pull, clear, 1.0 - exp(-(18.0 if clear < _pull else 3.0) * delta))
+		clear = _clear_line(pitch, dist)
+		if clear < 0.97:
+			var best := clear
+			var best_lift := 0.0
+			for deg in [10.0, -8.0, 20.0, 30.0, 40.0, 50.0]:
+				var l := clampf(deg_to_rad(deg), deg_to_rad(4.0) - pitch, deg_to_rad(80.0) - pitch)
+				var c := _clear_line(pitch + l, dist)
+				if c > best + 0.02:
+					best = c
+					best_lift = l
+				if c >= 0.97:
+					break
+			want_lift = best_lift
+			clear = best
+	if _first:
+		lift = want_lift
+		pull = clear
+		_first = false
+	lift = lerpf(lift, want_lift, 1.0 - exp(-4.0 * delta))
+	pull = lerpf(pull, clear, 1.0 - exp(-(5.0 if clear < pull else 2.5) * delta))
+
+	var p := pitch + lift
+	var offset := Vector3(cos(p) * cos(yaw), sin(p), cos(p) * sin(yaw)) * dist * maxf(pull, 0.08)
+	distance = offset.length()
 	_shake = maxf(0.0, _shake - delta * 0.8)
-	var wobble := Vector3(sin(Time.get_ticks_msec() * 0.031), sin(Time.get_ticks_msec() * 0.027), 0) * _shake
-	global_position = _focus + offset * maxf(_pull, 0.08) + wobble
+	var wobble := Vector3(sin(_time * 31.0), sin(_time * 27.0), 0) * _shake
+	global_position = _focus + offset + wobble
 	look_at(_focus)
 	fov = lerpf(62.0, 28.0, zoom)
 	target.set_ring_scale(maxf(1.0, dist / 20.0))
@@ -93,3 +103,13 @@ func _process(delta: float) -> void:
 	_dof.dof_blur_far_enabled = true
 	_dof.dof_blur_far_distance = dist * 1.25 + 10.0
 	_dof.dof_blur_far_transition = dist * 0.8 + 20.0
+
+
+## How much of the view line at this tilt is clear (0..1). Three lines side by side,
+## and the clearest one counts, so thin things like lamp posts don't matter.
+func _clear_line(p: float, dist: float) -> float:
+	var off := Vector3(cos(p) * cos(yaw), sin(p), cos(p) * sin(yaw)) * dist
+	var a: Vector3 = world.city.to_local(_focus)
+	var b: Vector3 = world.city.to_local(_focus + off)
+	var side := Vector3(-off.z, 0, off.x).normalized() * 0.35
+	return maxf(world.first_hit(a, b), maxf(world.first_hit(a + side, b + side), world.first_hit(a - side, b - side)))

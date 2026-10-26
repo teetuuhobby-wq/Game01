@@ -1,25 +1,33 @@
 extends Node3D
 ## STRIDER HOME, first playable toy: walk your town while it walks.
 ## Double-click run.bat to play. Tuning numbers are in tuning.gd.
+## Every normal play session is recorded to playtests/ (see recorder.gd): F8 flags a
+## moment, F3 shows debug info.
 ## Test options (after "--"): --autoplay lets a bot play the errand and quits when
-## it's done; --shots saves screenshots to shots/ along the way.
+## it's done; --shots saves screenshots to shots/ along the way;
+## --replay <playtests/folder> plays a recorded session back (see replay.gd).
 
+var controls: Node
 var world: Node3D
 var player: Node3D
 var camera: Camera3D
 var sfx: Node
 var errand: Node
+var recorder: Node
 var _shots := false
 var _shot_n := 0
 
 
 func _ready() -> void:
 	_setup_input()
+	controls = preload("res://controls.gd").new()
+	add_child(controls)
 	world = preload("res://world.gd").new()
 	add_child(world)
 
 	player = preload("res://player.gd").new()
 	player.world = world
+	player.controls = controls
 	player.position = world.you_spot
 	world.city.add_child(player)
 	world.player = player
@@ -27,6 +35,7 @@ func _ready() -> void:
 	camera = preload("res://camera_rig.gd").new()
 	camera.target = player
 	camera.world = world
+	camera.controls = controls
 	camera.yaw = atan2(-player.facing.z, -player.facing.x)   # start behind you
 	add_child(camera)
 	camera.make_current()
@@ -38,10 +47,29 @@ func _ready() -> void:
 
 	errand = preload("res://errand.gd").new()
 	add_child(errand)
-	errand.setup(world, player, sfx, camera)
+	errand.setup(world, player, sfx, camera, controls)
 
 	var args := OS.get_cmdline_user_args()
 	_shots = "--shots" in args
+	var replay_at := args.find("--replay")
+	if replay_at >= 0 and replay_at + 1 < args.size():
+		var rp := preload("res://replay.gd").new()
+		rp.controls = controls
+		rp.player = player
+		rp.folder = args[replay_at + 1] if args[replay_at + 1].begins_with("res://") else "res://" + args[replay_at + 1]
+		rp.shots = _shots
+		add_child(rp)
+		rp.finished.connect(func() -> void: get_tree().quit())
+		return
+	if not "--autoplay" in args:
+		recorder = preload("res://recorder.gd").new()
+		recorder.world = world
+		recorder.player = player
+		recorder.camera = camera
+		recorder.controls = controls
+		recorder.errand = errand
+		add_child(recorder)
+		recorder.start()
 	var bot: Node = null
 	if "--autoplay" in args:
 		bot = preload("res://bot.gd").new()
@@ -60,9 +88,13 @@ func _ready() -> void:
 			bot.set_process(true)
 
 
+## Esc frees the mouse; Esc again (with the mouse free) quits.
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("quit"):
-		get_tree().quit()
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		else:
+			get_tree().quit()
 
 
 func _on_stomp(at: Vector3) -> void:
@@ -78,7 +110,7 @@ func _setup_input() -> void:
 		"run": [KEY_SHIFT], "interact": [KEY_E, KEY_ENTER],
 		"turn_left": [KEY_Z], "turn_right": [KEY_X],
 		"zoom_in": [KEY_EQUAL, KEY_KP_ADD, KEY_PAGEUP], "zoom_out": [KEY_MINUS, KEY_KP_SUBTRACT, KEY_PAGEDOWN],
-		"quit": [KEY_ESCAPE],
+		"quit": [KEY_ESCAPE], "flag": [KEY_F8], "debug": [KEY_F3],
 	}
 	for action in keys:
 		if not InputMap.has_action(action):

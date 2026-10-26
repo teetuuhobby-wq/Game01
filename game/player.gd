@@ -11,6 +11,7 @@ const T := preload("res://tuning.gd")
 const RADIUS := 0.25   # half your width, metres
 
 var world: Node3D           # world.gd
+var controls: Node          # controls.gd
 var bot_input := Vector2.ZERO   # used instead of the keyboard when the test bot plays
 var bot_mode := false
 var moving := false
@@ -70,7 +71,7 @@ func _process(delta: float) -> void:
 	var dir := _input_dir()
 	moving = dir.length() > 0.1
 	if moving:
-		var running := Input.is_action_pressed("run") and not bot_mode
+		var running: bool = controls.run and not bot_mode
 		var speed := T.RUN_SPEED if running else T.WALK_SPEED
 		_move(dir * speed * delta)
 		facing = dir.normalized()
@@ -91,7 +92,7 @@ func _process(delta: float) -> void:
 func _input_dir() -> Vector3:
 	if bot_mode:
 		return Vector3(bot_input.x, 0, bot_input.y).limit_length(1.0)
-	var v := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var v: Vector2 = controls.move
 	if v == Vector2.ZERO:
 		return Vector3.ZERO
 	var cam := get_viewport().get_camera_3d()

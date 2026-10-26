@@ -19,3 +19,6 @@ build/
 
 # Auto-generated screenshots (re-rendered often). Copy keepers to docs/screens/ instead.
 shots/
+
+# Playtest recordings (big, and only useful on the machine they were made on)
+playtests/

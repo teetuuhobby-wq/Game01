@@ -77,7 +77,15 @@ Technical plan for the toy (Claude's recommendations from the session-02 review)
 
 ## How to run things
 
-- **The game (first toy):** double-click `game/run.bat`. Keys: WASD or arrows walk, Shift runs, E uses, mouse wheel or + - zooms, right-drag or Z X turns the camera, Esc quits. Tuning: `game/tuning.gd`.
+- **The game (first toy):** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms, Z X turn. F8 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning: `game/tuning.gd`.
+- **Playtests (recorded automatically):** every normal play session writes `game/playtests/<date_time>/`. It's git-ignored, so it stays on the machine it was played on. The folder holds:
+  - `events.csv`: start here. It lists the user's **F8 flags** with their notes and a screenshot (`flag_NN.png`), plus automatic flags: `stuck`, `camera_jump`, `low_fps` and errand steps.
+  - `log.csv`: 10 times a second, your position, floor, the camera (zoom, distance, lift, pull, yaw), FPS and errand step.
+  - `inputs.csv`: every frame's keys and mouse, used for replay.
+  - `session.txt`: the machine and the tuning values used.
+- **After a playtest (Claude):** read the newest `events.csv` and `log.csv`, then replay it hidden to *see* the flagged moments:
+  `... tools/godot_offscreen.ps1 game --fixed-fps 60 -- --replay playtests/<folder> --shots`
+  This saves the view just before and at each event to `<folder>/replay/`. Replay is exact: it drifted less than 1 mm in tests.
 - **Game tests (Claude):**
   - Logic, headless (seconds): `<godot_console.exe> --headless --fixed-fps 30 --path game -- --autoplay`. A bot plays the whole errand along the shortest route; exit code 0 = done (2 stuck, 3 no route, 4 too slow). Last result: done in 43 s of play.
   - With pictures, hidden: `... tools/godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots` saves the in-game camera's views at the start and at each step to `game/shots/`.
