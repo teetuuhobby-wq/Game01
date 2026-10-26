@@ -12,7 +12,7 @@ _Last updated: 2026-10-26, session 02 (work laptop): code review and fixes, hidd
 
 ## Open questions for the user (ask these first, one or two at a time)
 
-0. **City size (raised last thing in session 01):** the user said the HD city "feels a bit small, needs to be several times the current size." Ask **what part** first: (a) the awe of a *huge* walking city seen from outside, (b) more streets and districts to live in and wander, or (c) more people and bustle? Then offer options with sizes:
+0. **City size (raised last thing in session 01):** the user said the HD city "feels a bit small, needs to be several times the current size." **Answered in session 02: (b) more streets and districts matters most; (a) and (c) are liked too.** Next: pick one of the size options below. Original question was: (a) the awe of a *huge* walking city seen from outside, (b) more streets and districts to live in and wander, or (c) more people and bustle? Then offer options with sizes:
    - **Bigger deck with chunked rendering:** you see one neighbourhood at a time in diorama view. Medium.
    - **Terraced, multi-level city** (stacked districts climbing a central hill or spire): feels much bigger for less area, and gives great silhouettes. Medium.
    - **The clever fake:** the near districts are detailed, the far ones are lower-detail blocks. Small–Medium.

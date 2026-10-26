@@ -2,7 +2,7 @@
 
 *My interpretation, not your raw words. Updated after every Discover round.*
 
-_Last updated: 2026-10-25 (after Round 4: core desires confirmed, Discover complete)_
+_Last updated: 2026-10-26 (session 02: what part of "bigger city" matters)_
 
 ## Hard requirement (not a desire, a deal-breaker)
 
@@ -25,7 +25,7 @@ _Last updated: 2026-10-25 (after Round 4: core desires confirmed, Discover compl
 ## New signals (Round 6, end of session 01)
 
 - **Detail matters.** You asked for Town to City-level resolution, and the finer blocks were "definitely better." Confidence: high. This backs up the "has to look good" requirement.
-- **Scale: "the city feels a bit small, several times bigger."** Confidence: low–medium (one statement, but it fits Regios, whose walking cities are huge). Guess: you want the city to feel like a *place* you could get lost in, and big enough that "merely one resident" is true. Ask what part before building.
+- **Scale: "the city feels a bit small, several times bigger."** Confidence: low–medium (one statement, but it fits Regios, whose walking cities are huge). Guess: you want the city to feel like a *place* you could get lost in, and big enough that "merely one resident" is true. **Session 02 answer:** the part that matters most is **more streets and districts to live in and wander** (confidence now medium–high: you picked it straight away, matching my guess). The awe of a huge city seen from outside, and more people and bustle, are also liked, but they come second.
 
 ## Other signals
 
