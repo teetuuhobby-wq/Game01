@@ -1,4 +1,4 @@
-# Session 02: code review, hidden testing, terraced and 10x cities, first playable toy (2026-10-26, work laptop)
+# Session 02: code review, hidden testing, terraced and 10x cities, first playable toy, playtests, first person (2026-10-26, work laptop)
 
 Cleaned transcript of a Claude Code session: the user's messages and Claude's replies.
 Only the conversation is kept: Claude's final reply each turn, with no tool calls, tool output or system text.
@@ -488,5 +488,338 @@ Perhaps you try saving only our conversation. The other computer doesn't really 
 
 ### 🤖 Claude
 
-Generating today's file in conversation-only mode, then checking it for private details again:
+Done, and everything is on GitHub now. This time the safety check let it through, since what I published was only our conversation, checked and cleaned, at your explicit request.
+
+**What's there:**
+- **Today's conversation** (`docs/history/session-02-review-and-first-toy.md`): only your messages and my final reply each turn. It also keeps your answer to my multiple-choice question about "B", because that shows what you actually picked. There are no commands, no output and no progress chatter. I scanned it for private details. I also found and fixed one more leak: the `cd` command I'd given you showed your folder layout. Paths now appear only as "project folder", so the only identifying thing left is the public GitHub address.
+- **The history tool** has a new `--chat-only` mode that does this automatically, and the session routine in STATUS.md now says to save the conversation only, every session. The home PC will follow the same routine.
+- **The 10× branch** (`experiment/city-10x`) is on GitHub with its "look only, don't merge" note. STATUS.md on main explains what it is and how to view it.
+
+One note: today's history covers the conversation up to your last message. When we wrap up this session, I'll refresh it so it includes the rest.
+
+
+---
+
+## 🧑 User
+
+I play tested the game a bit. The camera can be quite wonky sometimes. Going up the stairs can sometimes cause issues with movement. I feel like the sounds of the City moving is too loud. By the way we should discuss debugging and ways for you to log my play test sessions so that you can get information that you need out of them.
+
+
+### 🤖 Claude
+
+## Fixed from your playtest
+
+**Stairs.** I found a real bug. At this laptop's ~20 FPS, running moved you so far each frame that the game mistook the next few steps for a wall, so you got stuck at the bottom or top. You now move in small slices each frame, so speed no longer matters. A test now runs up and down the stairs, walking and running, at 60, 20 and 12 FPS, and all 12 checks pass. Your height also keeps pace when you run, so your feet no longer sink into the steps.
+
+**Camera.** I fixed three things that could feel wonky:
+- Fully zoomed in, walking *toward* the camera made it swing round, which flipped your controls and could send you in circles. Now it only follows when you walk away from it.
+- Thin things like lamp posts made it pop in and out. Now it ignores them, and it glides in rather than snapping.
+- Each giant step shook it. The shake is now half as strong.
+
+**City sound.** The stomps are about a third as loud as before. It's `STOMP_DB` in `game/tuning.gd` if you want to set it yourself.
+
+**Still cramped:** inside Bram's workshop the camera ends up under the roof. I'd like to see what *you* saw before changing more.
+
+All tests pass again: the bot finishes the errand, the keys work, and the stairs work. Committed, not pushed yet.
+
+## Playtest logging: my proposal
+1. **Flight recorder (always on).** Each time you play, the game writes a small log 10 times a second: where you are, which keys you're holding, what the camera is doing, the frame rate, and your errand progress. It also flags moments automatically, like "pressing a direction but not moving for a second" (stuck) or "camera jumped suddenly". That's about 1 MB per hour, and it records only game data, nothing about your computer. The logs stay on the machine you play on and out of GitHub; I read them from the folder.
+2. **"That was weird" key (F8).** Press it the moment something feels off. It saves a screenshot and marks the moment in the log. You can type a short note if you like (Enter saves, Esc skips). I look at your flags first.
+3. **Replay.** Because your keys and timing are recorded, I can replay your session exactly, hidden, and take screenshots at your flagged moments from your own camera. Then I see what you saw instead of guessing. This is the biggest piece, a session or so.
+4. **Debug overlay (F3).** It shows the frame rate, your position, floor level, camera zoom and errand step on screen. Handy for describing a problem.
+
+**My pick: all four.** The recorder and F8 alone mean I read numbers about a problem; with replay I can actually see it.
+
+**One question while it's fresh:** when the camera felt wonky, was it **(a)** suddenly jumping in close, **(b)** spinning around you, or **(c)** shaking or swaying? Your answer tells me whether today's fixes hit the right thing.
+
+
+---
+
+## 🧑 User
+
+All four is good. Regarding my wonky camera it was mainly A. There was also moments where the camera was annoying and difficult to control due to moving and looking around at the same time.
+
+
+### 🤖 Claude
+
+All four playtest tools are built and tested, and the camera is reworked based on your feedback.
+
+## The camera
+- **Mouse look:** click in the game window once, and from then on moving the mouse looks around while you walk with WASD. Esc frees the mouse; press Esc again to quit. If you'd rather turn it off, it's `MOUSE_LOOK` in `game/tuning.gd`, along with sensitivity and an invert option.
+- **It only turns when you turn it.** The automatic swinging that made controls shift under you is gone.
+- **No more jumping in.** When something blocks the view, it first tries looking from a bit higher (over a wall) or lower (under a parasol). It only slides in if neither works, and it does so gently. The recorder also caught a fake "jump" at start-up, which is fixed, so the camera now starts settled.
+
+## Playtest tools
+- **Recorder:** every time you play, the game writes a folder in `game/playtests/` (named by date and time). It stays on your computer and out of GitHub. It holds a 10-times-a-second log of where you are and what the camera does, plus every key and mouse movement, and it flags moments automatically: getting stuck, the camera jumping in, or the frame rate dropping.
+- **F8:** press it the moment something feels off. It saves a screenshot, and a small box lets you type a note: Enter saves, Esc skips.
+- **Replay:** I can play your session back, hidden, and take screenshots just before and at each flagged moment. In tests it stayed within 0.7 mm of the original, and the replay's screenshot of an F8 moment matched the original almost pixel for pixel. So I'll see what you saw.
+- **F3:** shows the frame rate, where you are, your floor level, what the camera is doing, and which errand step you're on.
+
+**All tests pass:** the bot finishes the errand, and the key and stair checks pass at 20 FPS.
+
+**Next time you play:** just play normally, and press F8 whenever something bugs you. Afterwards, tell me you've playtested; I'll read the logs, replay your flagged moments, and come back with what I found. If you play on the home PC, I'll read the logs there.
+
+
+---
+
+## 🧑 User
+
+Yes, push main to GitHub.
+
+
+### 🤖 Claude
+
+I pushed both commits to [GitHub](https://github.com/teetuuhobby-wq/Game01): the stairs and camera fixes from your playtest, plus the new playtest tools. The laptop's `main` now matches GitHub.
+
+Next, play when you have a moment:
+1. Click in the window to turn on mouse look.
+2. Press F8 whenever something feels off.
+3. Tell me when you're done, and I'll go through the recording.
+
+
+---
+
+## 🧑 User
+
+I'm done playing. Go ahead and review it.
+
+
+### 🤖 Claude
+
+I replayed your 4-minute playtest hidden. It matched your session to within 2 mm, so I could see exactly what you saw at each flag. Here's what I found and fixed:
+
+| Your flag | What was really going on | Fix |
+|---|---|---|
+| "City legs clip through the walls" / "legs are really weird here" | The legs were attached from inside the city's outer edge, so each one swung up *through* the streets and stairs | The legs now attach just outside the city wall, on big struts underneath. From the street they tower beside the city. |
+| "Camera clips through buildings" | When the camera rose to look over something, it could end up inside a wall. My "ignore thin posts" trick also ignored building corners. | It keeps 45 cm from walls, and only posts and poles are ignored now |
+| "The door is smaller than me" | Doors were exactly 1.8 m, your height, and the hat made you taller | Doors are now 2.4 m × 1 m |
+| (auto-flag) stuck at 74 s | A lamp post stood at the foot of a staircase, right in the street | Lamps around the edge sit between the main streets now |
+
+I checked each fix by standing you at the same spots, with the same camera, and taking hidden screenshots. The bot still finishes the errand. Committed, not pushed yet.
+
+**What I learned about you:** you spent **92% of the time fully zoomed in**, and you raised first person. My read is that you want to *live* at street level, while the diorama is for admiring the town. Am I right? It also fits "more streets to wander" and being "just one resident". I've noted it in your taste file.
+
+**The camera question.** A camera following you in tight voxel streets will always struggle somewhat. Options:
+1. **First person only:** you see through your resident's eyes. It never clips, and the city feels its biggest. But you can't see yourself or your hat, and the blocky faces up close stand out. **Small.**
+2. **A better third person:** roofs and walls between the camera and you fade out, like *The Sims*. You keep seeing yourself, but tight streets stay a bit awkward. **Medium.**
+3. **Both (my pick):** scroll all the way in and you're in first person. Scroll out and you're over the shoulder, then the diorama. This matches how you actually play, fixes tight streets for free, and keeps the diorama view of the town. **Small–Medium.**
+
+
+---
+
+## 🧑 User
+
+What I learned about you: you spent 92% of the time fully zoomed in, and you raised first person. My read is that you want to live at street level, while the diorama is for admiring the town. Am I right? It also fits “more streets to wander” and being “just one resident”. I’ve noted it in your taste file.
+
+You are correct about this.
+
+As for the camera question, let's go with your recommendation and do both. Then I will play test it and review it again.
+
+
+### 🤖 Claude
+
+Both camera styles are in, and ready for your playtest. Screenshots are above.
+
+**How it works:** scroll in until the camera is close behind you, then one more notch glides it into your resident's eyes. You're in first person: your body is hidden, the mouse looks freely up and down, and W walks wherever you're looking. One notch out glides back over your shoulder, and further out brings back the diorama. The first-person field of view and eye height are in `game/tuning.gd` (`FIRST_PERSON_FOV`, `EYE_HEIGHT`).
+
+**Also changed:** you now need 2 m of headroom to walk somewhere (it was 1.6 m), so your head and hat never poke through anything. The route test caught one victim: Bram's sign hung at exactly 2 m across his doorway, so I raised it.
+
+**Tested, all hidden:**
+- **Switching:** one notch in puts the camera exactly at your eyes, and one notch out brings you back.
+- **Walking:** W walks exactly where you look.
+- **No clipping:** in 25 seconds of wandering and turning, the camera was never inside a block, in any of 750 frames.
+- **The rest still passes:** the bot finishes the errand, and the key and stair tests pass.
+
+**For your playtest:** it records automatically, so just play and press F8 whenever something feels off. Things worth trying: walk to the outer ring and look up at a leg, and check whether first person makes the city feel big enough from inside. That was the open question from earlier.
+
+
+---
+
+## 🧑 User
+
+I play tested it. Take a look and review it.
+
+
+### 🤖 Claude
+
+I've reviewed playtest 3. It went well overall, with one clear problem, now fixed.
+
+**What the recording shows**
+- **You spent 69% of the time in first person**, 22% close behind and 9% zoomed out. First person is clearly how you like to play, which confirms what you told me.
+- **You finished the errand in 57 seconds**, nearly three times faster than last time (158 s). Finding your way at street level works.
+- **You walked about 400 m:** 40% of the time on the top terrace, 35% on the outer ring and 25% on the middle terrace.
+
+**The problem: the plaza's flower ring**
+The recorder caught you stuck there four times, right before your F8 flag. I replayed your session on the exact version you played, and the screenshots show you up against a row of knee-high flowers you couldn't get past. The gaps between flowers *look* walkable but are narrower than a person, so the ring worked like an invisible fence. In first person you mostly see flowers at your feet and no way through.
+- **Fix:** you can now wade through those flowers, which suits a cozy town. Bushes, tables and walls still block you.
+- **Proof:** from your stuck spot, I tried walking in all 36 directions. In the version you played, 20 were blocked; now none are.
+- My first quick test missed this, because it happened to walk in one of the directions that slid free. That's why I replayed your real session instead of trusting it.
+
+**Also fixed:** a replay that can't find its recording now quits straight away instead of hanging. All tests pass (bot errand, keys, stairs, first person). Committed, not pushed yet.
+
+**One mystery:** your F8 note was saved as just **"Can'"**. Did you press Enter by accident, or was it cut off another way? If it keeps happening, I'll look into the note box.
+
+**Still in the logs:** close behind you (22% of the time), the camera still slid in about 20 times as you passed buildings. You didn't flag it, and you're mostly in first person now, so I've left it alone. Tell me if it bugs you.
+
+
+---
+
+## 🧑 User
+
+I accidentally pressed enter instead of typing out my message. Don't worry about it. What's next?
+
+
+### 🤖 Claude
+
+No worries! The first toy now does its job: you can live in the town at street level, and it works. So it's time to grow it, one thing at a time.
+
+**A quick check first:** now that you've walked it in first person, does the city feel big enough from inside? Or is the "bigger city" itch still there? Your answer decides whether size comes back onto the list.
+
+**What to add next.** Each option feeds one of your three core desires:
+1. **Nightfall (my pick, Small–Medium):** the sky turns amber, then dark. Windows and lamps glow, the bell rings, and the whole city slowly *kneels* to rest. Out in the dark desert, something moves, and maybe climbs a leg. No fighting yet; just the feeling of a safe, glowing home with danger outside. Right now nothing in the game is dangerous, and that's half of what you love about this setting.
+2. **The cargo lift (Medium):** the city stops, and you ride a lift down to the desert floor for parts and secrets, then hurry back before it walks on. This is the "explore the wasteland" part of the loop.
+3. **More everyday life (Small–Medium):** a board of small jobs from different neighbours, and people you can talk to with a line or two each. More reasons to wander your streets.
+4. **Art polish (Medium):** the critic's list of denser rows of houses, lanes up through the terraces, and richer walls, to win back the cosy charm the bigger city lost.
+
+**Why nightfall:** you've shown you love *living* in the town. Nightfall makes that home feel precious by putting something scary outside it, and it's the start of the "things climb the legs" idea you liked from the night pitch. We'd do the feeling first and decide later whether creatures actually attack.
+
+We're also near the end of a long session. Whenever you want to stop, I'll do the end-of-session wrap-up: update the docs, save our conversation, and push everything (four commits are still waiting).
+
+
+---
+
+## 🧑 User
+
+A quick check first: now that you’ve walked it in first person, does the city feel big enough from inside? Or is the “bigger city” itch still there? Your answer decides whether size comes back onto the list.
+
+The city still feels very small to me. I intend for it to have many different facilities like shops, a guild, etc... Honestly even the 10x version earlier may not be big enough. Tell me about the current gameplay loop we have planned if any.
+
+
+### 🤖 Claude
+
+I've saved shops, a guild and other facilities to your ideas list. They fit well.
+
+**My read:** this is the fourth time you've said the city is too small, so it clearly matters. But I don't think you want raw area. A 10× city of identical houses would still feel empty. I think you want **a city full of places with a purpose**: shops, a guild, a workshop, a tavern. Enough that a whole daily life happens among them. Am I right?
+
+## The loop we have planned (from GAME.md)
+1. **Day on the deck:** wander the town and help neighbours; fix, build, chat.
+2. **The city stops:** go down to the desert for parts and secrets, then get back before dark.
+3. **Night:** the city kneels to rest, and things climb the legs. Hold out until dawn.
+4. **Dawn:** the city walks on, a little better than yesterday.
+- **Long-term:** everyone calls your city a junk-heap backwater. Then the great threat arrives, and everything you built and everyone you helped comes together.
+
+**What exists today:** only a sliver of step 1, a single errand.
+
+**Honest gaps in that loop:**
+- **What you gain is undefined.** "A little better than yesterday" is vague. Better how, and for whom: the city, or you?
+- **What you do in the desert and at night is undefined.** Collect parts for what? Hold out how? We never settled how much fighting you want; your taste notes still list that as an open contradiction.
+- **Nothing ties the days together** into a reason to keep playing.
+
+## Where your new idea fits
+Your facilities could fill all three gaps:
+- **The guild** gives out jobs: fetch parts from below, guard a leg at night, escort the cargo lift. Doing jobs raises your **rank**, so you start as a nobody and climb. That's your underdog payoff (desire #3), built right into daily life.
+- **Shops** give you something to spend what you bring back on: tools, gear, things for your house.
+- **Workshops and the city** get better as you help, which is what "a little better each dawn" can actually mean.
+- **The loop becomes:** guild board → get ready in the shops → go out (desert by day, legs by night) → come home → spend, rank up, the city improves.
+
+**On size:** I'd let the facilities decide it. We list the places a city like this needs, give each a district, and grow the city one district at a time, built so it can keep growing. That's still Large overall, but each district is a playable step.
+
+
+---
+
+## 🧑 User
+
+My read: this is the fourth time you’ve said the city is too small, so it clearly matters. But I don’t think you want raw area. A 10× city of identical houses would still feel empty. I think you want a city full of places with a purpose: shops, a guild, a workshop, a tavern. Enough that a whole daily life happens among them. Am I right?
+
+Yea you are right about that.
+
+Regarding the gameplay loop I have an idea and I want you're opinion on it.
+
+During the day: Wander the town, gear and supply up, take on requests, interact with people, etc.
+The city stops: Now's the time for the player to go down to the desert for resources and to complete requests that has taken on with his party or solo. Night attacks are rare, but can happen which results in emergency quests with good pay.
+Dawn: The player must make it back to the city before it starts moving or risk being stranded and lost. If they do then they must somehow catch back up to the city on their vehicles or face a game over screen and load back.
+
+
+### 🤖 Claude
+
+Great, that's confirmed and saved. I like your loop a lot, and here's my honest take.
+
+## What's great about it
+- **"Get home before your home walks away"** is a fantastic hook, and an original one. It turns your #1 desire, a safe moving home in a dangerous world, into the core tension: the city doesn't wait for you. The image of running across the sand at dawn while the legs start to rise is exactly the kind of scene this game should be about.
+- **Requests from the town give every expedition a reason**, and the facilities (guild, shops) finally get a job. A guild with ranks is a natural home for your underdog payoff.
+- **Rare night attacks with emergency quests** match what your taste notes say: one or two huge moments matter more to you than constant combat. Rare makes them special.
+- **The rhythm is clear:** a cozy day in town, a tense night outside, a race home at dawn. Day for your home and its people, night for adventure.
+
+## Where I'd be careful
+1. **Your "party":** this is the big one, and it's the question below. AI companions who fight and follow you are hard to make feel good; online play with friends is hardest of all. Both are possible later, but I'd start **solo**.
+2. **Combat:** expeditions imply danger, and we've never tested whether fighting is fun for you. Your notes still mark "how much fighting?" as unresolved. I'd make the first expeditions about **finding things under time pressure**: darkness, storms, sinkholes, getting lost. Add fighting once we know you want it.
+3. **Vehicles:** chasing your city in a sand-skiff is a wonderful scene, but driving is a whole new system (Medium). For the first version, being late could mean a sprint on foot after the rising city. Vehicles come later.
+4. **Game over and reload:** that's harsh for a cozy game with friends, and it needs a save system. A softer default: if you're stranded, a passing caravan rescues you. You lose your haul and pay a fee, but you keep playing. The danger stays real without wiping your progress.
+5. **Everyday life:** watch that the town doesn't shrink to a menu between expeditions. It's your #2 desire, so the people and places you help should visibly change.
+
+**Overall:** this is a Large game, but it splits into nice small playable steps.
+
+## The first slice I'd suggest
+**"One night out" (Medium):**
+- At dusk the guild board offers a request.
+- The city kneels, and you ride the cargo lift down into the dark desert.
+- You find what's needed by lantern light.
+- Then you hurry back as dawn breaks and the legs start to rise.
+- If you're late, you sprint after it on foot.
+
+This tests the heart of your loop: does "get home before it leaves" feel exciting? And it contains the nightfall idea from before.
+
+
+---
+
+## 🧑 User
+
+The party would be AI companions: neighbours or guild members who come along.
+
+
+### 🤖 Claude
+
+I love the feeling behind that. You don't want to be a lone hero; you want to head into the dark desert with **people from your own town**: the neighbour you helped, a guild member you trust. It ties the adventure back to everyday life, which fits your #2 desire. I've saved it.
+
+**Why it's hard:** companions that *fight* alongside you are one of the hardest things to make feel good. They need to follow you over rough ground without getting stuck or lost, fight sensibly, stay out of your way, and talk at the right moments. Done badly, they're more annoying than helpful. Full fighting companions are **Large**.
+
+**Smaller versions that keep the feeling:**
+1. **One companion, the clever fake (Small–Medium):** a single neighbour, like Bram or Mira, comes along. They follow you, chat, carry extra loot, hold a lantern, point out things they spot, and get nervous and hurry you as dawn nears. No fighting. It already feels like you're not alone, and they can learn to fight later, once combat exists.
+2. **Send them out (Small):** you assign neighbours to their own guild requests, and they come back with loot and stories. It makes the guild feel alive and costs little, but you don't experience it with them.
+3. **Park the full party** for a later milestone, once expeditions and combat are proven fun.
+
+**My pick:** build "One night out" **solo first**, to find out whether the race home at dawn is exciting. Then add **one simple companion (option 1)** as the very next step. Starting solo means that if the night feels empty, we'll know whether it's the night itself or the companion that needs work.
+
+
+---
+
+## 🧑 User
+
+I want to add that expeditions into the desert should be dangerous and combat should almost always be a given.
+
+
+### 🤖 Claude
+
+Got it, and that's an important one. It settles a question your taste notes have had open since the start ("how much fighting?"). The town is for everyday life; the desert is where you fight. Night attacks on the city stay rare, big events. I've recorded it as your decision.
+
+It also changes the first slice. Combat now has to be in it, so the big question becomes **what kind of combat**. That choice shapes everything, including your companions:
+1. **Action:** you fight in real time, swinging, dodging and timing, in first person or close behind. It's the most thrilling and fits the race home at dawn. But it's the hardest to make *feel* good with blocky voxel creatures, and AI companions fighting in real time is the hard version of the party.
+2. **Turn-based tactics, like Chrono Ark:** when a fight starts, you and your party take turns choosing moves. Your companions become easy (they just act on their turns), clever planning matters, and it's the game you loved. But exploring stops when a fight starts.
+3. **A mix (real time with pause):** you fight in real time but can pause to give your party orders. Everything works at once, but it's the most work.
+
+Which *part* of fighting excites you: **the rush of reflexes, the satisfaction of a clever plan, or the spectacle of your party's powers?**
+
+Rather than guessing from descriptions, I'd build **two tiny combat toys on a separate branch**: one action fight and one turn-based fight against the same desert creature, about an afternoon each. You play both, and you'll know instantly which feels right.
+
+
+---
+
+## 🧑 User
+
+Let's postpone the decision for later. For now can you make sure the GitHub is up to date and that the other computer knows everything it needs to know?
+
+
+### 🤖 Claude
+
+Now saving our conversation, as before: your messages and my replies only, privacy-checked.
 
