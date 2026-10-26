@@ -8,7 +8,7 @@ _Last updated: 2026-10-26, session 02 (work laptop): code review and fixes, hidd
 
 - ✅ **Phase 1: Discover**: done. Three core desires confirmed (see TASTE.md).
 - ✅ **Phase 2: Pick a direction**: done. **"Strider Home"**: you're one ordinary resident of a living walking city crossing a dangerous wasteland, plus the night danger from pitch B. See GAME.md.
-- ➡️ **Phase 3: First playable toy**: built (`game/`) and **playtested twice**. Playtest 2 (recorded, 4 F8 flags) found legs through the streets, the camera in walls, doors too small, and a lamp blocking stairs; all fixed. **Camera decided: both.** Scroll all the way in for first person (built and tested). Next: the user playtests first person and reviews it.
+- ➡️ **Phase 3: First playable toy**: built (`game/`) and **playtested twice**. Playtest 2 (recorded, 4 F8 flags) found legs through the streets, the camera in walls, doors too small, and a lamp blocking stairs; all fixed. **Camera: both** (first person by scrolling all the way in). Playtest 3: 69% of the time in first person, errand done in 57 s; got stuck at the plaza's flower ring, which is now wade-through. Next: the user's call (another playtest, or the next thing to add).
 
 ## Open questions for the user (ask these first, one or two at a time)
 

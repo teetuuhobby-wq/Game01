@@ -31,6 +31,10 @@ _Last updated: 2026-10-26 (session 02: what part of "bigger city" matters)_
 
 - **They want to be *in* the city, at human scale.** Confidence: **high (confirmed by the user: "You are correct about this")**. They played **92% of the time fully zoomed in** (street level) and asked to discuss a **first-person** camera. They also noticed human-scale details ("the door is smaller than me") and things that break the illusion up close (legs clipping through walls). This fits "merely one resident" and "more streets to wander": the diorama is for admiring, but they *live* at street level.
 
+## New signals (playtest 3, session 02)
+
+- **First person is how they want to play.** In the first session after it was added, they spent **69% of the time in first person** (22% close behind, 9% zoomed out). They also did the errand almost 3x faster (57 s vs 158 s), so finding the way at street level works.
+
 ## Other signals
 
 - **Discovery: finding secret places.** low. One pick in Round 1 and nothing since. It would fit naturally (what's out in the wasteland?).

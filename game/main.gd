@@ -58,8 +58,8 @@ func _ready() -> void:
 		rp.player = player
 		rp.folder = args[replay_at + 1] if args[replay_at + 1].begins_with("res://") else "res://" + args[replay_at + 1]
 		rp.shots = _shots
+		rp.finished.connect(func() -> void: get_tree().quit())   # before add_child: it may finish straight away
 		add_child(rp)
-		rp.finished.connect(func() -> void: get_tree().quit())
 		return
 	if not "--autoplay" in args:
 		recorder = preload("res://recorder.gd").new()

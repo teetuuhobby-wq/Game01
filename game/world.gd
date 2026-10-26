@@ -71,6 +71,7 @@ var you_spot := Vector3.ZERO  # where you start, on the city
 var you_yaw := 0.0
 var mira_spot := Vector3.ZERO
 var stair_top := {}           # deck column -> height of the stair step there
+var soft := {}                # blocks people can wade through (plaza flower beds)
 var walk_floor := PackedInt32Array()  # floor height (blocks) of each deck column
 var walk_ok := PackedByteArray()      # 1 if a person can stand there
 var valve: MeshInstance3D     # the spare valve on Bram's bench
@@ -850,7 +851,8 @@ func _build_plaza() -> void:
 	for i in 6:
 		var a := PARASOL_A0 + TAU * i / 6.0
 		_parasol(int(cos(a) * 27.0), int(sin(a) * 27.0), cols[i % 3])
-	# Flower beds round the plaza edge
+	# Flower beds round the plaza edge. Knee-high, so you can wade through them
+	# (playtest 3: they worked like an invisible fence, especially in first person).
 	for i in 90:
 		var a := TAU * i / 90.0
 		if posmod(i, 15) < 3:
@@ -859,6 +861,8 @@ func _build_plaza() -> void:
 		var fz := int(sin(a) * 39.0)
 		sv(fx, 1, fz, P.LEAF2)
 		sv(fx, 2, fz, [P.PURPLE, P.PINK, P.RED, P.PURPLE][i % 4] if _h(fx, 2, fz) < 0.6 else P.LEAF)
+		for y in [1, 2]:
+			soft[Vector3i(fx, y, fz) + origin] = true
 
 
 func _parasol(px: int, pz: int, col: int) -> void:
@@ -1871,7 +1875,7 @@ func _build_walk_map() -> void:
 			var ok := gv(x, f, z) != 0
 			if ok:
 				for y in range(f + 1, f + 11):
-					if gv(x, y, z) != 0:
+					if gv(x, y, z) != 0 and not soft.has(Vector3i(x, y, z)):
 						ok = false
 						break
 			var i := (z - GZ0) * NX + (x - GX0)
