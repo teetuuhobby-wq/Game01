@@ -8,6 +8,7 @@ Tests (in game/tests/ unless noted):
   stairs          walk and run up and down stairs at a low frame rate (20 FPS)
   first person    switching in and out, walking where you look, camera never in a wall
   flowers         the plaza's flower ring doesn't trap you (playtest 3)
+  market          the market street is walkable end to end, busy, and walkers stay on it
 Exit code 0 = everything passed. Set GODOT to use a different Godot console .exe.
 #>
 # "Continue": Windows PowerShell treats anything Godot prints to stderr (even harmless
@@ -23,7 +24,8 @@ $runs = @(
 	@{ Name = "keys"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/key_test.tscn", "--", "--no-record") },
 	@{ Name = "stairs"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/stair_test.tscn", "--", "--no-record") },
 	@{ Name = "first person"; Args = @("--headless", "--fixed-fps", "30", "--path", $game, "res://tests/first_person_test.tscn", "--", "--no-record") },
-	@{ Name = "flowers"; Args = @("--headless", "--fixed-fps", "30", "--path", $game, "res://tests/flower_test.tscn", "--", "--no-record") }
+	@{ Name = "flowers"; Args = @("--headless", "--fixed-fps", "30", "--path", $game, "res://tests/flower_test.tscn", "--", "--no-record") },
+	@{ Name = "market"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/market_test.tscn", "--", "--no-record") }
 )
 $failed = 0
 foreach ($r in $runs) {

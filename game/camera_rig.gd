@@ -134,7 +134,8 @@ func _process(delta: float) -> void:
 	_dof.dof_blur_near_distance = dist * 0.68
 	_dof.dof_blur_near_transition = dist * 0.2
 	_dof.dof_blur_far_enabled = true
-	_dof.dof_blur_far_distance = lerpf(dist * 1.25 + 10.0, 150.0, first_person)
+	# Close behind you, keep the street sharp for 40 m (it used to blur from ~16 m and smeared the view)
+	_dof.dof_blur_far_distance = lerpf(maxf(dist * 1.25 + 10.0, 40.0), 150.0, first_person)
 	_dof.dof_blur_far_transition = dist * 0.8 + 20.0
 
 

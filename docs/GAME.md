@@ -38,7 +38,7 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
   - 50 neighbours on their routes, who stop and look at you as you pass.
   - One errand: Mira asks you to fetch a spare valve from Bram's workshop and fit it on the rain-catcher. A gold marker, an edge arrow and a goal line show the way.
   - Camera with mouse look: scroll all the way in for **first person** (through your eyes), out for over the shoulder, then the diorama. Behind you, it looks over or under things in the way instead of jumping in.
-  - Playtest tools: recorder, F8 flags, exact replay, F3 debug info.
+  - Playtest tools: recorder, F2 flags, exact replay, F3 debug info.
   - Sounds made from code: footsteps, giant stomps, wind, chime, clunk, bell.
   - `game/tuning.gd` for speeds, sway, camera and volumes.
 - **Out (still to come):** night and expeditions, combat, companions, shops and the guild, building, inventory, real dialogue, saving, a bigger city, and the art polish list.

@@ -49,6 +49,12 @@ _Last updated: 2026-10-26 (end of session 02: street level, first person, facili
 - **Confirmed (session 03): the narrow paths feel cramped and are slightly hard to walk.** And: "it doesn't feel like walking around a city, like I'd imagine walking around Tokyo." They suggested a city as big as a real one, where buses are sometimes needed. **Read:** the dream is a city that feels *endless and urban*: streets that keep going, crowds, life around every corner, maybe a ride across town. Not yet clear which part matters most (bustle, endless streets to get lost in, skyline scale, or the ride), so ask.
 - **Answered: "the crowds and bustle: lots of people, shops, signs and life everywhere."** Confidence: medium–high (picked over endless streets). So "big city" is mostly about **density of life**, not area. That fits "the world feels alive" (Round 5) and "places with a purpose" (session 02): three signals pointing the same way. Good news: density is much cheaper than size.
 
+## New signals (Market Street playtest, session 03)
+
+- **"The city feels a lot better."** The market (bigger outer ring, crowds, shops, signs) worked. They spent 37% of a 137 s session on the market street, 83% in first person. **Read:** this confirms that "big" means bustle and life, and that the direction is right. Confidence: high.
+- **Sound matters to them, and the code-made sounds aren't good enough.** The city's stomps are "ok"; their own footsteps are "not the best"; the crowd murmur sounded like "weird static". They asked to *discuss* how to handle sound, so it's a real concern. **Read:** it's the same "content has to be good" bar as the art, now applied to audio. Organic sounds (steps, voices, crowds) need real recordings; code synthesis only suits simple tones.
+- **The F8 key was awkward**, now F2 (no flags were pressed in either market session).
+
 ## Other signals
 
 - **Discovery: finding secret places.** low. One pick in Round 1 and nothing since. It would fit naturally (what's out in the wasteland?).
