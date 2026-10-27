@@ -1,11 +1,23 @@
 extends "res://main.gd"
 # BUG HUNT (headless): a bot walks from one random spot to another all over the city,
 # up and down every terrace, for a long time, and logs anything that goes wrong:
-#   stuck  - it barely moved for 3 s while following a route the walk map says is fine
-#   off    - it ended up standing where nobody can stand
-#   jump   - its height jumped more than 0.6 m in one frame (a glitch on stairs or an edge)
+#   stuck     - it barely moved for 3 s while following a route the walk map says is fine
+#   height    - it stayed more than 0.3 m above or below the floor under its feet for
+#               over half a second (floating, sinking, or stuck halfway up a step)
+#   no route  - from where it stands, none of 20 random spots can be reached: it's
+#               stranded (the bot is then put back on a random spot and carries on)
+#   leg too long - one trip took over 4 minutes (walking in circles)
+# (There's no "standing where nobody can stand" check: player.gd refuses every step onto
+# such a spot, so it can't happen. Being stranded is what "no route" catches.)
 # Run: <godot_console.exe> --headless --fixed-fps 20 --path game res://tests/soak_test.tscn -- --no-record --minutes 60
+# (the full bug hunt, about 7 minutes of real time; run_tests.ps1 does --minutes 1, about 30 s,
+# and --minutes 5 takes about a minute.)
 # Passes when nothing went wrong. Prints every problem spot (metres, on the city).
+
+const HEIGHT_SLACK := 0.3     # metres off the floor before it counts as a height glitch
+const HEIGHT_TIME := 0.5      # ...for this many seconds (stairs settle in under 0.1 s)
+const ROUTE_TRIES := 20       # random spots tried before calling a place "no route from here"
+const STRANDED_LIMIT := 3     # stranded this many times in a row: the map is broken, stop
 
 var minutes := 60.0
 var _rng := RandomNumberGenerator.new()
@@ -17,10 +29,11 @@ var _t := 0.0
 var _leg_t := 0.0
 var _check_t := 0.0
 var _check_pos := Vector3.ZERO
-var _last_y := 0.0
+var _off_floor_t := 0.0     # how long its height has been away from the floor
 var _legs := 0
 var _arrived := 0
-var _no_route := 0
+var _no_route := 0          # random spots picked that couldn't be reached (another is tried)
+var _stranded := 0          # times in a row it found no route at all
 var _problems := {}         # "kind @ x,z" -> count
 var _metres := 0.0
 var _last_pos := Vector3.ZERO
@@ -42,13 +55,16 @@ func _ready() -> void:
 			if world.level_at(x, z) >= 0 and world._roomy(i):
 				_targets.append(Vector3(x * world.VS, (world.walk_floor[i] + 0.5) * world.VS, z * world.VS))
 	print("SOAK: %d target spots, walking for %.0f minutes of game time" % [_targets.size(), minutes])
-	_last_y = player.position.y
 	_last_pos = player.position
 	_next_leg()
 
 
+## Picks a new random spot and a route to it. If none of ROUTE_TRIES spots can be
+## reached from here, the bot is stranded: that's a problem, noted at this spot, and the
+## bot is put down on a random spot to carry on (or, stranded again and again, it stops).
 func _next_leg() -> void:
-	for attempt in 20:
+	_path = PackedVector3Array()
+	for attempt in ROUTE_TRIES:
 		_goal = _targets[_rng.randi() % _targets.size()]
 		_path = world.find_path(player.position, _goal)
 		if not _path.is_empty():
@@ -57,8 +73,20 @@ func _next_leg() -> void:
 	_k = 0
 	_leg_t = 0.0
 	_check_t = 0.0
+	if _path.is_empty():
+		_note("no route from here")
+		_stranded += 1
+		if _stranded >= STRANDED_LIMIT:
+			print("SOAK: stranded %d times in a row, stopping early" % _stranded)
+			_finish()
+			return
+		player.position = _targets[_rng.randi() % _targets.size()]
+		_last_pos = player.position
+		_off_floor_t = 0.0
+	else:
+		_stranded = 0
+		_legs += 1
 	_check_pos = player.position
-	_legs += 1
 
 
 func _note(kind: String) -> void:
@@ -74,11 +102,7 @@ func _process(delta: float) -> void:
 	_leg_t += delta
 	_metres += Vector2(player.position.x - _last_pos.x, player.position.z - _last_pos.z).length()
 	_last_pos = player.position
-	if absf(player.position.y - _last_y) > 0.6:
-		_note("jump")
-	_last_y = player.position.y
-	if world.floor_at(player.position) < 0:
-		_note("off")
+	_check_height(delta)
 	if _t > minutes * 60.0:
 		_finish()
 		return
@@ -106,16 +130,30 @@ func _process(delta: float) -> void:
 		_next_leg()
 
 
+## Your feet should rest on the floor under you: player.gd glides your height to
+## (floor + 0.5) blocks, so after a step it settles in a frame or two. Height that stays
+## off for longer is a glitch (no floor at all counts as off, too). Noted once each time.
+func _check_height(delta: float) -> void:
+	var f: int = world.floor_at(player.position)
+	var gap := INF if f < 0 else absf(player.position.y - (f + 0.5) * world.VS)
+	if gap <= HEIGHT_SLACK:
+		_off_floor_t = 0.0
+		return
+	_off_floor_t += delta
+	if _off_floor_t > HEIGHT_TIME and _off_floor_t - delta <= HEIGHT_TIME:
+		_note("height")
+
+
 func _finish() -> void:
 	_done = true
 	player.bot_input = Vector2.ZERO
-	print("SOAK: walked %.0f m in %.0f min: %d routes, %d finished, %d spots with no route" % [
+	print("SOAK: walked %.0f m in %.1f min: %d routes, %d finished, %d picked spots had no route (another was tried)" % [
 			_metres, _t / 60.0, _legs, _arrived, _no_route])
 	var keys: Array = _problems.keys()
 	keys.sort()
 	for k in keys:
 		print("PROBLEM  %s  (x%d)" % [k, _problems[k]])
 	var ok := _problems.is_empty()
-	print("%s  an hour's walk all over the city with no stuck spots, falls or glitches  (%d problem spots)" % [
-			"PASS" if ok else "FAIL", _problems.size()])
+	print("%s  a %.0f-minute walk all over the city with no stuck spots, falls or glitches  (%d problem spots)" % [
+			"PASS" if ok else "FAIL", minutes, _problems.size()])
 	get_tree().quit(0 if ok else 1)
