@@ -63,12 +63,14 @@ func find_target() -> Dictionary:
 	for id in world.cast_nodes:
 		var node: Node3D = world.cast_nodes[id]
 		var c: Dictionary = Town.CAST[id]
-		var s := _score(here, face, node.position, TALK_REACH, 3.0)
+		var s := _score(here, face, node.position, TALK_REACH, 3.0) - 0.8   # people first: you came to the bar to talk
 		if s < best_score:
 			best_score = s
 			best = {"kind": "talk", "id": id, "label": "talk to %s (%s)" % [c["name"], c["role"]], "pos": node.position}
 	for spot in world.interact_spots:
 		var s := _score(here, face, spot["pos"], spot.get("reach", THING_REACH), 2.0)
+		if spot["kind"] == "sit":
+			s += 0.3   # and a seat only when it's clearly the one you mean
 		if s < best_score:
 			best_score = s
 			best = spot

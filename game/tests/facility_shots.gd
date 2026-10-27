@@ -37,6 +37,45 @@ func _ready() -> void:
 		var look: Vector3 = n.position - at
 		look.y = 0.0
 		await _shot("fac_person_%s" % id, at, look.normalized(), 0.3 if id == "wendel" else -0.1)
+	# Using things: talking to Dorran, reading the request board, sitting in the tavern
+	var interact: Node = null
+	for c in get_children():
+		if c.get_script() == preload("res://interact.gd"):
+			interact = c
+	var dor: Vector3 = world.cast_spots["dorran"]["talk_from"]
+	await _shot("fac_use_prompt_dorran", dor, world.cast_nodes["dorran"].position - dor, -0.1)
+	interact.use(interact.find_target())
+	await _shot("fac_use_talk_dorran", dor, world.cast_nodes["dorran"].position - dor, -0.1)
+	if player.seated:
+		print("PROBLEM: E at the bar sat you down instead of talking")
+		player.stand_up()
+	for sp in world.interact_spots:
+		if sp["id"] == "guild_board":
+			var at: Vector3 = sp["pos"] + Vector3(0, 0, -0.4)
+			await _shot("fac_use_prompt_board", at, Vector3(0, 0, 1), -0.1)
+			interact.use(sp)
+			await _shot("fac_use_read_board", at, Vector3(0, 0, 1), -0.1)
+	for sp in world.interact_spots:
+		if sp["where"] == "tavern" and sp["kind"] == "sit":
+			player.position = sp["pos"] - sp["face"] * 0.7
+			player.position.y = 0.1
+			interact.use(sp)
+			camera.yaw = atan2(-sp["face"].z, -sp["face"].x) + 2.4
+			camera.snap_zoom(0.2)
+			await _settle()
+			_save_shot("fac_use_sitting_tavern")
+			player.stand_up()
+			break
+	for sp in world.interact_spots:
+		if sp.get("soak", false):
+			player.position = sp["pos"] - sp["face"] * 0.7
+			interact.use(sp)
+			camera.yaw = atan2(-sp["face"].z, -sp["face"].x) + 2.8
+			camera.snap_zoom(0.25)
+			await _settle()
+			_save_shot("fac_use_soaking_bath")
+			player.stand_up()
+			break
 	# The cast in a row on the top terrace
 	var Town := preload("res://town_data.gd")
 	var row := Node3D.new()
