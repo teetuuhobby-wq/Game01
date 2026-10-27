@@ -16,19 +16,19 @@ const VARIANTS := {
 		"keys": [
 			{"sun_height": 14.0, "sun_turn": -40.0, "sun_warmth": 0.85, "sun_brightness": 1.6, "shadow_fill": 0.45, "shadow_warmth": 0.9, "sky_brightness": 0.8, "glare": 0.6, "haze": 0.0012, "exposure": 1.0, "colour": 1.2, "contrast": 1.1, "miniature": 0.0},
 			{"sun_height": 2.0, "sun_turn": -40.0, "sun_warmth": 1.0, "sun_brightness": 0.9, "shadow_fill": 0.35, "shadow_warmth": 0.6, "sky_brightness": 0.35, "glare": 0.9, "haze": 0.002, "exposure": 1.05, "colour": 1.25, "contrast": 1.12, "miniature": 0.0},
-			{"sun_height": 35.0, "sun_turn": 70.0, "sun_warmth": -0.6, "sun_brightness": 0.1, "shadow_fill": 0.12, "shadow_warmth": 0.1, "sky_brightness": 0.04, "glare": 1.3, "haze": 0.004, "exposure": 1.0, "colour": 1.0, "contrast": 1.08, "miniature": 0.0},
+			{"sun_height": 35.0, "sun_turn": 70.0, "sun_warmth": -0.6, "sun_brightness": 0.05, "shadow_fill": 0.05, "shadow_warmth": 0.1, "sky_brightness": 0.04, "glare": 1.3, "haze": 0.004, "exposure": 1.3, "colour": 1.0, "contrast": 1.08, "miniature": 0.0},
 		]},
 	"2": {"name": "Blue hour", "fog": Color(0.45, 0.50, 0.62), "night_fog": Color(0.06, 0.09, 0.18), "glow": 4.5,
 		"keys": [
 			{"sun_height": 10.0, "sun_turn": -40.0, "sun_warmth": 0.5, "sun_brightness": 1.3, "shadow_fill": 0.55, "shadow_warmth": 0.3, "sky_brightness": 0.8, "glare": 0.4, "haze": 0.001, "exposure": 1.0, "colour": 1.05, "contrast": 1.05, "miniature": 0.0},
 			{"sun_height": -2.0, "sun_turn": -40.0, "sun_warmth": -0.3, "sun_brightness": 0.5, "shadow_fill": 0.4, "shadow_warmth": 0.0, "sky_brightness": 0.3, "glare": 0.9, "haze": 0.0018, "exposure": 1.1, "colour": 1.0, "contrast": 1.05, "miniature": 0.0},
-			{"sun_height": 40.0, "sun_turn": 60.0, "sun_warmth": -0.9, "sun_brightness": 0.14, "shadow_fill": 0.14, "shadow_warmth": 0.0, "sky_brightness": 0.06, "glare": 1.3, "haze": 0.0035, "exposure": 1.05, "colour": 0.95, "contrast": 1.05, "miniature": 0.0},
+			{"sun_height": 40.0, "sun_turn": 60.0, "sun_warmth": -0.9, "sun_brightness": 0.06, "shadow_fill": 0.06, "shadow_warmth": 0.0, "sky_brightness": 0.06, "glare": 1.3, "haze": 0.0035, "exposure": 1.35, "colour": 0.95, "contrast": 1.05, "miniature": 0.0},
 		]},
 	"3": {"name": "Dust", "fog": Color(0.70, 0.40, 0.25), "night_fog": Color(0.20, 0.10, 0.08), "glow": 3.5,
 		"keys": [
 			{"sun_height": 12.0, "sun_turn": -40.0, "sun_warmth": 0.9, "sun_brightness": 1.2, "shadow_fill": 0.55, "shadow_warmth": 1.0, "sky_brightness": 0.7, "glare": 0.7, "haze": 0.005, "exposure": 0.95, "colour": 1.1, "contrast": 1.0, "miniature": 0.0},
 			{"sun_height": 3.0, "sun_turn": -40.0, "sun_warmth": 1.0, "sun_brightness": 0.7, "shadow_fill": 0.4, "shadow_warmth": 1.0, "sky_brightness": 0.3, "glare": 1.0, "haze": 0.007, "exposure": 1.0, "colour": 1.15, "contrast": 1.0, "miniature": 0.0},
-			{"sun_height": 30.0, "sun_turn": 70.0, "sun_warmth": -0.3, "sun_brightness": 0.08, "shadow_fill": 0.12, "shadow_warmth": 0.4, "sky_brightness": 0.03, "glare": 1.4, "haze": 0.006, "exposure": 1.0, "colour": 0.95, "contrast": 1.05, "miniature": 0.0},
+			{"sun_height": 30.0, "sun_turn": 70.0, "sun_warmth": -0.3, "sun_brightness": 0.04, "shadow_fill": 0.05, "shadow_warmth": 0.4, "sky_brightness": 0.03, "glare": 1.4, "haze": 0.006, "exposure": 1.3, "colour": 0.95, "contrast": 1.05, "miniature": 0.0},
 		]},
 }
 
@@ -43,6 +43,8 @@ var _lights: Array[OmniLight3D] = []
 var _eyes: Array[MeshInstance3D] = []
 var _eyes_placed := false
 var _caption: Label
+var _stars: MultiMeshInstance3D
+var _ground_lights: Array[OmniLight3D] = []
 var _shot_i := 0
 var _start_x := 0.0
 
@@ -68,6 +70,8 @@ func _ready() -> void:
 	_make_lift()
 	_make_lights()
 	_make_eyes()
+	_make_stars()
+	_make_ground_glow()
 	_make_caption()
 	_restart()
 
@@ -113,7 +117,20 @@ func _process(delta: float) -> void:
 	var f := smoothstep(0.0, 1.0, k / 0.45 if k < 0.45 else (k - 0.45) / 0.55)
 	for key in a:
 		_mood.values[key] = lerpf(a[key], b[key], f)
+	if k >= 0.45:
+		# The sun goes quickly once it's down: no hard daylight after sunset
+		var quick := smoothstep(0.45, 0.6, k)
+		for key in ["sun_brightness", "shadow_fill"]:
+			_mood.values[key] = lerpf(a[key], b[key], quick)
 	_mood.apply()
+	# The sky: a deep blue dome with a last ember band low on the horizon, and stars
+	var night_sky := smoothstep(0.4, 0.85, k)
+	world.sky_mat.sky_top_color = Color(0.45, 0.66, 0.74).lerp(Color(0.03, 0.06, 0.18), night_sky)
+	world.sky_mat.sky_horizon_color = Color(0.98, 0.80, 0.62).lerp(v["fog"], smoothstep(0.1, 0.45, k)).lerp(Color(0.35, 0.14, 0.08), night_sky)
+	_stars.visible = night_sky > 0.3
+	(_stars.multimesh.mesh.material as StandardMaterial3D).albedo_color.a = night_sky
+	for g in _ground_lights:
+		g.light_energy = smoothstep(0.55, 0.85, k) * 6.0
 	var night := smoothstep(0.35, 0.8, k)
 	world.env.fog_light_color = (v["fog"] as Color).lerp(v["night_fog"], night)
 	world.mat_glow.emission_energy_multiplier = lerpf(1.2, v["glow"], night)
@@ -137,7 +154,9 @@ func _process(delta: float) -> void:
 		_place_eyes()
 	for i in _eyes.size():
 		var e := _eyes[i]
-		e.visible = eyes_on > 0.05 and fmod(_t * (0.6 + i * 0.07) + i * 1.3, 4.0) > 0.35
+		e.visible = eyes_on > 0.05 and fmod(_t * (0.6 + (i / 2) * 0.07) + (i / 2) * 1.3, 4.0) > 0.35
+		if (i / 2) % 3 == 1:
+			e.position.x += sin(_t * 0.3 + i) * 0.02   # a few creep slowly
 		(e.material_override as StandardMaterial3D).albedo_color.a = eyes_on
 	_move_camera(k)
 	if shots:
@@ -156,15 +175,24 @@ func _process(delta: float) -> void:
 ## A slow drifting shot: out in the desert ahead of the city, swinging round toward
 ## its side as it stops, then easing in to the lit deck and the lift at night.
 func _move_camera(k: float) -> void:
+	var from := _cam_pose(k)
+	_cam.position = from
+	if _stars != null:
+		_stars.global_position = from
+	var c: Vector3 = world.city.position
+	var look := c + Vector3(0, lerpf(4.0, -11.0, smoothstep(0.5, 1.0, k)), 0)
+	_cam.look_at(look, Vector3.UP)
+
+
+## Where the camera is at moment k (0..1) of the scene.
+func _cam_pose(k: float) -> Vector3:
 	var c: Vector3 = world.city.position
 	var ang := lerpf(-0.35, 0.5, smoothstep(0.0, 1.0, k))
-	var dist := lerpf(115.0, 100.0, smoothstep(0.3, 1.0, k))
-	var h := lerpf(24.0, 9.0, smoothstep(0.2, 1.0, k))
+	var dist := lerpf(115.0, 100.0, smoothstep(0.3, 0.7, k)) + 45.0 * smoothstep(0.72, 1.0, k)
+	var h := lerpf(24.0, 9.0, smoothstep(0.2, 0.7, k)) - 5.0 * smoothstep(0.72, 1.0, k)
 	var from := c + Vector3(cos(ang) * dist, 0, sin(ang) * dist)
 	from.y = world.ground_at(from.x, from.z) + h
-	_cam.position = from
-	var look := c + Vector3(0, lerpf(4.0, -9.0, smoothstep(0.5, 1.0, k)), 0)
-	_cam.look_at(look, Vector3.UP)
+	return from
 
 
 ## The cargo lift: a timber platform with rails, crates and a lantern, on four chains
@@ -261,18 +289,65 @@ func _place_eyes() -> void:
 	_eyes_placed = true
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 21
-	var fwd := -_cam.global_basis.z
+	var end := _cam_pose(1.0)                 # where the camera will end up
+	var fwd: Vector3 = world.city.position - end
 	fwd.y = 0.0
 	fwd = fwd.normalized()
 	var right := fwd.cross(Vector3.UP)
 	for i in range(0, _eyes.size(), 2):
 		var side := -1.0 if (i / 2) % 2 == 0 else 1.0
-		var d := rng.randf_range(25.0, 55.0)
-		var off := rng.randf_range(0.35, 0.75) * d * side
-		var c := _cam.global_position + fwd * d + right * off
+		var d := rng.randf_range(18.0, 45.0)
+		var off := rng.randf_range(0.25, 0.6) * d * side
+		var c := end + fwd * d + right * off
 		c.y = world.ground_at(c.x, c.z) + rng.randf_range(0.5, 1.1)
 		_eyes[i].global_position = c - right * 0.35
 		_eyes[i + 1].global_position = c + right * 0.35
+
+
+## Stars, faded in as night falls.
+func _make_stars() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var q := QuadMesh.new()
+	q.size = Vector2(1.6, 1.6)
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	m.billboard_keep_scale = true
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.vertex_color_use_as_albedo = true
+	m.disable_fog = true
+	m.albedo_color = Color(1, 1, 1, 0)
+	q.material = m
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
+	mm.mesh = q
+	mm.instance_count = 700
+	for i in mm.instance_count:
+		var dir := Vector3(rng.randf_range(-1, 1), rng.randf_range(0.08, 1.0), rng.randf_range(-1, 1)).normalized()
+		mm.set_instance_transform(i, Transform3D(Basis().scaled(Vector3.ONE * rng.randf_range(0.6, 1.8)), dir * 900.0))
+		var b := rng.randf_range(0.6, 1.4)
+		mm.set_instance_color(i, Color(b, b, b * 1.1))
+	_stars = MultiMeshInstance3D.new()
+	_stars.multimesh = mm
+	_stars.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_stars.visible = false
+	_cam.add_child(_stars)     # the sky moves with the camera, so it's always far away
+	_stars.top_level = true
+
+
+## A warm pool of light spilling onto the sand around the knelt city.
+func _make_ground_glow() -> void:
+	for p in [Vector3(-30, -8, -18), Vector3(30, -8, -18), Vector3(-30, -8, 18), Vector3(30, -8, 18), Vector3(0, -8, 0)]:
+		var l := OmniLight3D.new()
+		l.light_color = Color(1.0, 0.62, 0.32)
+		l.omni_range = 34.0
+		l.omni_attenuation = 1.6
+		l.light_energy = 0.0
+		l.position = p
+		world.city.add_child(l)
+		_ground_lights.append(l)
 
 
 ## Pairs of glowing eyes out in the dark desert (placed when night falls).
@@ -281,7 +356,7 @@ func _make_eyes() -> void:
 		for side in 2:
 			var e := MeshInstance3D.new()
 			var b := BoxMesh.new()
-			b.size = Vector3(0.22, 0.15, 0.22)
+			b.size = Vector3(0.28, 0.18, 0.28)
 			var m := StandardMaterial3D.new()
 			m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -298,7 +373,10 @@ func _make_caption() -> void:
 	_caption = Label.new()
 	_caption.add_theme_font_size_override("font_size", 18)
 	_caption.add_theme_color_override("font_color", Color(1, 1, 1, 0.6))
-	_caption.position = Vector2(20, 14)
+	_caption.anchor_top = 1.0
+	_caption.anchor_bottom = 1.0
+	_caption.offset_left = 20
+	_caption.offset_top = -34
 	layer.add_child(_caption)
 
 
