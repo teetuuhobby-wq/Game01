@@ -549,7 +549,7 @@ func _build_store() -> void:
 		for out in range(1, 6):
 			if absi(u - uc) <= 9 and out < 2:
 				continue
-			var stripe := P.WALL4 if posmod(u / 2, 2) == 0 else P.WHITE
+			var stripe := P.AWN2 if posmod(u / 2, 2) == 0 else P.WALL2   # cream, not bright white (it bloomed)
 			svv(fp(o, a, n, u, 14 - out / 2, out), stripe)
 			if out == 5 and posmod(u, 2) == 0:
 				svv(fp(o, a, n, u, 11, out), stripe)    # a scalloped edge
@@ -855,7 +855,7 @@ func _tavern_wall(x: int, y: int, z: int, x0: int, z0: int, x1: int, z1: int, to
 
 
 func _store_wall(_x: int, y: int, _z: int) -> int:
-	return P.STONE2 if y <= 3 else P.WALL1
+	return P.STONE2 if y <= 3 else P.WALL0
 
 
 func _bath_wall(x: int, y: int, z: int) -> int:
