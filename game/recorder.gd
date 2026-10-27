@@ -120,7 +120,8 @@ func _auto_flags(delta: float) -> void:
 	var p: Vector3 = player.position
 	var moved := Vector2(p.x - _last_pos.x, p.z - _last_pos.z).length()
 	_last_pos = p
-	if controls.move.length() > 0.5 and moved < 0.2 * delta:
+	# (Not while you sit: then a walk key you're still holding is meant to do nothing)
+	if controls.move.length() > 0.5 and moved < 0.2 * delta and not player.seated:
 		_stuck_time += delta
 		if _stuck_time > 0.8 and not _stuck_noted:
 			_stuck_noted = true

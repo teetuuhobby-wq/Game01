@@ -14,6 +14,7 @@ const MOUSE_SENSITIVITY := 0.0035   # how far the camera turns per bit of mouse 
 const MOUSE_INVERT_Y := false    # true = push the mouse up to look down
 const FIRST_PERSON_FOV := 75.0   # how wide you see through your own eyes (degrees)
 const EYE_HEIGHT := 1.55         # metres; you're 1.8 m tall
+const SEATED_EYE_DROP := 0.35    # metres your eyes go down when you sit (first person)
 const STOMP_SHAKE := 0.06        # how much the camera shakes when a giant foot lands
 
 # --- The walking city ---

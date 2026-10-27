@@ -218,7 +218,8 @@ func _update_cast(delta: float) -> void:
 		n.rotation.y = e["yaw"] + sin(e["phase"] * 0.4) * 0.25
 
 
-## The neighbours round the plaza and on the terraces get the same treatment.
+## Nobody's body fills the screen: anyone close to the camera is hidden (see people.gd),
+## the neighbours round the plaza and on the terraces, the regulars and the named residents.
 func _hide_close_residents() -> void:
 	if camera == null:
 		return
@@ -229,3 +230,7 @@ func _hide_close_residents() -> void:
 		pw["node"].visible = _mk_clear_of_camera(pw["node"].position, cam)
 	for e in _extra_nodes:
 		e["node"].visible = _mk_clear_of_camera(e["node"].position, cam)
+	# The named residents and Mira too, or walking into the barkeep fills the screen
+	for id in cast_nodes:
+		var n: Node3D = cast_nodes[id]
+		n.visible = _mk_clear_of_camera(n.position, cam)

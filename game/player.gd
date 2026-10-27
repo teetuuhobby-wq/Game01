@@ -91,6 +91,7 @@ func sit(at: Vector3, dir: Vector3, stand_at: Vector3, drop := 0.0) -> void:
 	_seat_body.rotation.y = body.rotation.y
 	_seat_body.position.y = drop
 	body.position.y = drop          # the camera's eye height follows the body
+	hand.reparent(_seat_body, false)   # whatever you carry (the valve) stays in your hand
 	set_first_person(_first_person)
 
 
@@ -98,7 +99,13 @@ func stand_up() -> void:
 	seated = false
 	position = _stand_at
 	body.position.y = 0.0
+	hand.reparent(body, false)
 	set_first_person(_first_person)
+
+
+## How high your eyes are above where you stand (metres): lower when you sit.
+func eye_height() -> float:
+	return T.EYE_HEIGHT + body.position.y - (T.SEATED_EYE_DROP if seated else 0.0)
 
 
 ## Turn to face a direction on the city (used in first person, so you face where you look).
