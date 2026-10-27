@@ -30,7 +30,7 @@ func _build_workshop() -> void:
 	var h: int = LEVELS[level_at(cx, (z0 + z1) / 2)][1]
 	origin = Vector3i(0, h, 0)
 	for y in range(1, 15):
-		var p := P.STONE2 if y <= 2 else (P.WOOD_DARK if posmod(y, 4) == 0 else P.WOOD)
+		var p := P.STONE2 if y <= 2 else (P.WOOD_DARK if posmod(y, 4) == 0 else P.WALL2)   # plastered, with timber bands
 		for x in range(x0, x1 + 1):
 			sv(x, y, z1, p)
 		for z in range(z0, z1):

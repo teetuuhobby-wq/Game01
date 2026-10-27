@@ -60,7 +60,7 @@ func _process(delta: float) -> void:
 	_prompt.text = ("E: " + target["label"]) if not target.is_empty() and not _panel.visible else ""
 	if _panel.visible:
 		var same: bool = target.get("id", "") == showing
-		_hint.text = ("E: close" if target.get("kind", "") == "read" else "E: keep talking") if same else ""
+		_hint.text = ("E: keep talking" if target.get("kind", "") == "talk" else "E: close") if same else ""
 	if not target.is_empty() and controls.use_pressed:
 		use(target)
 	_update_panel(delta)
@@ -123,6 +123,9 @@ func use(t: Dictionary) -> void:
 			_show(t["id"], b["title"], "\n".join(b["lines"]), t["pos"], 60.0)
 			sfx.play("crate", -14.0)
 		"look":
+			if showing == t["id"]:
+				_close()
+				return
 			_show(t["id"], "", Town.PLACES[t["id"]]["text"], t["pos"])
 			sfx.play("chime", -16.0)
 		"sit":
@@ -247,5 +250,10 @@ func _update_marker() -> void:
 	var at: Vector3 = target["pos"]
 	if target.get("kind", "") == "talk":
 		at = world.cast_nodes[target["id"]].position
+	# Up close it sits at chest height and smaller, so it stays in view
+	var d := Vector2(at.x - player.position.x, at.z - player.position.z).length()
+	if d < 1.5:
+		up = minf(up, 1.2)
+	_marker.scale = Vector3.ONE * clampf(d / 1.5, 0.5, 1.0)
 	_marker.position = at + Vector3(0, up + sin(_t * 3.0) * 0.06, 0)
 	_marker.rotation = Vector3(PI / 4.0, _t * 2.0, PI / 4.0)

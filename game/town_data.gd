@@ -28,7 +28,7 @@ const CAST := {
 			"If you take a request, come back in one piece. The paperwork for the other thing is dreadful.",
 			"Quiet tonight. I prefer quiet. Quiet doesn't argue.",
 		],
-		"after": ["I hear you fixed Mira's rain-catcher. Unrequested, unrecorded, unpaid. Very irregular. Well done."],
+		"after": ["I hear you fixed the west catcher. Unrequested, unrecorded, unpaid. Very irregular. Well done."],
 	},
 	"dorran": {
 		"name": "Dorran", "role": "barkeep", "where": "tavern",
@@ -79,10 +79,10 @@ const CAST := {
 	},
 	"tamsin": {
 		"name": "Tamsin", "role": "bath attendant", "where": "bath",
-		"shirt": Color(0.62, 0.85, 0.85), "bottom": Color(0.62, 0.85, 0.85), "hair": Color(0.10, 0.09, 0.08),
+		"shirt": Color(0.25, 0.70, 0.78), "bottom": Color(0.25, 0.70, 0.78), "hair": Color(0.10, 0.09, 0.08),
 		"skin": Color(0.92, 0.75, 0.62),
 		"look": {"dress": true, "hair": "long", "sash": Color(0.96, 0.95, 0.90)},
-		"items": ["towels"], "habit": "stroll",
+		"items": ["towels", "head_towel"], "habit": "stroll",
 		"personality": "Calm, unhurried, speaks softly so everyone else does too.",
 		"lines": [
 			"Sand stays outside. Worries too, if you can manage it.",
@@ -90,7 +90,7 @@ const CAST := {
 			"Find a spot along the ledge and sit as long as you like. No one's counting.",
 			"Some evenings, before the city kneels, you can feel each step through the water. Slow and steady.",
 		],
-		"after": ["The pool filled faster today. Mira's rain-catcher, I think. Tell her the water says thank you."],
+		"after": ["The pool filled faster today. The west catcher, I think. Tell her the water says thank you."],
 	},
 	"mira": {
 		"name": "Mira", "role": "your neighbour", "where": "plaza",
@@ -105,11 +105,11 @@ const CAST := {
 			"Bram grumbles, but he'll have left it out for you. He always does.",
 		],
 		"lines": [
-			"These pots won't water themselves. Well. Not since you fixed the catcher, anyway.",
+			"These pots won't water themselves. Believe me, I've asked.",
 		],
 		"after": [
 			"Listen! Water in the pipes again. You're officially my favourite neighbour.",
-			"The guild hall's at the foot of the stairs on the homes side. Or go soak at the bathhouse. You've earned it.",
+			"Guild hall's at the foot of the homes-side stairs. Or go soak. You've earned it.",
 			"Don't tell Bram, but he worried about that catcher more than I did.",
 		],
 	},

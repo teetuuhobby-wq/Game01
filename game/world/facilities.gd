@@ -116,7 +116,7 @@ func _fac_doorway(side: Array, uc: int, frame: int) -> Array:
 	var c := fp(o, a, n, uc, 0, 0)
 	var nn := Vector3(n)
 	var at := Vector3(c.x, 0, c.z)
-	_fac_light(c.x + nn.x * 3, c.y + 9, c.z + nn.z * 3, Color(1.0, 0.72, 0.42), 0.8, 4.0)
+	_fac_light(c.x + nn.x * 6, c.y + 9, c.z + nn.z * 6, Color(1.0, 0.72, 0.42), 0.35, 3.5)
 	return [_mp(at.x + nn.x * 10, 0, at.z + nn.z * 10), _mp(at.x - nn.x * 8, 0, at.z - nn.z * 8)]
 
 
@@ -197,11 +197,9 @@ func _fac_light(x: float, y: float, z: float, col := Color(1.0, 0.72, 0.42), ene
 func _fac_lantern(x: int, z: int, top: int, low: int) -> void:
 	for y in range(low + 2, top):
 		sv(x, y, z, P.IRON)
-	box3(x - 1, low + 1, z - 1, x + 1, low + 1, z + 1, P.BRASS)   # a small brass cage round a flame
-	for d: Vector2i in [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]:
-		box3(x + d.x, low - 1, z + d.y, x + d.x, low, z + d.y, P.IRON)
+	sv(x, low + 1, z, P.BRASS)          # a slim brass lantern round a flame
 	box3(x, low - 1, z, x, low, z, P.GLOW)
-	box3(x - 1, low - 2, z - 1, x + 1, low - 2, z + 1, P.BRASS)
+	sv(x, low - 2, z, P.BRASS)
 	_fac_light(x, low - 1, z)
 
 
@@ -358,7 +356,7 @@ func _build_guild() -> void:
 		var nx := bx - 6 + (i % 3) * 5
 		var ny := 7 + (i / 3) * 3
 		box3(nx, ny, z1 - 2, nx + 2, ny + 1, z1 - 2, P.WHITE if i % 4 != 1 else P.CLOTH0)
-	interact_spots.append({"id": "guild_board", "kind": "read", "pos": _mp(bx, 0, z1 - 4),
+	interact_spots.append({"id": "guild_board", "kind": "read", "pos": _mp(bx, 0, z1 - 6),
 			"label": "read the request board", "where": "guild"})
 	box3(bx - 7, 6, z0 + 1, bx + 7, 16, z0 + 1, P.BRASS)
 	box3(bx - 6, 7, z0 + 2, bx + 6, 15, z0 + 2, P.WOOD_DARK)
@@ -390,7 +388,9 @@ func _build_guild() -> void:
 			elif k == 2:
 				box3(x, 5, side_z, x + 1, 5, side_z, P.WHITE)
 			elif k == 3:
-				box3(x, 5, side_z - 1, x, 6, side_z, P.IRON)
+				box3(x, 5, side_z - 1, x, 6, side_z, P.STONE2)     # a helmet
+			else:
+				box3(x, 5, side_z, x + 1, 6, side_z + 1, P.TERRA3)  # a leather pack
 	# Regulars at the tables
 	for e in [[x0 + 24, zc + 15, -1], [x0 + 32, zc + 15, -1], [x0 + 28, zc - 15, 1], [x1 - 18, zc - 15, 1]]:
 		extras.append({"pos": _mp(e[0], 0, e[1]), "face": Vector3(0, 0, e[2]), "pose": "sit", "where": "guild"})
@@ -428,13 +428,13 @@ func _build_tavern() -> void:
 	var a: Vector3i = front[1]
 	var n: Vector3i = front[2]
 	_fac_hanging_sign(front, uc - 13, P.AWN1, [
-		".ttttt.",
-		".hhhhh.",
-		"..l.l..",
-		".l...l.",
-		"l.....l",
-		"l.....l",
-	], {"t": P.TERRA, "h": P.HULL, "l": P.WOOD_DARK})
+		".wwww..",
+		".mmmm.m",
+		".mmmm.m",
+		".mmmm.m",
+		".mmmmm.",
+		".mmmm..",
+	], {"w": P.WHITE, "m": P.WOOD_DARK})
 	for si in 4:
 		_fac_windows(sides[si], 5, 8, uc - 9 if si == 2 else -1, uc + 9 if si == 2 else -1, P.SHUTTER1, si == 2)
 	_fac_glow_windows(x0, z0, x1, z1, top)
@@ -504,6 +504,8 @@ func _build_tavern() -> void:
 		for d: Vector2i in [Vector2i(4, 0), Vector2i(-4, 0), Vector2i(0, 4), Vector2i(0, -4)]:
 			if t == tables[3] and d.y > 0:
 				continue   # no stool with its back to the fire
+			if t == tables[0] and d.x < 0:
+				continue   # nor right inside the door
 			_fac_stool(t.x + d.x, t.y + d.y, -Vector3(d.x, 0, d.y).normalized(), "tavern", "sit at the table")
 	# Stools along the bar, leaving the way from the door to the barkeep open
 	for z in [zc - 8, zc - 4, zc + 4, zc + 8]:
@@ -776,10 +778,10 @@ func _furnish_workshop() -> void:
 	_fac_light(x0 + 3, h + 6, z0 + 4, Color(1.0, 0.5, 0.2), 0.8, 3.5)
 	_fac_light(cx, h + 11, z1 - 4, Color(1.0, 0.85, 0.65), 1.0, 6.0)
 	# His name over the front, so you know whose shed it is
-	fac_signs.append([Vector3(cx, h + 12, z0 - 1.3) * VS, Vector3(0, 0, -1), "BRAM'S WORKSHOP"])
+	fac_signs.append([Vector3(cx, h + 16.5, z0 - 3.2) * VS, Vector3(0, 0, -1), "BRAM'S WORKSHOP"])
 	interact_spots.append({"id": "workshop_bench", "kind": "look", "pos": _mp(x1 - 2, h, z0 + 2),
 			"label": "tinker with the pump on the side bench", "where": "workshop"})
-	cast_spots["bram"] = {"pos": _mp(x0 + 6, h, z0 + 1), "face": Vector3(0, 0, -1), "where": "workshop"}
+	cast_spots["bram"] = {"pos": _mp(x0 + 2, h, z0 - 4), "face": Vector3(0, 0, -1), "where": "workshop"}
 	facilities["workshop"] = {"name": "Bram's workshop", "rect": WORKSHOP, "door_out": _mp(cx, h, z0 - 2),
 			"door_in": _mp(cx, h, z0 + 4), "inside": _mp(cx, h, z1 - 9), "level": level_at(cx, z1 - 9)}
 

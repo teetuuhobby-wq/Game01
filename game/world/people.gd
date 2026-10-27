@@ -454,20 +454,20 @@ func _item_mesh(kind: String, top: float) -> MeshInstance3D:
 			add.call(1, hand_y + 1, 6, can.darkened(0.3))
 		"spyglass":    # a long brass spyglass raised to the eye
 			var eye_y := top / h - 3.0
-			for i in 10:
+			for i in 8:
 				for d in [0.0, 1.0]:
-					add.call(2 + i, eye_y + d + i * 0.15, 1.0, Color(0.80, 0.62, 0.30) if i < 9 else Color(0.45, 0.75, 0.85))
+					add.call(2 + i, eye_y + d + i * 0.15, 1.0, Color(0.80, 0.62, 0.30) if i < 7 else Color(0.45, 0.75, 0.85))
 		"satchel":     # a bag on your right hip, strap across the chest
 			for y in range(0, 3):
 				for x in range(-1, 2):
 					add.call(x, hand_y - 1 + y, 5, Color(0.78, 0.42, 0.20))
 			for i in 7:
 				add.call(2, hand_y + 1 + i, 4 - i * 1.3, Color(0.92, 0.80, 0.30))
-		"spectacles":  # little dark round glasses over the eyes
+		"spectacles":  # little gold-rimmed glasses over the eyes
 			var ey := top / h - 3.5
-			for z in [-2, -1, 1, 2]:
-				add.call(2.3, ey, z, Color(0.10, 0.08, 0.06))
-			add.call(2.3, ey + 0.5, 0, Color(0.80, 0.62, 0.30))
+			for z in [-3, -2, -1, 1, 2, 3]:
+				add.call(2.3, ey + (0.5 if absi(z) == 2 else 0.0), z, Color(0.95, 0.80, 0.35))
+			add.call(2.3, ey, 0, Color(0.95, 0.80, 0.35))
 		"tall_bun":    # a big bun on top of the head
 			var by := top / h
 			for y in range(0, 3):
@@ -483,6 +483,13 @@ func _item_mesh(kind: String, top: float) -> MeshInstance3D:
 				for z in range(-2, 3):
 					add.call(x, hy + 1, z, Color(0.36, 0.27, 0.18))
 					add.call(x, hy + 2, z, Color(0.36, 0.27, 0.18))
+		"head_towel":  # a white towel wrapped up on the head
+			var wy := top / h
+			for y in range(0, 2):
+				for x in range(-2, 3):
+					for z in range(-3, 4):
+						if absi(x) + absi(z) < 5:
+							add.call(x, wy + y, z, Color(0.97, 0.97, 0.95))
 		"cap":         # a bright red cap with a peak
 			var cy := top / h + 0.3
 			for x in range(-2, 3):
