@@ -66,6 +66,8 @@ func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color, look := 
 					c = Color(0.15, 0.12, 0.10)
 				elif row == 0 and x == 1 and look.get("beard", false):
 					c = hair
+				elif row == 0 and x == 1 and z == 0:
+					c = skin.darkened(0.25)    # a mouth
 				if hair_style == "scarf" and absi(z) == 1 and row >= 1 and x == 0:
 					c = top_hair
 				add.call(x, y, z, c)
@@ -309,12 +311,13 @@ func _add_market_crowd() -> void:
 		var c := _mk_point(rng.randf_range(6.0, _mk_len - 6.0), side * 2.6)
 		var n := rng.randi_range(2, 4)
 		for k in n:
-			var a := TAU * k / n + rng.randf_range(-0.3, 0.3)
+			# Loose little clusters, not neat rings: uneven gaps, some turned half away
+			var a := TAU * k / n + rng.randf_range(-0.6, 0.6)
 			var node := _mk_person(looks, false)
 			_mk_hat(node, hats)
-			node.position = c + Vector3(cos(a), 0.0, sin(a)) * 0.6
+			node.position = c + Vector3(cos(a), 0.0, sin(a)) * rng.randf_range(0.5, 0.95)
 			var to_c := c - node.position
-			node.rotation.y = atan2(-to_c.z, to_c.x)
+			node.rotation.y = atan2(-to_c.z, to_c.x) + rng.randf_range(-0.5, 0.5)
 			market_idlers.append({"node": node, "yaw": node.rotation.y, "phase": rng.randf() * TAU})
 	for sk in shopkeepers + shoppers:
 		var node := _mk_person(looks, false)
