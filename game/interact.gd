@@ -24,7 +24,11 @@ var last_text := ""     # the last thing shown (tests read it)
 var _panel: PanelContainer
 var _who: Label
 var _text: Label
+var _hint: Label         # "E: next" / "E: close", inside the panel
 var _prompt: Label
+var _marker: MeshInstance3D   # a small diamond over what E would use
+var _last_id := ""            # last frame's target, kept unless something is clearly better
+var _t := 0.0
 var _show_time := 0.0
 var _show_at := Vector3.ZERO
 
@@ -36,21 +40,31 @@ func setup(w: Node3D, p: Node3D, c: Node, e: Node, s: Node) -> void:
 	errand = e
 	sfx = s
 	_make_ui()
+	_make_marker()
 
 
 func _process(delta: float) -> void:
+	_t += delta
 	if player.seated:
 		target = {}
 		_prompt.text = "E or walk: stand up"
 		if controls.use_pressed or controls.move != Vector2.ZERO or player.bot_input != Vector2.ZERO:
 			player.stand_up()
+			sfx.play("crate", -16.0)
 		_update_panel(delta)
+		_update_marker()
 		return
 	target = {} if errand.busy_here() else find_target()
-	_prompt.text = ("E: " + target["label"]) if not target.is_empty() else ""
+	_last_id = target.get("id", "")
+	# While a panel is open the hint inside it says what E does; no second prompt on top
+	_prompt.text = ("E: " + target["label"]) if not target.is_empty() and not _panel.visible else ""
+	if _panel.visible:
+		var same: bool = target.get("id", "") == showing
+		_hint.text = ("E: close" if target.get("kind", "") == "read" else "E: keep talking") if same else ""
 	if not target.is_empty() and controls.use_pressed:
 		use(target)
 	_update_panel(delta)
+	_update_marker()
 
 
 ## The best thing to use from where you stand: the nearest in reach, preferring what
@@ -63,12 +77,13 @@ func find_target() -> Dictionary:
 	for id in world.cast_nodes:
 		var node: Node3D = world.cast_nodes[id]
 		var c: Dictionary = Town.CAST[id]
-		var s := _score(here, face, node.position, TALK_REACH, 3.0) - 0.8   # people first: you came to the bar to talk
+		var s := _score(here, face, node.position, TALK_REACH, 3.0, id) - 0.5   # people first: you came to the bar to talk
 		if s < best_score:
 			best_score = s
-			best = {"kind": "talk", "id": id, "label": "talk to %s (%s)" % [c["name"], c["role"]], "pos": node.position}
+			best = {"kind": "talk", "id": id, "label": "talk to %s (%s)" % [c["name"], c["role"]], "pos": node.position,
+					"height": 2.3 * node.scale.y}
 	for spot in world.interact_spots:
-		var s := _score(here, face, spot["pos"], spot.get("reach", THING_REACH), 2.0)
+		var s := _score(here, face, spot["pos"], spot.get("reach", THING_REACH), 2.0, spot["id"])
 		if spot["kind"] == "sit":
 			s += 0.3   # and a seat only when it's clearly the one you mean
 		if s < best_score:
@@ -77,7 +92,7 @@ func find_target() -> Dictionary:
 	return best
 
 
-func _score(here: Vector3, face: Vector3, at: Vector3, reach: float, max_dy: float) -> float:
+func _score(here: Vector3, face: Vector3, at: Vector3, reach: float, max_dy: float, id := "") -> float:
 	var d := at - here
 	if absf(d.y) > max_dy:
 		return INF
@@ -86,7 +101,7 @@ func _score(here: Vector3, face: Vector3, at: Vector3, reach: float, max_dy: flo
 	if dist > reach:
 		return INF
 	var facing := face.dot(d.normalized()) if dist > 0.05 else 1.0
-	return dist - 0.6 * facing
+	return dist - 0.6 * facing - (0.25 if id != "" and id == _last_id else 0.0)
 
 
 ## Does it: says a line, opens a board, sits you down, or describes something.
@@ -94,7 +109,11 @@ func use(t: Dictionary) -> void:
 	match t["kind"]:
 		"talk":
 			var c: Dictionary = Town.CAST[t["id"]]
-			_show(t["id"], "%s, %s" % [c["name"], c["role"]], talk.next_line(t["id"], errand.step == errand.Step.DONE), t["pos"])
+			var done: bool = errand.step == errand.Step.DONE
+			var line := talk.next_line(t["id"], done)
+			var n: int = talk.lines_for(t["id"], done).size()
+			var k: int = posmod(talk._said[t["id"]] - 1, n) + 1
+			_show(t["id"], "%s, %s   (%d/%d)" % [c["name"], c["role"], k, n], line, t["pos"])
 			sfx.play("tick", -6.0)
 		"read":
 			if showing == t["id"]:
@@ -105,6 +124,7 @@ func use(t: Dictionary) -> void:
 			sfx.play("crate", -14.0)
 		"look":
 			_show(t["id"], "", Town.PLACES[t["id"]]["text"], t["pos"])
+			sfx.play("chime", -16.0)
 		"sit":
 			# You get up again where you were standing, which you know is clear
 			var stand: Vector3 = player.position
@@ -113,15 +133,25 @@ func use(t: Dictionary) -> void:
 			sfx.play("crate", -12.0)
 
 
-func _show(id: String, who: String, text: String, at: Vector3, seconds := SHOW_TIME) -> void:
+func _show(id: String, who: String, text: String, at: Vector3, seconds := -1.0) -> void:
 	showing = id
 	last_text = text
 	_who.text = who
 	_who.visible = who != ""
 	_text.text = text
+	_hint.text = ""
 	_panel.visible = true
-	_show_time = seconds
+	_show_time = seconds if seconds > 0.0 else 4.0 + 0.05 * text.length()   # long lines stay longer
 	_show_at = at
+	_fit_panel()
+
+
+## The panel hugs its text, sitting just above the key hints at the bottom.
+func _fit_panel() -> void:
+	_panel.reset_size()
+	var h := _panel.get_combined_minimum_size().y
+	_panel.offset_top = -60.0 - h
+	_panel.offset_bottom = -60.0
 
 
 func _close() -> void:
@@ -171,9 +201,8 @@ func _make_ui() -> void:
 	_panel.anchor_bottom = 1.0
 	_panel.offset_left = -430
 	_panel.offset_right = 430
-	_panel.offset_top = -250
+	_panel.offset_top = -160
 	_panel.offset_bottom = -60
-	_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_panel.visible = false
 	layer.add_child(_panel)
 	var v := VBoxContainer.new()
@@ -188,3 +217,35 @@ func _make_ui() -> void:
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text.custom_minimum_size = Vector2(820, 0)
 	v.add_child(_text)
+	_hint = Label.new()
+	_hint.add_theme_font_size_override("font_size", 16)
+	_hint.add_theme_color_override("font_color", Color(1.0, 0.85, 0.5, 0.8))
+	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	v.add_child(_hint)
+
+
+## A small gold diamond that bobs over whatever E would use right now.
+func _make_marker() -> void:
+	_marker = MeshInstance3D.new()
+	var m := BoxMesh.new()
+	m.size = Vector3.ONE * 0.14
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(1.0, 0.85, 0.4)
+	mat.no_depth_test = true
+	m.material = mat
+	_marker.mesh = m
+	_marker.visible = false
+	world.city.add_child(_marker)
+
+
+func _update_marker() -> void:
+	_marker.visible = not target.is_empty() and not _panel.visible
+	if not _marker.visible:
+		return
+	var up: float = target.get("height", 1.0 if target.get("kind", "") != "sit" else 0.9)
+	var at: Vector3 = target["pos"]
+	if target.get("kind", "") == "talk":
+		at = world.cast_nodes[target["id"]].position
+	_marker.position = at + Vector3(0, up + sin(_t * 3.0) * 0.06, 0)
+	_marker.rotation = Vector3(PI / 4.0, _t * 2.0, PI / 4.0)

@@ -109,12 +109,14 @@ func _fac_doorway(side: Array, uc: int, frame: int) -> Array:
 		svv(fp(o, a, n, u, FAC_DOOR_TOP + 1, 0), frame)
 		svv(fp(o, a, n, u, FAC_DOOR_TOP + 1, 1), frame)
 	for du in [-FAC_DOOR_HALF - 3, FAC_DOOR_HALF + 3]:
+		svv(fp(o, a, n, uc + du, 10, 1), P.BRASS)
 		svv(fp(o, a, n, uc + du, 11, 1), P.IRON)
 		svv(fp(o, a, n, uc + du, 12, 1), P.GLOW)
 		svv(fp(o, a, n, uc + du, 13, 1), P.IRON)
 	var c := fp(o, a, n, uc, 0, 0)
 	var nn := Vector3(n)
 	var at := Vector3(c.x, 0, c.z)
+	_fac_light(c.x + nn.x * 3, c.y + 9, c.z + nn.z * 3, Color(1.0, 0.72, 0.42), 0.8, 4.0)
 	return [_mp(at.x + nn.x * 10, 0, at.z + nn.z * 10), _mp(at.x - nn.x * 8, 0, at.z - nn.z * 8)]
 
 
@@ -133,13 +135,58 @@ func _fac_sign(side: Array, uc: int, y: int, half: int, board: int, edge: int, t
 
 
 ## Windows (from the house template) along one wall, skipping the doorway.
-func _fac_windows(side: Array, y0: int, every: int, skip_from: int, skip_to: int, shutter: int) -> void:
+func _fac_windows(side: Array, y0: int, every: int, skip_from: int, skip_to: int, shutter: int, flowers := false) -> void:
 	var L: int = side[3]
 	var k := 5
 	while k + 3 <= L - 5:
 		if k + 3 < skip_from or k > skip_to:
-			_window(side[0], side[1], side[2], k, y0, shutter, false)
+			_window(side[0], side[1], side[2], k, y0, shutter, flowers)
 		k += every
+
+
+## A sign hanging out over the street on an iron arm, with a picture that shows the
+## trade (so you can tell what a place is while walking along, before you can read it).
+## icon: 7 rows of 7 characters; "." is the board, letters pick from colours.
+func _fac_hanging_sign(side: Array, u: int, board: int, icon: Array, colours: Dictionary) -> void:
+	var o: Vector3i = side[0]
+	var a: Vector3i = side[1]
+	var n: Vector3i = side[2]
+	for out in range(1, 10):
+		svv(fp(o, a, n, u, 19, out), P.IRON)
+	for out in [2, 8]:
+		svv(fp(o, a, n, u, 18, out), P.IRON)
+	for yy in range(10, 18):
+		for out in range(1, 10):
+			var rim := yy == 10 or yy == 17 or out == 1 or out == 9
+			svv(fp(o, a, n, u, yy, out), P.WOOD_DARK if rim else board)
+	for row in 6:
+		var line: String = icon[row]
+		for col in 7:
+			var ch := line[col]
+			if ch != ".":
+				svv(fp(o, a, n, u, 16 - row, 2 + col), colours[ch])
+
+
+## Windows seen from inside glow warm, like lit glass, instead of dark holes.
+func _fac_glow_windows(x0: int, z0: int, x1: int, z1: int, top: int) -> void:
+	for y in range(1, top):
+		for x in range(x0 + 1, x1):
+			for z in [z0 + 1, z1 - 1]:
+				if gv(x, y, z) == P.GLASS:
+					sv(x, y, z, P.WIN_GLOW)
+		for z in range(z0 + 1, z1):
+			for x in [x0 + 1, x1 - 1]:
+				if gv(x, y, z) == P.GLASS:
+					sv(x, y, z, P.WIN_GLOW)
+
+
+## A barrel (3x3, 5 high) with iron hoops.
+func _fac_barrel(x: int, z: int) -> void:
+	for y in range(1, 6):
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				if absi(dx) + absi(dz) < 2 or y in [2, 4]:
+					sv(x + dx, y, z + dz, P.IRON if y == 2 or y == 4 else P.WOOD)
 
 
 func _fac_light(x: float, y: float, z: float, col := Color(1.0, 0.72, 0.42), energy := 1.6, rng_m := 9.0) -> void:
@@ -150,11 +197,11 @@ func _fac_light(x: float, y: float, z: float, col := Color(1.0, 0.72, 0.42), ene
 func _fac_lantern(x: int, z: int, top: int, low: int) -> void:
 	for y in range(low + 2, top):
 		sv(x, y, z, P.IRON)
-	box3(x - 1, low + 1, z - 1, x + 1, low + 1, z + 1, P.IRON)    # a small iron cage round a flame
+	box3(x - 1, low + 1, z - 1, x + 1, low + 1, z + 1, P.BRASS)   # a small brass cage round a flame
 	for d: Vector2i in [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]:
 		box3(x + d.x, low - 1, z + d.y, x + d.x, low, z + d.y, P.IRON)
 	box3(x, low - 1, z, x, low, z, P.GLOW)
-	box3(x - 1, low - 2, z - 1, x + 1, low - 2, z + 1, P.IRON)
+	box3(x - 1, low - 2, z - 1, x + 1, low - 2, z + 1, P.BRASS)
 	_fac_light(x, low - 1, z)
 
 
@@ -202,16 +249,60 @@ func _build_guild() -> void:
 	for cx in [x0, x1]:
 		for cz in [z0, z1]:
 			box3(cx - 1, 1, cz - 1, cx + 1, top + 5, cz + 1, P.STONE)
-	# The guild flag on a pole
-	box3(x0 + 6, top + 1, z0 + 6, x0 + 6, top + 22, z0 + 6, P.IRON)
-	for fx in range(1, 11):
-		for fy in range(0, 6):
-			sv(x0 + 6 + fx, top + 21 - fy, z0 + 6, P.AWN2 if fy == 2 or fy == 3 else P.GOLD)
+	# A pale stone roof, and a little tower with a tiled roof and the guild's flag
+	box3(x0, top + 1, z0, x1, top + 1, z1, P.PAVE)
+	var wx0 := x0 + 4
+	var wz0 := z1 - 16
+	var wx1 := x0 + 17
+	var wz1 := z1 - 3
+	for y in range(top + 2, top + 15):
+		for x in range(wx0, wx1 + 1):
+			for z in [wz0, wz1]:
+				sv(x, y, z, P.WALL2 if posmod(y, 4) != 0 else P.STONE)
+		for z in range(wz0, wz1 + 1):
+			for x in [wx0, wx1]:
+				sv(x, y, z, P.WALL2 if posmod(y, 4) != 0 else P.STONE)
+	for k in [wx0 + 5, wx0 + 8]:
+		box3(k, top + 8, wz1, k + 1, top + 11, wz1, P.WIN_GLOW)
+		box3(wx1, top + 8, k + (wz0 - wx0), wx1, top + 11, k + 1 + (wz0 - wx0), P.WIN_GLOW)
+	_hip_roof(wx0, wz0, wx1, wz1, top + 14)
+	var px := (wx0 + wx1) / 2
+	var pz := (wz0 + wz1) / 2
+	box3(px, top + 20, pz, px, top + 44, pz, P.IRON)
+	for fx in range(1, 21):
+		for fy in range(0, 11):
+			sv(px + fx, top + 43 - fy, pz, P.AWN2 if fy >= 3 and fy <= 7 else P.GOLD)
 	var sides := _sides(x0, z0, x1, z1)
 	var front: Array = sides[3]                  # the east wall, facing the street
 	var uc: int = front[3] / 2
 	var door := _fac_doorway(front, uc, P.STONE)
 	_fac_sign(front, uc, 16, 9, P.AWN2, P.GOLD, "ADVENTURERS' GUILD")
+	_fac_hanging_sign(front, uc + 20, P.AWN2, [
+		"s.....s",
+		".s...s.",
+		"..s.s..",
+		"...s...",
+		"..g.g..",
+		".g...g.",
+	], {"s": P.WHITE, "g": P.GOLD})
+	# A notice board and a rack of spears outside, beside the door
+	var fo: Vector3i = front[0]
+	var fa: Vector3i = front[1]
+	var fn: Vector3i = front[2]
+	for k in [-13, -8]:
+		for yy in range(1, 11):
+			svv(fp(fo, fa, fn, uc + k, yy, 2), P.WOOD_DARK)
+	for k in range(-13, -7):
+		for yy in range(6, 11):
+			svv(fp(fo, fa, fn, uc + k, yy, 2), P.WOOD)
+	for k in [-12, -10]:
+		svv(fp(fo, fa, fn, uc + k, 8, 3), P.WHITE)
+		svv(fp(fo, fa, fn, uc + k + 1, 9, 3), P.CLOTH0)
+	for k in range(8, 13, 2):
+		for yy in range(1, 12):
+			svv(fp(fo, fa, fn, uc + k, yy, 1), P.WOOD_DARK if yy < 11 else P.IRON)
+	for k in range(8, 13):
+		svv(fp(fo, fa, fn, uc + k, 4, 1), P.WOOD)
 	# Long blue-and-gold banners down the front
 	for du in [-14, 14]:
 		for yy in range(8, 29):
@@ -223,7 +314,18 @@ func _build_guild() -> void:
 	for si in 4:
 		var s: Array = sides[si]
 		_fac_windows(s, 18, 9, uc - 18 if si == 3 else -1, uc + 18 if si == 3 else -1, P.SHUTTER0)
+	_fac_glow_windows(x0, z0, x1, z1, top)
 	_fac_beams(x0, z0, x1, z1, 26, 8, false)
+	# A red runner with gold edges down the middle aisle
+	for x in range(x0 + 12, x1 - 1):
+		for z in range(zc - 2, zc + 3):
+			sv(x, 0, z, P.GOLD if absi(z - zc) == 2 else P.CLOTH1)
+	# Maps and notes pinned to the side walls, near the door
+	for wz in [z1 - 1, z0 + 1]:
+		box3(x1 - 14, 7, wz, x1 - 6, 13, wz, P.WALL2)
+		for i in 5:
+			sv(x1 - 13 + i * 2, 9 + posmod(i, 2) * 2, wz, P.AWN2 if i % 2 == 0 else P.TERRA)
+		box3(x1 - 12, 8, wz, x1 - 8, 8, wz, P.WOOD_DARK)
 	# The clerk's counter across the far (west) end
 	box3(x0 + 8, 1, zc - 12, x0 + 10, 4, zc + 12, P.WOOD_DARK)
 	box3(x0 + 8, 5, zc - 13, x0 + 11, 5, zc + 13, P.WOOD)
@@ -247,8 +349,8 @@ func _build_guild() -> void:
 		sv(x0 + 1, 19 + i, zc + 6 - i, P.WOOD_DARK)
 	sv(x0 + 1, 31, zc + 6, P.IRON)
 	sv(x0 + 1, 31, zc - 6, P.IRON)
-	interact_spots.append({"id": "guild_trophy", "kind": "look", "pos": _mp(x0 + 13, 0, zc + 1),
-			"label": "look at the horn on the wall", "where": "guild", "reach": 2.2})
+	interact_spots.append({"id": "guild_trophy", "kind": "look", "pos": _mp(x0 + 22, 0, zc),
+			"label": "look at the horn on the wall", "where": "guild", "reach": 2.6})
 	# The request board on the north wall, the members' list on the south wall
 	var bx := x0 + 30
 	box3(bx - 8, 6, z1 - 1, bx + 8, 15, z1 - 1, P.WOOD)
@@ -263,7 +365,7 @@ func _build_guild() -> void:
 	for row in 4:
 		box3(bx - 5, 8 + row * 2, z0 + 3, bx + 2 - row, 8 + row * 2, z0 + 3, P.GOLD)
 	interact_spots.append({"id": "guild_ranks", "kind": "read", "pos": _mp(bx, 0, z0 + 4),
-			"label": "read the members' list", "where": "guild"})
+			"label": "read the guild notices", "where": "guild"})
 	# Two long tables with benches, either side of the middle aisle
 	for side_z in [zc + 10, zc - 10]:
 		var tz0: int = side_z - 2
@@ -278,9 +380,17 @@ func _build_guild() -> void:
 		box3(x0 + 19, 1, bench_z, x1 - 13, 2, bench_z, P.WOOD_DARK)
 		for x in range(x0 + 20, x1 - 13, 4):
 			_fac_stool(x, bench_z, Vector3(0, 0, -outer), "guild", "sit at the table")
-		# Mugs and maps on the tables
-		for x in range(x0 + 22, x1 - 15, 6):
-			sv(x, 5, side_z, P.WOOD if posmod(x, 12) < 6 else P.WHITE)
+		# Mugs, plates, scrolls and the odd helmet on the tables
+		for x in range(x0 + 21, x1 - 14, 3):
+			var k := posmod(x * 7 + side_z, 5)
+			if k == 0:
+				box3(x, 5, side_z - 1, x, 6, side_z - 1, P.WOOD)
+			elif k == 1:
+				sv(x, 5, side_z + 1, P.STONE)
+			elif k == 2:
+				box3(x, 5, side_z, x + 1, 5, side_z, P.WHITE)
+			elif k == 3:
+				box3(x, 5, side_z - 1, x, 6, side_z, P.IRON)
 	# Regulars at the tables
 	for e in [[x0 + 24, zc + 15, -1], [x0 + 32, zc + 15, -1], [x0 + 28, zc - 15, 1], [x1 - 18, zc - 15, 1]]:
 		extras.append({"pos": _mp(e[0], 0, e[1]), "face": Vector3(0, 0, e[2]), "pose": "sit", "where": "guild"})
@@ -317,17 +427,21 @@ func _build_tavern() -> void:
 	var o: Vector3i = front[0]
 	var a: Vector3i = front[1]
 	var n: Vector3i = front[2]
-	for out in range(1, 6):
-		svv(fp(o, a, n, uc - 12, 16, out), P.IRON)
-	for out in range(2, 6):
-		for yy in range(11, 16):
-			svv(fp(o, a, n, uc - 12, yy, out), P.WOOD if yy == 11 or yy == 15 or out == 2 or out == 5 else P.AWN1)
-	svv(fp(o, a, n, uc - 12, 13, 3), P.TERRA)
-	svv(fp(o, a, n, uc - 12, 13, 4), P.TERRA)
-	svv(fp(o, a, n, uc - 12, 12, 3), P.HULL)
-	svv(fp(o, a, n, uc - 12, 12, 4), P.HULL)
+	_fac_hanging_sign(front, uc - 13, P.AWN1, [
+		".ttttt.",
+		".hhhhh.",
+		"..l.l..",
+		".l...l.",
+		"l.....l",
+		"l.....l",
+	], {"t": P.TERRA, "h": P.HULL, "l": P.WOOD_DARK})
 	for si in 4:
-		_fac_windows(sides[si], 5, 8, uc - 9 if si == 2 else -1, uc + 9 if si == 2 else -1, P.SHUTTER1)
+		_fac_windows(sides[si], 5, 8, uc - 9 if si == 2 else -1, uc + 9 if si == 2 else -1, P.SHUTTER1, si == 2)
+	_fac_glow_windows(x0, z0, x1, z1, top)
+	# A barrel and mugs outside the door
+	_fac_barrel(fp(o, a, n, uc - 17, 0, 3).x, fp(o, a, n, uc - 17, 0, 3).z)
+	var mb := fp(o, a, n, uc - 17, 6, 3)
+	sv(mb.x, 6, mb.z, P.GOLD)
 	# A bench outside by the door
 	for du in [-11, 7]:
 		for k in 5:
@@ -342,12 +456,17 @@ func _build_tavern() -> void:
 	box3(bar_x - 1, 5, zc - 12, bar_x + 1, 5, zc + 12, P.WOOD)
 	for z in range(zc - 9, zc + 10, 3):
 		sv(bar_x, 6, z, [P.GOLD, P.GLASS, P.WOOD, P.RED][posmod(z, 4)])
-	# Barrels along the back wall, shelves of bottles above
+	# Barrels along the back wall and in a corner, shelves of bottles above
 	for z in range(zc - 12, zc + 13, 5):
-		for y in range(1, 6):
-			for dx in range(-1, 2):
-				for dz in range(-1, 2):
-					sv(x1 - 2 + dx, y, z + dz, P.IRON if y == 2 or y == 4 else P.WOOD)
+		_fac_barrel(x1 - 2, z)
+	_fac_barrel(x0 + 4, z0 + 3)
+	_fac_barrel(x0 + 8, z0 + 3)
+	# Hams and strings of garlic hanging from the beams
+	for hz in [zc - 15, zc + 15]:
+		for k in range(4):
+			var hxx := x0 + 10 + k * 9
+			box3(hxx, 15, hz, hxx, 17, hz, P.IRON if k % 2 == 0 else P.WHITE)
+			box3(hxx, 13, hz, hxx, 14, hz, P.TERRA2 if k % 2 == 0 else P.WHITE)
 	for y in [9, 13]:
 		box3(x1 - 1, y, zc - 12, x1 - 1, y, zc + 12, P.WOOD)
 		for z in range(zc - 11, zc + 12, 2):
@@ -365,9 +484,13 @@ func _build_tavern() -> void:
 	_fac_light(hx, 4, z1 - 6, Color(1.0, 0.55, 0.25), 2.4, 8.0)
 	interact_spots.append({"id": "tavern_hearth", "kind": "look", "pos": _mp(hx, 0, z1 - 7),
 			"label": "warm your hands at the fire", "where": "tavern"})
-	# Round tables with stools
-	var tables := [Vector2i(x0 + 14, zc - 8), Vector2i(x0 + 26, zc - 12), Vector2i(x0 + 26, zc + 6), Vector2i(x0 + 14, zc + 10)]
+	# Round tables with stools (the one by the hearth leaves the fire some room)
+	var tables := [Vector2i(x0 + 14, zc - 8), Vector2i(x0 + 26, zc - 12), Vector2i(x0 + 26, zc + 6), Vector2i(x0 + 14, zc + 8)]
 	for t: Vector2i in tables:
+		for dx in range(-3, 4):
+			for dz in range(-3, 4):
+				if dx * dx + dz * dz <= 10:
+					sv(t.x + dx, 0, t.y + dz, P.TERRA2 if (dx + dz) % 3 != 0 else P.AWN1)   # a rug under it
 		sv(t.x, 1, t.y, P.WOOD_DARK)
 		box3(t.x, 2, t.y, t.x, 3, t.y, P.WOOD_DARK)
 		for dx in range(-2, 3):
@@ -376,20 +499,24 @@ func _build_tavern() -> void:
 					sv(t.x + dx, 4, t.y + dz, P.WOOD)
 		sv(t.x, 5, t.y, P.WHITE)       # a candle
 		sv(t.x, 6, t.y, P.GLOW)
+		box3(t.x + 1, 5, t.y, t.x + 1, 6, t.y, P.WOOD)     # a tankard
+		sv(t.x - 1, 5, t.y + 1, P.STONE)                    # a plate
 		for d: Vector2i in [Vector2i(4, 0), Vector2i(-4, 0), Vector2i(0, 4), Vector2i(0, -4)]:
+			if t == tables[3] and d.y > 0:
+				continue   # no stool with its back to the fire
 			_fac_stool(t.x + d.x, t.y + d.y, -Vector3(d.x, 0, d.y).normalized(), "tavern", "sit at the table")
-	# Stools along the bar
-	for z in range(zc - 9, zc + 10, 4):
-		_fac_stool(bar_x - 4, z, Vector3(1, 0, 0), "tavern", "sit at the bar")
+	# Stools along the bar, leaving the way from the door to the barkeep open
+	for z in [zc - 8, zc - 4, zc + 4, zc + 8]:
+		_fac_stool(bar_x - 2, z, Vector3(1, 0, 0), "tavern", "sit at the bar")
 	# Regulars: three at tables, one at the bar
 	for e in [[x0 + 18, zc - 8, Vector3(-1, 0, 0)], [x0 + 26, zc + 2, Vector3(0, 0, 1)],
-			[x0 + 10, zc + 10, Vector3(1, 0, 0)], [bar_x - 4, zc + 3, Vector3(1, 0, 0)]]:
+			[x0 + 10, zc + 8, Vector3(1, 0, 0)], [bar_x - 2, zc + 4, Vector3(1, 0, 0)]]:
 		extras.append({"pos": _mp(e[0], 0, e[1]), "face": e[2], "pose": "sit", "where": "tavern"})
 		_remove_spot("tavern_seat_%d_%d" % [e[0], e[1]])
 	for l: Vector2i in [Vector2i(x0 + 14, zc), Vector2i(x0 + 28, zc - 4), Vector2i(bar_x - 6, zc)]:
 		_fac_lantern(l.x, l.y, top - 1, 14)
 	cast_spots["dorran"] = {"pos": _mp(bar_x + 3, 0, zc), "face": Vector3(-1, 0, 0), "where": "tavern",
-			"talk_from": _mp(bar_x - 3, 0, zc - 2)}
+			"talk_from": _mp(bar_x - 3, 0, zc)}
 	_fac_record("tavern", "the Kneeling Strider", TAVERN, door, 0)
 
 
@@ -420,13 +547,27 @@ func _build_store() -> void:
 		for out in range(1, 6):
 			if absi(u - uc) <= 9 and out < 2:
 				continue
-			svv(fp(o, a, n, u, 14 - out / 2, out), P.AWN2 if posmod(u / 3, 2) == 0 else P.WHITE)
-	# Crates and sacks outside, beside the door
+			var stripe := P.WALL4 if posmod(u / 2, 2) == 0 else P.WHITE
+			svv(fp(o, a, n, u, 14 - out / 2, out), stripe)
+			if out == 5 and posmod(u, 2) == 0:
+				svv(fp(o, a, n, u, 11, out), stripe)    # a scalloped edge
+	# Crates of colourful goods and sacks outside, beside the door
 	for du in [-14, -11, 11, 14]:
 		var c := fp(o, a, n, uc + du, 0, 3)
 		box3(c.x - 1, 1, c.z - 1, c.x + 1, 3, c.z + 1, P.WOOD if du < 0 else P.CLOTH0)
+		if du < 0:
+			box3(c.x - 1, 4, c.z - 1, c.x + 1, 4, c.z + 1, P.RED if du == -14 else P.AWN1)
+	_fac_hanging_sign(front, uc + 16, P.WHITE, [
+		"...k...",
+		"..sss..",
+		".sssss.",
+		".sssss.",
+		".sssss.",
+		"..sss..",
+	], {"k": P.WOOD_DARK, "s": P.CLOTH0})
 	for si in 4:
-		_fac_windows(sides[si], 5, 9, uc - 10 if si == 1 else -1, uc + 10 if si == 1 else -1, P.SHUTTER0)
+		_fac_windows(sides[si], 5, 9, uc - 10 if si == 1 else -1, uc + 10 if si == 1 else -1, P.SHUTTER0, si == 1)
+	_fac_glow_windows(x0, z0, x1, z1, top)
 	# The counter, across the room facing the door
 	box3(xc - 12, 1, z0 + 9, xc + 12, 4, z0 + 10, P.WOOD_DARK)
 	box3(xc - 13, 5, z0 + 8, xc + 13, 5, z0 + 11, P.WOOD)
@@ -438,13 +579,20 @@ func _build_store() -> void:
 			box3(sx, y, z0 + 2, sx + 2, y, z1 - 4, P.WOOD)
 			for z in range(z0 + 3, z1 - 4):
 				if y < 13 and posmod(z * 3 + y, 4) != 0:
-					var good: int = [P.TERRA, P.BRASS, P.CLOTH2, P.LEAF2, P.AWN1, P.GLASS, P.RED][posmod(z + y * 2, 7)]
-					box3(sx + 1, y + 1, z, sx + 1, y + 2, z, good)
+					var good: int = [P.TERRA, P.BRASS, P.CLOTH2, P.LEAF2, P.AWN1, P.WHITE, P.RED][posmod(z + y * 2, 7)]
+					box3(sx + 1, y + 1, z, sx + 1, y + 1 + posmod(z * 5 + y, 3), z, good)   # jars, tins and rolls of different sizes
 	for y in [6, 11]:
 		box3(xc - 14, y, z0 + 1, xc + 14, y, z0 + 2, P.WOOD)
 		for x in range(xc - 13, xc + 14, 2):
 			sv(x, y + 1, z0 + 1, [P.GLOW, P.BRASS, P.IRON][posmod(x, 3)])   # lanterns for sale
-	sv(xc, 13, z0 + 1, P.GOLD)   # the lucky compass, not for sale
+	box3(xc, 13, z0 + 1, xc, 14, z0 + 1, P.BRASS)   # Pell's first lantern, not for sale
+	# Bunches of herbs and garlic hanging under the ceiling
+	for hx2 in range(x0 + 6, x1 - 5, 5):
+		box3(hx2, top - 2, z1 - 5, hx2, top - 1, z1 - 5, P.LEAF2 if hx2 % 2 == 0 else P.WHITE)
+	# Sacks and a barrel at the ends of the counter, a till on top
+	box3(xc - 17, 1, z0 + 9, xc - 16, 3, z0 + 10, P.CLOTH0)
+	_fac_barrel(xc + 17, z0 + 9)
+	box3(xc + 1, 6, z0 + 9, xc + 2, 7, z0 + 9, P.WOOD_DARK)
 	# Sacks of grain in a corner, a rug in front of the counter
 	for i in 5:
 		var sx2 := x0 + 6 + (i % 3) * 3
@@ -452,7 +600,7 @@ func _build_store() -> void:
 		box3(sx2, 1, sz2, sx2 + 1, 2 + i % 2, sz2 + 1, P.CLOTH0)
 	for x in range(xc - 8, xc + 9):
 		for z in range(z0 + 13, z0 + 22):
-			sv(x, 0, z, P.RED if (x + z) % 4 != 0 else P.AWN1)
+			sv(x, 0, z, P.TERRA2 if (x + z) % 4 != 0 else P.WALL2)
 	interact_spots.append({"id": "store_shelves", "kind": "look", "pos": _mp(x0 + 7, 0, (z0 + z1) / 2),
 			"label": "look over the shelves", "where": "store"})
 	for l: Vector2i in [Vector2i(xc, z0 + 18), Vector2i(xc - 10, z1 - 8), Vector2i(xc + 10, z1 - 8)]:
@@ -476,30 +624,56 @@ func _build_bath() -> void:
 	var zc := (z0 + z1) / 2
 	_fac_walls(x0, z0, x1, z1, top, _bath_wall)
 	_fac_floor(x0, z0, x1, z1, _bath_floor, top, P.WALL0)
-	# The dome, with a gold finial and a steam vent
-	var rx := (x1 - x0) / 2.0 + 1.0
-	var rz := (z1 - z0) / 2.0 + 1.0
-	for x in range(x0 - 1, x1 + 2):
-		for z in range(z0 - 1, z1 + 2):
-			var dx := (x - xc) / rx
-			var dz := (z - zc) / rz
-			var d := dx * dx + dz * dz
+	# A flat roof, and on it a round drum holding up a tall white dome with a blue band,
+	# a gold finial and a steam vent: you can see it over the rooftops
+	box3(x0, top + 1, z0, x1, top + 1, z1, P.STONE2)
+	var R := minf((x1 - x0) / 2.0, (z1 - z0) / 2.0) - 3.0
+	var drum := 5
+	for x in range(xc - int(R) - 1, xc + int(R) + 2):
+		for z in range(zc - int(R) - 1, zc + int(R) + 2):
+			var d := sqrt(float((x - xc) * (x - xc) + (z - zc) * (z - zc)))
+			if d <= R and d > R - 1.5:
+				for y in range(top + 2, top + 2 + drum):
+					sv(x, y, z, P.WALL4 if y == top + 2 + drum - 1 else P.WALL1)
+	var dome_h := R * 0.9
+	for x in range(xc - int(R), xc + int(R) + 1):
+		for z in range(zc - int(R), zc + int(R) + 1):
+			var d := sqrt(float((x - xc) * (x - xc) + (z - zc) * (z - zc))) / R
 			if d > 1.0:
 				continue
-			var h := int(sqrt(1.0 - d) * 14.0)
-			for y in range(top + 1, top + 1 + h):
-				var dd := sqrt(d + pow((y - top) / 14.0, 2))
-				if dd > 0.82:
-					sv(x, y, z, P.WALL0 if posmod(y, 4) != 0 else P.WALL4)
-	box3(xc, top + 15, zc, xc, top + 19, zc, P.GOLD)
-	fac_particles.append([Vector3(xc, top + 15, zc) * VS, "steam_vent"])
+			var hh := int(sqrt(1.0 - d * d) * dome_h)
+			var y0 := top + 2 + drum
+			for y in range(maxi(y0, y0 + hh - 3), y0 + hh + 1):
+				var band := absi(y - (y0 + int(dome_h * 0.35))) <= 1
+				sv(x, y, z, P.WALL4 if band else P.WALL1)
+	var ftop := top + 2 + drum + int(dome_h)
+	box3(xc, ftop, zc, xc, ftop + 5, zc, P.GOLD)
+	fac_particles.append([Vector3(xc + 4, ftop, zc) * VS, "steam_vent"])
 	var sides := _sides(x0, z0, x1, z1)
 	var front: Array = sides[1]
 	var uc: int = front[3] / 2
 	var door := _fac_doorway(front, uc, P.WALL4)
 	_fac_sign(front, uc, 15, 7, P.WALL4, P.WHITE, "BATHHOUSE")
+	_fac_hanging_sign(front, uc + 16, P.WHITE, [
+		".w..w..",
+		"..w..w.",
+		".w..w..",
+		"bbbbbbb",
+		".bbbbb.",
+		"..bbb..",
+	], {"w": P.WALL4, "b": P.SHUTTER0})
 	for si in 4:
 		_fac_windows(sides[si], 6, 10, uc - 10 if si == 1 else -1, uc + 10 if si == 1 else -1, P.SHUTTER1)
+	_fac_glow_windows(x0, z0, x1, z1, top)
+	# Folded towels and buckets outside the door
+	var bo: Vector3i = front[0]
+	var ba: Vector3i = front[1]
+	var bn: Vector3i = front[2]
+	for k in range(9, 13):
+		var tw := fp(bo, ba, bn, uc + k, 0, 2)
+		box3(tw.x, 1, tw.z, tw.x, 2 + posmod(k, 2), tw.z, [P.WHITE, P.WALL4][posmod(k, 2)])
+	var bk := fp(bo, ba, bn, uc - 11, 0, 2)
+	box3(bk.x, 1, bk.z, bk.x + 1, 2, bk.z + 1, P.WOOD)
 	# The pool: tiled floor, a low rim with two ways in, water you can wade through
 	var px0 := x0 + 12
 	var px1 := x1 - 12
@@ -527,8 +701,13 @@ func _build_bath() -> void:
 		extras.append({"pos": _mp(e[0], 0, e[1]), "face": e[2], "pose": "soak", "where": "bath"})
 		_remove_spot("bath_seat_%d_%d" % [e[0], e[1]])
 	fac_particles.append([_mp(xc, 2, zc), "steam_pool"])
-	interact_spots.append({"id": "bath_steam", "kind": "look", "pos": _mp(xc, 0, pz1 + 4),
+	interact_spots.append({"id": "bath_steam", "kind": "look", "pos": _mp(xc, 0, pz1),
 			"label": "breathe in the steam", "where": "bath"})
+	# A little fountain in the middle of the pool
+	box3(xc - 1, 1, zc - 1, xc + 1, 3, zc + 1, P.WHITE)
+	box3(xc, 4, zc, xc, 5, zc, P.WALL4)
+	sv(xc, 6, zc, P.WATER)
+	fac_particles.append([_mp(xc, 6, zc), "fountain"])
 	# Columns on the pool's corners (on the rim, out of the way), benches along the
 	# walls, towels, plants
 	for cx in [px0, px1]:
@@ -542,15 +721,18 @@ func _build_bath() -> void:
 			box3(bx, 1, z - 1, bx, 2, z + 1, P.WOOD)
 	for x in range(x0 + 8, x1 - 7, 10):
 		box3(x, 1, z0 + 1, x + 3, 6, z0 + 2, P.WOOD)
-		for y in [3, 5]:
-			box3(x, y, z0 + 1, x + 3, y, z0 + 1, [P.WHITE, P.WALL4][posmod(x + y, 2)])
+		for y in [2, 4, 6]:
+			box3(x, y, z0 + 1, x + 3, y, z0 + 1, [P.WHITE, P.WALL4, P.CLOTH1, P.AWN1][posmod(x + y, 4)])
+		box3(x + 5, 1, z0 + 2, x + 6, 2, z0 + 3, P.WOOD)          # a bucket
+		sv(x + 5, 2, z0 + 2, P.IRON)
 	for pl in [Vector2i(x0 + 3, z1 - 3), Vector2i(x1 - 3, z1 - 3), Vector2i(x0 + 3, z0 + 3), Vector2i(x1 - 3, z0 + 3)]:
 		box3(pl.x - 1, 1, pl.y - 1, pl.x + 1, 2, pl.y + 1, P.TERRA)
 		box3(pl.x - 2, 3, pl.y - 2, pl.x + 2, 6, pl.y + 2, P.LEAF)
 	for l: Vector2i in [Vector2i(xc - 12, zc), Vector2i(xc + 12, zc), Vector2i(xc, z1 - 6)]:
 		_fac_lantern(l.x, l.y, top, 15)
-	var loop := [_mp(px0 - 5, 0, pz1 + 4), _mp(px1 + 5, 0, pz1 + 4), _mp(px1 + 5, 0, pz0 - 4), _mp(px0 - 5, 0, pz0 - 4)]
-	cast_spots["tamsin"] = {"pos": loop[0], "face": Vector3(1, 0, 0), "where": "bath", "loop": loop}
+	# Tamsin keeps to the towel shelves, so she's easy to find
+	var loop := [_mp(x0 + 12, 0, z0 + 5), _mp(x0 + 30, 0, z0 + 5)]
+	cast_spots["tamsin"] = {"pos": loop[0], "face": Vector3(0, 0, 1), "where": "bath", "loop": loop}
 	_fac_record("bath", "the Bathhouse", BATH, door, 0)
 
 
@@ -570,19 +752,34 @@ func _furnish_workshop() -> void:
 	box3(x0 + 1, 1, z0 + 2, x0 + 4, 4, z0 + 5, P.STONE)
 	box3(x0 + 2, 5, z0 + 3, x0 + 3, 5, z0 + 4, P.GLOW)
 	box3(x0 + 2, 6, z0 + 3, x0 + 2, 13, z0 + 3, P.IRON)
-	# Gears and pipes on the side wall
-	for i in 3:
-		var gz := z0 + 3 + i * 4
-		for d in range(-1, 2):
-			sv(x1 - 1, 8 + d, gz, P.BRASS)
-			sv(x1 - 1, 8, gz + d, P.BRASS)
-	box3(x1 - 1, 11, z0 + 1, x1 - 1, 11, z1 - 1, P.IRON)
+	# Round brass gears and a pipe on the side wall
+	for i in 2:
+		var gz := z0 + 5 + i * 6
+		for dz in range(-2, 3):
+			for dy in range(-2, 3):
+				var r2 := dz * dz + dy * dy
+				if r2 >= 3 and r2 <= 6 or r2 == 0:
+					sv(x1 - 1, 9 + dy, gz + dz, P.BRASS)
+	box3(x1 - 1, 13, z0 + 1, x1 - 1, 13, z1 - 1, P.IRON)
+	# Hammers and spanners hanging on the other wall
+	for k in range(4):
+		var tz := z0 + 7 + k * 2
+		box3(x0 + 1, 8, tz, x0 + 1, 11, tz, P.WOOD_DARK)
+		box3(x0 + 1, 11, tz - (k % 2), x0 + 1, 11, tz + 1 - (k % 2), P.IRON)
+	# An anvil against the wall by the forge, and a side bench with a pump in pieces
+	# (the shed is small: everything keeps to the walls)
+	box3(x0 + 1, 1, z0 + 7, x0 + 2, 2, z0 + 7, P.IRON)
+	box3(x0 + 1, 3, z0 + 6, x0 + 2, 3, z0 + 8, P.IRON)
+	box3(x1 - 3, 1, z0 + 1, x1 - 1, 3, z0 + 4, P.WOOD_DARK)
+	box3(x1 - 3, 4, z0 + 2, x1 - 2, 4, z0 + 3, P.BRASS)
 	origin = Vector3i.ZERO
-	_fac_light(x0 + 3, h + 6, z0 + 4, Color(1.0, 0.5, 0.2), 1.6, 5.0)
-	_fac_light(cx, h + 11, z1 - 4, Color(1.0, 0.75, 0.45), 1.2, 6.0)
-	interact_spots.append({"id": "workshop_bench", "kind": "look", "pos": _mp(x0 + 5, h, z1 - 8),
-			"label": "tinker at the workbench", "where": "workshop"})
-	cast_spots["bram"] = {"pos": _mp(x1 - 4, h, z1 - 7), "face": Vector3(-1, 0, 0), "where": "workshop"}
+	_fac_light(x0 + 3, h + 6, z0 + 4, Color(1.0, 0.5, 0.2), 0.8, 3.5)
+	_fac_light(cx, h + 11, z1 - 4, Color(1.0, 0.85, 0.65), 1.0, 6.0)
+	# His name over the front, so you know whose shed it is
+	fac_signs.append([Vector3(cx, h + 12, z0 - 1.3) * VS, Vector3(0, 0, -1), "BRAM'S WORKSHOP"])
+	interact_spots.append({"id": "workshop_bench", "kind": "look", "pos": _mp(x1 - 2, h, z0 + 2),
+			"label": "tinker with the pump on the side bench", "where": "workshop"})
+	cast_spots["bram"] = {"pos": _mp(x0 + 6, h, z0 + 1), "face": Vector3(0, 0, -1), "where": "workshop"}
 	facilities["workshop"] = {"name": "Bram's workshop", "rect": WORKSHOP, "door_out": _mp(cx, h, z0 - 2),
 			"door_in": _mp(cx, h, z0 + 4), "inside": _mp(cx, h, z1 - 9), "level": level_at(cx, z1 - 9)}
 
@@ -618,10 +815,10 @@ func _build_lookout() -> void:
 func _place_pip() -> void:
 	var g: Dictionary = facilities["guild"]
 	var t: Dictionary = facilities["tavern"]
-	var a: Vector3 = g["door_out"] + Vector3(0.6, 0, 0.0)
-	var b: Vector3 = t["door_out"] + Vector3(-0.6, 0, 0.0)
+	var a: Vector3 = g["door_out"] + Vector3(0.4, 0, -1.8)
+	var b: Vector3 = t["door_out"] + Vector3(-0.4, 0, -1.8)
 	cast_spots["pip"] = {"pos": a, "face": Vector3(1, 0, 0), "where": "south_street",
-			"loop": [a, a.lerp(b, 0.5) + Vector3(0, 0, -1.0), b, a.lerp(b, 0.5) + Vector3(0, 0, -3.0)]}
+			"loop": [a, a.lerp(b, 0.5) + Vector3(0, 0, -0.7), b, a.lerp(b, 0.5) + Vector3(0, 0, -2.0)]}
 
 
 func _remove_spot(id: String) -> void:
@@ -630,8 +827,13 @@ func _remove_spot(id: String) -> void:
 			interact_spots.remove_at(i)
 
 
+## Pale sandstone in courses, darker at the foot.
 func _guild_wall(x: int, y: int, z: int) -> int:
-	return P.STONE2 if y <= 3 else _stone(x, y, z)
+	if y <= 3:
+		return P.STONE2
+	if posmod(y, 4) == 0:
+		return P.STONE
+	return P.WALL2 if _h(x, y, z) < 0.8 else P.PLAZA
 
 
 func _guild_floor(x: int, z: int) -> int:
@@ -657,9 +859,9 @@ func _store_wall(_x: int, y: int, _z: int) -> int:
 func _bath_wall(x: int, y: int, z: int) -> int:
 	if y <= 3:
 		return P.STONE2
-	if y >= 16 and y <= 18:
-		return P.WALL4 if posmod(x + z, 2) == 0 else P.SHUTTER0
-	return P.WALL0
+	if y == 16 or y == 17:
+		return P.WALL4 if posmod(x + z + y, 2) == 0 else P.SHUTTER0   # a two-row checker of blues
+	return P.WALL1
 
 
 func _bath_floor(x: int, z: int) -> int:
@@ -701,9 +903,9 @@ func _add_facility_nodes() -> void:
 		p.local_coords = true   # the steam moves with the walking city, not left behind
 		p.position = f[0]
 		var box := BoxMesh.new()
-		box.size = Vector3.ONE * 0.25
+		box.size = Vector3.ONE * (0.07 if f[1] == "fountain" else 0.14)
 		var m := StandardMaterial3D.new()
-		m.albedo_color = Color(1, 1, 1, 0.22)
+		m.albedo_color = Color(1, 1, 1, 0.13) if f[1] != "fountain" else Color(0.6, 0.85, 1.0, 0.7)
 		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		box.material = m
@@ -716,10 +918,17 @@ func _add_facility_nodes() -> void:
 		p.scale_amount_min = 0.6
 		p.scale_amount_max = 1.6
 		if f[1] == "steam_pool":
-			p.amount = 50
-			p.lifetime = 5.0
+			p.amount = 36
+			p.lifetime = 4.0
 			p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 			p.emission_box_extents = Vector3(3.0, 0.1, 1.8)
+		elif f[1] == "fountain":
+			p.amount = 30
+			p.lifetime = 0.8
+			p.spread = 25.0
+			p.gravity = Vector3(0, -6.0, 0)
+			p.initial_velocity_min = 1.2
+			p.initial_velocity_max = 1.8
 		else:
 			p.amount = 16
 			p.lifetime = 4.0

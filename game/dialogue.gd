@@ -1,7 +1,8 @@
 extends RefCounted
 ## TALKING, as plain rules (no pictures): which line each resident says next.
-## Each press of E gives the next line, round and round. Once Mira's errand is done,
-## everyone starts again with their "after" line (news travels), then the rest.
+## Each press of E gives the next line, round and round. Before Mira's errand is done
+## some say their "before" lines first; once it's done, everyone starts again with
+## their "after" lines (news travels), then the rest.
 
 const Town := preload("res://town_data.gd")
 
@@ -13,8 +14,7 @@ var _knew_done := {}  # cast id -> true once they've started on their "after" li
 func lines_for(id: String, errand_done: bool) -> Array:
 	var c: Dictionary = Town.CAST[id]
 	var out: Array = []
-	if errand_done:
-		out.append_array(c.get("after", []))
+	out.append_array(c.get("after" if errand_done else "before", []))
 	out.append_array(c["lines"])
 	return out
 

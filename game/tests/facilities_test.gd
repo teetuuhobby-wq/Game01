@@ -5,7 +5,8 @@ extends "res://main.gd"
 #     has a spot in reach that you can walk to
 #   - nobody stands in a doorway or on the stairs
 #   - every resident has enough to say, and the talk changes after Mira's errand
-#   - a bot walks into each building and uses everything there with E, then sits
+#   - a bot walks into each building and uses everything there with E (even while
+#     Mira's errand is on, so nothing sits inside the valve's reach), then sits
 #     down and gets up again, without getting stuck
 # Run: <godot_console.exe> --headless --fixed-fps 20 --path game res://tests/facilities_test.tscn -- --no-record
 
@@ -60,7 +61,7 @@ func _reachable_near(at: Vector3, reach: float, from: Vector3, max_dy := 2.0):
 				continue
 			cands.append([d, p])
 	cands.sort_custom(func(a, b) -> bool: return a[0] < b[0])
-	for k in mini(cands.size(), 6):
+	for k in mini(cands.size(), 40):
 		if not world.find_path(from, cands[k][1]).is_empty() or Vector2(from.x - cands[k][1].x, from.z - cands[k][1].z).length() < 0.3:
 			return cands[k][1]
 	return null
@@ -111,7 +112,7 @@ func _static_checks() -> void:
 	bad = []
 	for id in Town.CAST:
 		var c: Dictionary = Town.CAST[id]
-		var n: int = c["lines"].size() + c.get("after", []).size()
+		var n: int = c["lines"].size() + c.get("after", []).size() + c.get("before", []).size()
 		if n < 4 or n > 7 or c.get("after", []).is_empty():
 			bad.append("%s (%d lines)" % [id, n])
 	results.append(["every resident has 4-7 lines, including one for after the errand", bad.is_empty(), str(bad)])
@@ -212,7 +213,9 @@ func _process(delta: float) -> void:
 			player.face(at - player.position)
 			var t: Dictionary = _interact.find_target()
 			var want_id: String = u["id"]
-			if t.get("id", "") == want_id:
+			if errand.busy_here():
+				_log.append("%s: E belongs to Mira's errand here" % want_id)   # e.g. too close to the valve
+			elif t.get("id", "") == want_id:
 				controls.use_pressed = true
 				_used += 1
 				if u["kind"] == "sit":

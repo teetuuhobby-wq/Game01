@@ -103,8 +103,8 @@ func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color, look := 
 
 func _random_person() -> MeshInstance3D:
 	var shirts := [Color(0.16, 0.55, 0.58), Color(0.82, 0.30, 0.26), Color(0.94, 0.80, 0.40),
-			Color(0.96, 0.95, 0.90), Color(0.40, 0.52, 0.78), Color(0.55, 0.70, 0.40),
-			Color(0.62, 0.36, 0.62), Color(0.88, 0.55, 0.30)]
+			Color(0.96, 0.95, 0.90), Color(0.40, 0.52, 0.78), Color(0.52, 0.58, 0.34),
+			Color(0.62, 0.36, 0.62), Color(0.88, 0.62, 0.36)]
 	var pants := [Color(0.30, 0.24, 0.20), Color(0.24, 0.28, 0.38), Color(0.55, 0.48, 0.38)]
 	var dresses := [Color(0.72, 0.24, 0.30), Color(0.26, 0.46, 0.66), Color(0.84, 0.70, 0.40),
 			Color(0.36, 0.56, 0.42), Color(0.92, 0.90, 0.84)]
@@ -443,21 +443,54 @@ func _item_mesh(kind: String, top: float) -> MeshInstance3D:
 				for x in range(2, 4):
 					for z in range(-2, 2):
 						add.call(x, hand_y + 1 + y, z, Color(0.95, 0.95, 0.92) if y % 2 == 0 else Color(0.40, 0.65, 0.78))
-		"watering_can":
+		"watering_can":   # a bright green can with a long spout
+			var can := Color(0.20, 0.66, 0.50)
 			for y in range(0, 3):
-				for x in range(1, 3):
-					add.call(x, hand_y - 2 + y, 5, Color(0.72, 0.45, 0.25))
-			add.call(3, hand_y, 5, Color(0.72, 0.45, 0.25))
-			add.call(4, hand_y + 1, 5, Color(0.72, 0.45, 0.25))
-		"spyglass":    # a long brass spyglass held up
-			for i in 6:
-				add.call(2 + i, hand_y + 3 + i * 0.4, 4, Color(0.80, 0.62, 0.30) if i < 5 else Color(0.45, 0.75, 0.85))
-		"satchel":     # a bag on a strap
+				for x in range(0, 3):
+					for z in range(5, 7):
+						add.call(x, hand_y - 2 + y, z, can)
+			for i in 3:
+				add.call(3 + i, hand_y - 1 + i, 5.5, can)
+			add.call(1, hand_y + 1, 6, can.darkened(0.3))
+		"spyglass":    # a long brass spyglass raised to the eye
+			var eye_y := top / h - 3.0
+			for i in 10:
+				for d in [0.0, 1.0]:
+					add.call(2 + i, eye_y + d + i * 0.15, 1.0, Color(0.80, 0.62, 0.30) if i < 9 else Color(0.45, 0.75, 0.85))
+		"satchel":     # a bag on your right hip, strap across the chest
 			for y in range(0, 3):
 				for x in range(-1, 2):
-					add.call(x, hand_y - 1 + y, -5, Color(0.52, 0.34, 0.20))
-			for i in 6:
-				add.call(0, hand_y + 2 + i, -4 + i * 1.2, Color(0.36, 0.24, 0.15))
+					add.call(x, hand_y - 1 + y, 5, Color(0.78, 0.42, 0.20))
+			for i in 7:
+				add.call(2, hand_y + 1 + i, 4 - i * 1.3, Color(0.92, 0.80, 0.30))
+		"spectacles":  # little dark round glasses over the eyes
+			var ey := top / h - 3.5
+			for z in [-2, -1, 1, 2]:
+				add.call(2.3, ey, z, Color(0.10, 0.08, 0.06))
+			add.call(2.3, ey + 0.5, 0, Color(0.80, 0.62, 0.30))
+		"tall_bun":    # a big bun on top of the head
+			var by := top / h
+			for y in range(0, 3):
+				for x in range(-1, 1):
+					for z in range(-1, 1):
+						add.call(x, by + y, z + 0.5, Color(0.70, 0.68, 0.66))
+		"brim_hat":    # a wide, battered hat
+			var hy := top / h + 0.3
+			for x in range(-4, 5):
+				for z in range(-4, 5):
+					add.call(x, hy, z, Color(0.42, 0.32, 0.22))
+			for x in range(-2, 3):
+				for z in range(-2, 3):
+					add.call(x, hy + 1, z, Color(0.36, 0.27, 0.18))
+					add.call(x, hy + 2, z, Color(0.36, 0.27, 0.18))
+		"cap":         # a bright red cap with a peak
+			var cy := top / h + 0.3
+			for x in range(-2, 3):
+				for z in range(-2, 3):
+					add.call(x, cy, z, Color(0.88, 0.20, 0.18))
+			for x in range(3, 5):
+				for z in range(-2, 3):
+					add.call(x, cy - 0.5, z, Color(0.88, 0.20, 0.18))
 	var mesh := _cubes(PackedVector3Array(pts), PackedColorArray(cols), h, false)
 	return _mi(mesh)
 
@@ -500,8 +533,8 @@ func _make_character(c: Dictionary) -> Node3D:
 	var mi := _make_person(c["shirt"], c["bottom"], c["hair"], c["skin"], c["look"])
 	node.add_child(mi)
 	var top: float = mi.mesh.get_meta("top", 1.8)
-	if c.has("item"):
-		node.add_child(_item_mesh(c["item"], top))
+	for item in c.get("items", []):
+		node.add_child(_item_mesh(item, top))
 	if c.get("kid", false):
 		node.scale = Vector3.ONE * 0.72
 	return node
