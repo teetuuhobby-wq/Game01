@@ -43,6 +43,8 @@ const PRESETS := {
 var world: Node3D      # world.gd: its env, sun and sky_mat get changed
 var camera: Camera3D   # for the miniature blur
 var values := {}
+var least_haze := 0.0  # low quality (quality.gd) needs at least this much haze
+var _blur: CameraAttributesPractical   # the camera's blur settings, kept even while low quality takes them off it
 
 
 func _ready() -> void:
@@ -83,10 +85,14 @@ func apply() -> void:
 	env.ambient_light_color = Color(0.55, 0.66, 0.82).lerp(Color(0.62, 0.48, 0.40), values["shadow_warmth"])
 	world.sky_mat.energy_multiplier = values["sky_brightness"]
 	env.glow_intensity = values["glare"]
-	env.fog_density = values["haze"]
+	env.fog_density = maxf(values["haze"], least_haze)
 	env.fog_light_color = Color(0.96, 0.82, 0.66) * clampf(values["sky_brightness"], 0.1, 1.0)
 	env.tonemap_exposure = values["exposure"]
 	env.adjustment_saturation = values["colour"]
 	env.adjustment_contrast = values["contrast"]
-	if camera != null and camera.attributes is CameraAttributesPractical:
-		camera.attributes.dof_blur_amount = values["miniature"]
+	# Low quality takes the blur settings off the camera, so hold on to them the first
+	# time and keep setting them: switching back to high then shows the latest blur.
+	if _blur == null and camera != null and camera.attributes is CameraAttributesPractical:
+		_blur = camera.attributes
+	if _blur != null:
+		_blur.dof_blur_amount = values["miniature"]

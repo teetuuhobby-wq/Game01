@@ -35,6 +35,12 @@ const FIX_TIME := 1.5            # seconds to hold E to fit the valve
 
 # --- Graphics ---
 const QUALITY := "high"          # "high" for the home PC, "low" for a weaker laptop (F6 switches in the game)
+# Low quality only:
+const LOW_RENDER_SCALE := 0.7    # share of the screen's resolution the 3D is drawn at
+const LOW_VIEW_DISTANCE := 450.0 # metres the camera can see (high: 1000)
+const LOW_HAZE := 0.004          # the least haze, so the shorter view doesn't end in a visible edge
+const LOW_SHADOW_DISTANCE := 80.0   # metres around you that get sun shadows
+const LOW_PEOPLE_VIEW := 45.0    # metres: people further from the camera are hidden
 
 # --- Sound ---
 # Volumes, variety and which recording to use are set in the game with the sound board

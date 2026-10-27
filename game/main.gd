@@ -46,7 +46,7 @@ func _ready() -> void:
 	add_child(mood)
 	var quality := preload("res://quality.gd").new()
 	add_child(quality)
-	quality.setup(world, camera)
+	quality.setup(world, camera, mood)
 	var mood_panel := preload("res://mood_panel.gd").new()
 	mood_panel.mood = mood
 	mood_panel.controls = controls
