@@ -12,9 +12,11 @@ Tests (in game/tests/ unless noted):
   sound           every sound works, the sound board (F4) opens, recordings load
   mood            the mood panel (F5) opens, presets and sliders change the light
   buildings       doors lead in, everything and everyone can be reached and used with E,
+                  nobody can be talked to through a wall, nobody sits on a seat you can use,
                   a bot tours all 5 buildings (guild, tavern, store, bathhouse, workshop)
   using edges     one press of E does one thing; sitting down while walking doesn't
-                  stand you straight back up
+                  stand you straight back up; sitting lowers your eyes and keeps the
+                  valve in hand; residents near the camera are hidden
 Exit code 0 = everything passed. Set GODOT to use a different Godot console .exe.
 #>
 # "Continue": Windows PowerShell treats anything Godot prints to stderr (even harmless
