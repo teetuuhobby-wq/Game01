@@ -40,12 +40,24 @@ func _ready() -> void:
 	add_child(camera)
 	camera.make_current()
 	world.camera = camera
+	var mood := preload("res://mood.gd").new()
+	mood.world = world
+	mood.camera = camera
+	add_child(mood)
+	var mood_panel := preload("res://mood_panel.gd").new()
+	mood_panel.mood = mood
+	mood_panel.controls = controls
+	add_child(mood_panel)
 
 	sfx = preload("res://sfx.gd").new()
 	sfx.world = world
 	sfx.player = player
 	add_child(sfx)
 	player.stepped.connect(sfx.footstep)
+	var board := preload("res://sound_board.gd").new()
+	board.sfx = sfx
+	board.controls = controls
+	add_child(board)
 	world.stomped.connect(_on_stomp)
 
 	errand = preload("res://errand.gd").new()
@@ -114,6 +126,7 @@ func _setup_input() -> void:
 		"turn_left": [KEY_Z], "turn_right": [KEY_X],
 		"zoom_in": [KEY_EQUAL, KEY_KP_ADD, KEY_PAGEUP], "zoom_out": [KEY_MINUS, KEY_KP_SUBTRACT, KEY_PAGEDOWN],
 		"quit": [KEY_ESCAPE], "flag": [KEY_F2], "debug": [KEY_F3],
+		"sound_board": [KEY_F4], "mood": [KEY_F5],
 	}
 	for action in keys:
 		if not InputMap.has_action(action):

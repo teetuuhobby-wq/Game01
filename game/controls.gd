@@ -17,6 +17,7 @@ var turn := 0.0               # Z / X keys, -1 to 1
 var flag_pressed := false     # F2 pressed this frame
 
 var typing := false           # the F2 note box is open: game keys are ignored
+var menu_open := false        # a panel (sound board, mood) is open: clicks and the wheel are for it
 var replaying := false        # a replay is setting the snapshot instead of the keyboard
 
 var _mouse := Vector2.ZERO
@@ -33,7 +34,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or event.button_mask & MOUSE_BUTTON_MASK_RIGHT:
 			_mouse += event.relative
-	elif event is InputEventMouseButton and event.pressed:
+	elif event is InputEventMouseButton and event.pressed and not menu_open:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			_wheel -= 1.0
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:

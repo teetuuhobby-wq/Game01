@@ -9,6 +9,8 @@ Tests (in game/tests/ unless noted):
   first person    switching in and out, walking where you look, camera never in a wall
   flowers         the plaza's flower ring doesn't trap you (playtest 3)
   market          the market street is walkable end to end, busy, and walkers stay on it
+  sound           every sound works, the sound board (F4) opens, recordings load
+  mood            the mood panel (F5) opens, presets and sliders change the light
 Exit code 0 = everything passed. Set GODOT to use a different Godot console .exe.
 #>
 # "Continue": Windows PowerShell treats anything Godot prints to stderr (even harmless
@@ -25,7 +27,9 @@ $runs = @(
 	@{ Name = "stairs"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/stair_test.tscn", "--", "--no-record") },
 	@{ Name = "first person"; Args = @("--headless", "--fixed-fps", "30", "--path", $game, "res://tests/first_person_test.tscn", "--", "--no-record") },
 	@{ Name = "flowers"; Args = @("--headless", "--fixed-fps", "30", "--path", $game, "res://tests/flower_test.tscn", "--", "--no-record") },
-	@{ Name = "market"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/market_test.tscn", "--", "--no-record") }
+	@{ Name = "market"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/market_test.tscn", "--", "--no-record") },
+	@{ Name = "sound"; Args = @("--headless", "--path", $game, "res://tests/sound_test.tscn", "--", "--no-record") },
+	@{ Name = "mood"; Args = @("--headless", "--path", $game, "res://tests/mood_test.tscn", "--", "--no-record") }
 )
 $failed = 0
 foreach ($r in $runs) {

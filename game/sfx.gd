@@ -1,98 +1,265 @@
 extends Node
-## SOUND: every sound in the toy is made here from code, so there are no sound files.
-## Footsteps, the city's giant stomps, wind, the errand's chime, clunk and bell, and the
-## market crowd: a murmur of voices that grows as you get closer, with coins and crates.
+## SOUND: every sound in the game, by name. Each one can come from a recording
+## (audio files in audio/<name>/, see audio/CREDITS.md) or be made here from code.
+## The sound board (F4 in the game, sound_board.gd) lets you pick which, and set each
+## sound's volume and variety; your choices are saved in audio/sound_settings.json.
 
-const T := preload("res://tuning.gd")
 const RATE := 22050
+const SETTINGS := "res://audio/sound_settings.json"
 
-var _steps: Array[AudioStreamWAV] = []
-var _stomp: AudioStreamWAV
-var _chime: AudioStreamWAV
-var _clunk: AudioStreamWAV
-var _tick: AudioStreamWAV
-var _bell: AudioStreamWAV
-var _clink: AudioStreamWAV
-var _knock: AudioStreamWAV
-var _chatter: AudioStreamPlayer
-var _market_t := 2.0
-var _rng := RandomNumberGenerator.new()
+## name: [group, what it is, "one" (plays when something happens) or "loop", volume (dB), variety]
+## Variety = how much the pitch changes from one play to the next (0.1 = up to 10% either way).
+const SOUNDS := {
+	"footstep": ["You", "Your footsteps", "one", -10.0, 0.08],
+	"stomp": ["City", "Giant footsteps", "one", -11.0, 0.06],
+	"wind": ["City", "Desert wind", "loop", -20.0, 0.0],
+	"crowd": ["Market", "Crowd chatter", "loop", -12.0, 0.0],
+	"coins": ["Market", "Coins", "one", -18.0, 0.15],
+	"crate": ["Market", "Crates set down", "one", -18.0, 0.15],
+	"chime": ["Errand", "Picked something up", "one", -4.0, 0.0],
+	"clunk": ["Errand", "Valve fitted", "one", -4.0, 0.0],
+	"tick": ["Errand", "Valve turning", "one", -8.0, 0.05],
+	"bell": ["Errand", "Town bell", "one", -4.0, 0.0],
+}
+## Sounds whose code-made version isn't good enough to play: they stay silent
+## until a recording is chosen (the crowd murmur sounded like static).
+const CODE_OFF := ["crowd"]
 
 var world: Node3D    # set by main.gd, for how close you are to the market
 var player: Node3D
+var settings := {}   # name -> {"db": float, "variety": float, "choice": "code" | "off" | "all" | a file name}
+
+var _code := {}      # name -> [AudioStream] made in code
+var _files := {}     # name -> [file names] found in audio/<name>/
+var _cache := {}     # file path -> AudioStream
+var _loops := {}     # name -> AudioStreamPlayer for looping sounds
+var _market_t := 2.0
+var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
 	_rng.seed = 11
+	var steps := []
 	for i in 4:
-		_steps.append(_wav(_footstep()))
-	_stomp = _wav(_make_stomp())
-	_chime = _wav(_make_chime())
-	_clunk = _wav(_make_clunk())
-	_tick = _wav(_make_tick())
-	_bell = _wav(_make_bell())
-	var wind := AudioStreamPlayer.new()
-	wind.stream = _wav(_make_wind(), true)
-	wind.volume_db = T.WIND_DB
-	wind.autoplay = true
-	add_child(wind)
-	_clink = _wav(_make_clink())
-	_knock = _wav(_make_knock())
-	_chatter = AudioStreamPlayer.new()
-	if T.CHATTER_ON:
-		_chatter.stream = _wav(_make_chatter(), true)
-	_chatter.volume_db = -80.0
-	_chatter.autoplay = true
-	add_child(_chatter)
+		steps.append(_wav(_footstep()))
+	_code = {
+		"footstep": steps, "stomp": [_wav(_make_stomp())], "wind": [_wav(_make_wind(), true)],
+		"crowd": [_wav(_make_chatter(), true)], "coins": [_wav(_make_clink())], "crate": [_wav(_make_knock())],
+		"chime": [_wav(_make_chime())], "clunk": [_wav(_make_clunk())], "tick": [_wav(_make_tick())],
+		"bell": [_wav(_make_bell())],
+	}
+	rescan()
+	_load_settings()
+	for n in SOUNDS:
+		if SOUNDS[n][2] == "loop":
+			var p := AudioStreamPlayer.new()
+			add_child(p)
+			_loops[n] = p
+			refresh_loop(n)
 
 
-## The market's sound follows you: loud in the street, fading over about 25 m.
-func _process(delta: float) -> void:
-	if not T.CHATTER_ON or world == null or player == null or not world.has_method("market_distance"):
+## Looks for recordings in audio/<name>/ (.ogg, .wav or .mp3).
+func rescan() -> void:
+	for n in SOUNDS:
+		var found := []
+		var dir := DirAccess.open("res://audio/" + n)
+		if dir != null:
+			for f in dir.get_files():
+				if f.get_extension().to_lower() in ["ogg", "wav", "mp3"]:
+					found.append(f)
+		found.sort()
+		_files[n] = found
+
+
+## The choices for a sound, as shown on the sound board.
+func choices(n: String) -> Array:
+	var c := ["off", "code"]
+	if _files[n].size() > 1:
+		c.append("all")
+	c.append_array(_files[n])
+	return c
+
+
+func _load_settings() -> void:
+	var saved := {}
+	if FileAccess.file_exists(SETTINGS):
+		var parsed = JSON.parse_string(FileAccess.get_file_as_string(SETTINGS))
+		if parsed is Dictionary:
+			saved = parsed
+	for n in SOUNDS:
+		var def_choice := "code"
+		if _files[n].size() > 1:
+			def_choice = "all"
+		elif _files[n].size() == 1:
+			def_choice = _files[n][0]
+		elif n in CODE_OFF:
+			def_choice = "off"
+		var st := {"db": float(SOUNDS[n][3]), "variety": float(SOUNDS[n][4]), "choice": def_choice}
+		if saved.has(n) and saved[n] is Dictionary:
+			for k in ["db", "variety", "choice"]:
+				if saved[n].has(k):
+					st[k] = saved[n][k]
+		if not str(st["choice"]) in choices(n):
+			st["choice"] = def_choice   # the chosen file was removed
+		settings[n] = st
+
+
+func save_settings() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://audio"))
+	var f := FileAccess.open(SETTINGS, FileAccess.WRITE)
+	f.store_string(JSON.stringify(settings, "\t", true))
+
+
+## Back to the built-in volume and variety (keeps the chosen recording).
+func reset(n: String) -> void:
+	settings[n]["db"] = float(SOUNDS[n][3])
+	settings[n]["variety"] = float(SOUNDS[n][4])
+	refresh_loop(n)
+
+
+## The stream to play for a sound right now (null = silent).
+func _stream(n: String) -> AudioStream:
+	var c: String = settings[n]["choice"]
+	var loop: bool = SOUNDS[n][2] == "loop"
+	if c == "off":
+		return null
+	if c == "code":
+		return _code[n][_rng.randi() % _code[n].size()]
+	var file := c
+	if c == "all":
+		file = _files[n][_rng.randi() % _files[n].size()]
+	return _load_file("res://audio/%s/%s" % [n, file], loop)
+
+
+## Loads a recording straight from its file (no import step needed).
+func _load_file(path: String, loop: bool) -> AudioStream:
+	var key := path + ("#loop" if loop else "")
+	if _cache.has(key):
+		return _cache[key]
+	var s: AudioStream = null
+	match path.get_extension().to_lower():
+		"ogg":
+			var o := AudioStreamOggVorbis.load_from_file(path)
+			if o != null:
+				o.loop = loop
+			s = o
+		"mp3":
+			var m := AudioStreamMP3.new()
+			m.data = FileAccess.get_file_as_bytes(path)
+			m.loop = loop
+			s = m
+		"wav":
+			var w := AudioStreamWAV.load_from_file(path)
+			if w != null and loop:
+				w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+				w.loop_end = int(w.get_length() * w.mix_rate)
+			s = w
+	if s == null:
+		push_warning("sound: couldn't load " + path)
+	_cache[key] = s
+	return s
+
+
+## Plays a one-off sound by name, with its volume and a little pitch variety.
+func play(n: String, extra_db := 0.0) -> void:
+	var stream := _stream(n)
+	if stream == null:
 		return
+	var v: float = settings[n]["variety"]
+	var p := AudioStreamPlayer.new()
+	p.stream = stream
+	p.volume_db = float(settings[n]["db"]) + extra_db
+	p.pitch_scale = 1.0 + _rng.randf_range(-v, v)
+	add_child(p)
+	p.finished.connect(p.queue_free)
+	p.play()
+
+
+## Restarts a looping sound with its current choice and volume.
+func refresh_loop(n: String) -> void:
+	if not _loops.has(n):
+		return
+	var p: AudioStreamPlayer = _loops[n]
+	var stream := _stream(n)
+	if p.stream != stream:
+		p.stop()
+		p.stream = stream
+		if stream != null:
+			p.play()
+	if n == "wind":
+		p.volume_db = settings[n]["db"]
+
+
+## Plays a sound once on the sound board: a looping one for 4 seconds, at full volume.
+func preview(n: String) -> void:
+	if SOUNDS[n][2] == "one":
+		play(n)
+		return
+	var stream := _stream(n)
+	if stream == null:
+		return
+	var p := AudioStreamPlayer.new()
+	p.stream = stream
+	p.volume_db = settings[n]["db"]
+	add_child(p)
+	p.play()
+	get_tree().create_timer(4.0).timeout.connect(p.queue_free)
+
+
+## After new files were found: keep the volumes, re-check the chosen recordings.
+func reload_settings() -> void:
+	var keep := settings.duplicate(true)
+	_load_settings()
+	for n in keep:
+		settings[n]["db"] = keep[n]["db"]
+		settings[n]["variety"] = keep[n]["variety"]
+		if str(keep[n]["choice"]) in choices(n):
+			settings[n]["choice"] = keep[n]["choice"]
+		refresh_loop(n)
+
+
+func footstep() -> void:
+	play("footstep")
+
+
+func stomp() -> void:
+	play("stomp")
+
+
+func chime() -> void:
+	play("chime")
+
+
+func clunk() -> void:
+	play("clunk")
+
+
+func tick() -> void:
+	play("tick")
+
+
+func bell() -> void:
+	play("bell")
+
+
+## How loud the market is where you stand: 1 in the street, fading over about 25 m.
+func market_level() -> float:
+	if world == null or player == null or not world.has_method("market_distance"):
+		return 0.0
 	var d: float = world.market_distance(player.position)
-	var k := clampf(1.0 - (d - 3.0) / 25.0, 0.0, 1.0)
-	_chatter.volume_db = T.CHATTER_DB + linear_to_db(maxf(k * k, 0.0001))
+	return clampf(1.0 - (d - 3.0) / 25.0, 0.0, 1.0)
+
+
+## The crowd follows you, and now and then a coin drops or a crate is set down.
+func _process(delta: float) -> void:
+	var k := market_level()
+	var crowd: AudioStreamPlayer = _loops["crowd"]
+	crowd.volume_db = float(settings["crowd"]["db"]) + linear_to_db(maxf(k * k, 0.0001))
 	if k > 0.6:
 		_market_t -= delta
 		if _market_t <= 0.0:
 			_market_t = _rng.randf_range(1.0, 4.0)
-			var db := T.EFFECTS_DB - 14.0 + _rng.randf_range(-4.0, 2.0)
-			_play(_clink if _rng.randf() < 0.6 else _knock, db, _rng.randf_range(0.85, 1.2))
-
-
-func footstep() -> void:
-	_play(_steps[_rng.randi() % _steps.size()], T.FOOTSTEP_DB, _rng.randf_range(0.9, 1.1))
-
-
-func stomp() -> void:
-	_play(_stomp, T.STOMP_DB, _rng.randf_range(0.92, 1.05))
-
-
-func chime() -> void:
-	_play(_chime, T.EFFECTS_DB)
-
-
-func clunk() -> void:
-	_play(_clunk, T.EFFECTS_DB)
-
-
-func tick() -> void:
-	_play(_tick, T.EFFECTS_DB - 4.0, _rng.randf_range(0.95, 1.05))
-
-
-func bell() -> void:
-	_play(_bell, T.EFFECTS_DB)
-
-
-func _play(stream: AudioStream, db: float, pitch := 1.0) -> void:
-	var p := AudioStreamPlayer.new()
-	p.stream = stream
-	p.volume_db = db
-	p.pitch_scale = pitch
-	add_child(p)
-	p.finished.connect(p.queue_free)
-	p.play()
+			play("coins" if _rng.randf() < 0.6 else "crate", _rng.randf_range(-4.0, 2.0))
 
 
 ## Turns samples (-1..1) into a 16-bit sound.

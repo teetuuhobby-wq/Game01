@@ -33,10 +33,6 @@ const MARKET_CARRY := 0.2        # share of walkers carrying a crate or basket
 const USE_DISTANCE := 1.8        # how close you need to be to use something (metres)
 const FIX_TIME := 1.5            # seconds to hold E to fit the valve
 
-# --- Sound (decibels: 0 = full volume, -6 = about half as loud) ---
-const FOOTSTEP_DB := -10.0
-const STOMP_DB := -11.0          # the city's footsteps (was -2: too loud, playtest 1)
-const WIND_DB := -20.0
-const EFFECTS_DB := -4.0
-const CHATTER_ON := false        # off: the code-made murmur sounded like static (session 03 playtest)
-const CHATTER_DB := -12.0        # the market crowd's murmur, in the middle of the street
+# --- Sound ---
+# Volumes, variety and which recording to use are set in the game with the sound board
+# (press F4), and saved in audio/sound_settings.json. The built-in values are in sfx.gd.

@@ -69,6 +69,9 @@ var noise := FastNoiseLite.new()
 var city: Node3D
 var player: Node3D            # you (set by main.gd); neighbours stop to look at you
 var camera: Camera3D          # set by main.gd: people right in front of it are hidden
+var env: Environment          # the light and colour settings (changed by mood.gd)
+var sun: DirectionalLight3D
+var sky_mat: ProceduralSkyMaterial
 var you_spot := Vector3.ZERO  # where you start, on the city
 var you_yaw := 0.0
 var mira_spot := Vector3.ZERO
@@ -167,6 +170,7 @@ func _make_materials() -> void:
 
 func _make_world() -> void:
 	var psm := ProceduralSkyMaterial.new()
+	sky_mat = psm
 	psm.sky_top_color = Color(0.45, 0.66, 0.74)
 	psm.sky_horizon_color = Color(0.98, 0.80, 0.62)
 	psm.ground_horizon_color = Color(0.85, 0.64, 0.46)
@@ -174,7 +178,7 @@ func _make_world() -> void:
 	var sky := Sky.new()
 	sky.sky_material = psm
 
-	var env := Environment.new()
+	env = Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -200,7 +204,7 @@ func _make_world() -> void:
 	add_child(we)
 
 	# Low golden-hour sun from the camera's left, for long shadows.
-	var sun := DirectionalLight3D.new()
+	sun = DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-28, -30, 0)
 	sun.light_color = Color(1.0, 0.77, 0.54)
 	sun.light_energy = 2.0
