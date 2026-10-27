@@ -10,7 +10,8 @@ _Last updated: 2026-10-27, the long night at the end of session 03 (home PC): fi
 2. **Docs live on `main` only.** The copies of `docs/` on experiment branches are older (each has a ⚠️ banner saying so); when you're on a branch, read `git show main:docs/STATUS.md`. Update docs on `main`. **When merging a branch into `main`, keep `main`'s version of `docs/STATUS.md` and the other living docs** (never bring in the banner or the old text); `docs/ARCHITECTURE.md` from `tidy` is the exception: it is newer.
 3. Give the user the recap from the morning report (part 2 below), and ask what they played and what to merge.
 4. ~~**On the work laptop:** measure `experiment/laptop-speed`~~ Done 2026-10-27 (session 04), see part 2, item 5: low quality is about **2x faster** on the laptop. Still worth the user playing it there to say if low *looks* acceptable.
-5. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
+5. **Review of everything (2026-10-27, work laptop): `docs/REVIEW-2026-10-27.md`.** All tests pass on every branch, but the review found real bugs the tests miss (panels, talking through walls, unfair combat-toy hits). Nothing fixed yet: ask the user which to fix.
+6. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
 
 ## 🌅 Morning report, part 2 (the long night, 2026-10-27)
 
