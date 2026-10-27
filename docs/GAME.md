@@ -42,4 +42,5 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
   - Sounds made from code: footsteps, giant stomps, wind, chime, clunk, bell.
   - `game/tuning.gd` for speeds, sway and camera.
   - **Added in session 03:** the bigger city with the market street and crowd; the sound board (F4); the mood and lighting panel (F5).
+  - **Added overnight (2026-10-27):** recorded wind, town life, bell, and the city creaking as it steps. Two combat toys wait on a branch (`experiment/combat-toys`) to settle the combat style.
 - **Out (still to come):** night and expeditions, combat, companions, shops and the guild, building, inventory, real dialogue, saving, a bigger city, and the art polish list.

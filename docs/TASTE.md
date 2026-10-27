@@ -94,3 +94,9 @@ _Last updated: 2026-10-26 (end of session 02: street level, first person, facili
 - You have REA installed, plus the techniques doc.
 - You want to **play the story blind**, so you don't want to read spoilers. Respect that: keep story reviews spoiler-free for you.
 - You're open to getting more tools if needed (still ask before anything paid).
+
+## New signals (end of session 03, before the overnight run)
+
+- **Hands-on helper, wants concrete asks.** They offered to make a Freesound account and download sounds, then asked for *exact links* instead of search links. Read: happy to do small, clear jobs; doesn't want to browse or choose blind. Give them short, exact to-do lists. Confidence: medium.
+- **Trusts Claude with autonomy, wants momentum.** "You'll have a lot of time … do a lot more than just sounds", then accepted all defaults. Read: they like waking up to things to play. Keep overnight work to playable, reversible experiments on branches. Confidence: medium.
+

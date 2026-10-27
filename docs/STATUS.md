@@ -1,8 +1,19 @@
 # STATUS: start here
 
-**New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 02 is the latest).
+**New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 03 is the latest, and includes the overnight run).
 
-_Last updated: 2026-10-26, session 03 (home PC). Session 03: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
+_Last updated: 2026-10-27, overnight work at the end of session 03 (home PC): new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
+
+## 🌅 Morning report (overnight, 2026-10-27)
+
+The user went to sleep and asked Claude to work through the night: **sounds, then two combat toys, then a polish pass** (all defaults accepted). Nothing was merged into `main` except the sounds; nothing was decided for the user.
+
+1. **Sounds (on `main`):** the user's 7 Freesound downloads are in: desert wind, town life, a real bell, and 4 creaks. Originals are kept in `audio_originals/` (not in git); `tools/prepare_sounds.py` made small, seamless game copies. New: **the city creaks and groans** as it steps, and **town life** plays away from the market. All tests pass. **Needs the user's ears:** F4 to balance (Claude can't hear).
+2. **Combat toys (branch `experiment/combat-toys`, `prototypes/combat_toys/run.bat`):** a menu, then the same night desert and dune beetle, fought two ways. **1 = action** (WASD, Space roll, click strike; read its wind-ups, punish it while stuck). **2 = turn-based** (You and Bram share a hand of cards; the beetle shows what, at whom and *when*). Bot tests: a smart bot beats both; standing still or playing at random loses. A separate critic scored them (readability / looks / impact): action 6/5/6, turn-based 8/6/3, and its top issues were fixed (darker-than-night beetle, too-strong hit flash, overlapping numbers, a floating horn, camera, end screens). **Not re-scored after the fixes.** Not felt by a human yet: only the user can say which is fun.
+3. **Polish (branch `experiment/polish-01`):** residents now come in many builds (heights, dresses, aprons, hair styles, beards, headscarves), and the default golden hour is softer (less glare); the old light is the F5 preset "Golden hour (strong)". A separate critic compared before and after (people 4 → 6, light 5 → 6.5, overall 5.5 → 6.5; burned-out white pixels dropped from ~8–10% to 0–2%). A second round from its notes: anyone within 1.3 m of the camera is hidden (no more giant torsos in first person), faces have a nose, long hair narrows down the back, a little less haze. **Its next ideas, not done:** small brows/neck on heads, crisper colours in the bird's-eye view, crowds standing less in queues. Before/after: `docs/screens/2026-10-27_polish_*.jpg`.
+
+**To try them:** see "Branches" below. **Questions for the user:** which combat toy do you want more of (and *what part* of it)? Keep the polish? How do the new sounds feel?
+
 
 ## Where we are
 
@@ -17,9 +28,9 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 
 ## Open questions for the user (ask one or two at a time)
 
-0. **Sound: recordings are in (session 03), waiting for the user to listen.** `game/audio/` holds 30 CC0 recordings (credits in `game/audio/CREDITS.md`): footsteps in 3 sets (`stone`, the default; `wood`; `rpg`), coins, crates, and 3 market crowd recordings (France, the default; Sofia; London). The user plays, opens the sound board (F4), picks favourites, sets volumes and presses Save. **Ask how they sound.** Claude can't hear: watch for "too loud", "too quiet", "the loop jumps" (the crowd files are 2–3 minute recordings that restart).
+0. **Sound: recordings are in (session 03 + overnight), waiting for the user to listen.** Overnight added: desert wind, town life, bell, creaks (see the morning report). `game/audio/` holds 30 CC0 recordings (credits in `game/audio/CREDITS.md`): footsteps in 3 sets (`stone`, the default; `wood`; `rpg`), coins, crates, and 3 market crowd recordings (France, the default; Sofia; London). The user plays, opens the sound board (F4), picks favourites, sets volumes and presses Save. **Ask how they sound.** Claude can't hear: watch for "too loud", "too quiet", "the loop jumps" (the crowd files are 2–3 minute recordings that restart).
 
-1. **What kind of combat?** The user postponed this at the end of session 02. Options: (a) action, real time; (b) turn-based tactics like Chrono Ark (a game they love; it makes AI companions easy); (c) real time with pause to order the party. Ask "what part?" (the rush of reflexes, a clever plan, or the party's spectacle). *Claude's suggestion: two tiny combat toys on a branch (an afternoon each), one action and one turn-based, against the same desert creature. Let the user play both and react.*
+1. **What kind of combat? → play the two toys** (built overnight, branch `experiment/combat-toys`). Then ask "what part?" of the one they liked. The user postponed this at the end of session 02. Options: (a) action, real time; (b) turn-based tactics like Chrono Ark (a game they love; it makes AI companions easy); (c) real time with pause to order the party. Ask "what part?" (the rush of reflexes, a clever plan, or the party's spectacle). *Claude's suggestion: two tiny combat toys on a branch (an afternoon each), one action and one turn-based, against the same desert creature. Let the user play both and react.*
 2. **Companions:** the user wants a party of AI companions (neighbours, guild members). *Claude's lean: the first expedition solo, then one simple companion who follows, talks, carries and warns at dawn (no fighting), and fighting companions once combat exists.* Not confirmed.
 3. **Fail state when stranded:** the user said "catch up on a vehicle, or game over and reload." *Claude suggested softer (a caravan rescues you, you lose your haul) and no vehicles in the first version (a sprint on foot after the rising city).* Not confirmed.
 4. **Which facilities first** (shops, guild, tavern, workshop…) and how the city grows to hold them (district by district).
@@ -101,10 +112,12 @@ Settle question 1 (combat style). Then propose the first Phase 4 milestone with 
 | Branch | What it is | Status |
 |---|---|---|
 | `main` | The project. Always work here. | Active |
+| `experiment/combat-toys` | **The two combat toys** (overnight, 2026-10-27): `prototypes/combat_toys/`. Double-click its `run.bat`, pick 1 (action) or 2 (turn-based). Tests: `prototypes/combat_toys/run_tests.ps1`. Tuning: `prototypes/combat_toys/tuning.gd`. Doesn't touch the game. | Waiting for the user to play both |
+| `experiment/polish-01` | **Polish pass** (overnight): varied residents and a softer default golden hour. Before/after: `docs/screens/2026-10-27_polish_*.jpg`. All game tests pass. | If the user likes it: merge into `main` |
 | `experiment/market-street` | The Market Street test (session 03). **Merged into `main`** after the user played it ("the city feels a lot better"). | Done, kept for history |
 | `experiment/city-10x` | **Look only, don't merge.** The terraced city at 10x its area (265 x 177 m, 4 terraces, 736 houses), built because the user asked to *see* the real scale. Code: `prototypes/look_test_10x/`. 6 FPS and a 33 s start on the laptop, 2.7 GB of memory. | Parked. The user later said even 10x may not be big enough, but what they mean is more *places with a purpose* (see TASTE). |
 
-To look at the 10x city: `git fetch`, `git switch experiment/city-10x`, double-click `prototypes/look_test_10x/run.bat`, then `git switch main`. Commit or stash any work first.
+To look at the 10x city: `git fetch`, `git switch experiment/city-10x`, double-click `prototypes/look_test_10x/run.bat`, then `git switch main`. Commit or stash any work first. The same goes for the combat toys (`experiment/combat-toys`, then `prototypes/combat_toys/run.bat`) and the polish (`experiment/polish-01`, then `game/run.bat`).
 
 ## Session ritual
 

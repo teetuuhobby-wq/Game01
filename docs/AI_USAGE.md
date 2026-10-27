@@ -7,6 +7,7 @@ Not required for a friends-only game, but cheap to keep (and essential if we eve
 | All code and docs | Claude Code (Claude Opus 5.5) | 2026-10-25 → | Ongoing |
 | Look-test voxel art (city, legs, wasteland) | Claude Code, generated from code (technique C9), no image AI | 2026-10-26 | `prototypes/look_test/main.gd` |
 | HD look-test art (20 cm blocks: houses, plaza, residents, legs) | Claude Code, generated from code (technique C9), no image AI | 2026-10-26 | `prototypes/look_test_hd/main.gd`. Town to City Steam screenshots were viewed as a style reference only; nothing was copied. |
+| Combat toys art (beetle, people, night desert, distant city) | Claude Code, generated from code (technique C9), no image AI | 2026-10-27 | `prototypes/combat_toys/` on branch `experiment/combat-toys`. Sounds there are Kenney CC0 recordings. |
 
 ## Toolkit we have (checked 2026-10-25)
 
