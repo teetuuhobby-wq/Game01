@@ -1,6 +1,8 @@
 extends Node
 ## SOUND: every sound in the game, by name. Each one can come from a recording
 ## (audio files in audio/<name>/, see audio/CREDITS.md) or be made here from code.
+## A subfolder of recordings (e.g. audio/footstep/stone/) is a "set": one choice that
+## plays a random file from it each time, so repeated sounds don't all sound alike.
 ## The sound board (F4 in the game, sound_board.gd) lets you pick which, and set each
 ## sound's volume and variety; your choices are saved in audio/sound_settings.json.
 
@@ -31,6 +33,7 @@ var settings := {}   # name -> {"db": float, "variety": float, "choice": "code" 
 
 var _code := {}      # name -> [AudioStream] made in code
 var _files := {}     # name -> [file names] found in audio/<name>/
+var _sets := {}      # name -> {set name: [paths inside audio/<name>/]} from its subfolders
 var _cache := {}     # file path -> AudioStream
 var _loops := {}     # name -> AudioStreamPlayer for looping sounds
 var _market_t := 2.0
@@ -58,22 +61,39 @@ func _ready() -> void:
 			refresh_loop(n)
 
 
-## Looks for recordings in audio/<name>/ (.ogg, .wav or .mp3).
+## Looks for recordings in audio/<name>/ and its subfolders (.ogg, .wav or .mp3).
 func rescan() -> void:
 	for n in SOUNDS:
-		var found := []
+		_files[n] = _audio_in("res://audio/" + n)
+		_sets[n] = {}
 		var dir := DirAccess.open("res://audio/" + n)
 		if dir != null:
-			for f in dir.get_files():
-				if f.get_extension().to_lower() in ["ogg", "wav", "mp3"]:
-					found.append(f)
-		found.sort()
-		_files[n] = found
+			for sub in dir.get_directories():
+				var inside := []
+				for f in _audio_in("res://audio/%s/%s" % [n, sub]):
+					inside.append(sub + "/" + f)
+				if not inside.is_empty():
+					_sets[n][sub] = inside
+
+
+func _audio_in(path: String) -> Array:
+	var found := []
+	var dir := DirAccess.open(path)
+	if dir != null:
+		for f in dir.get_files():
+			if f.get_extension().to_lower() in ["ogg", "wav", "mp3"]:
+				found.append(f)
+	found.sort()
+	return found
 
 
 ## The choices for a sound, as shown on the sound board.
 func choices(n: String) -> Array:
 	var c := ["off", "code"]
+	var names: Array = _sets[n].keys()
+	names.sort()
+	for s in names:
+		c.append("set: " + s)
 	if _files[n].size() > 1:
 		c.append("all")
 	c.append_array(_files[n])
@@ -88,8 +108,12 @@ func _load_settings() -> void:
 			saved = parsed
 	for n in SOUNDS:
 		var def_choice := "code"
-		if _files[n].size() > 1:
+		if not _sets[n].is_empty():
+			def_choice = choices(n)[2]   # the first set
+		elif _files[n].size() > 1 and SOUNDS[n][2] == "one":
 			def_choice = "all"
+		elif _files[n].size() > 1:
+			def_choice = _files[n][0]    # a loop plays one recording
 		elif _files[n].size() == 1:
 			def_choice = _files[n][0]
 		elif n in CODE_OFF:
@@ -128,6 +152,11 @@ func _stream(n: String) -> AudioStream:
 	var file := c
 	if c == "all":
 		file = _files[n][_rng.randi() % _files[n].size()]
+	elif c.begins_with("set: "):
+		var pick: Array = _sets[n].get(c.substr(5), [])
+		if pick.is_empty():
+			return null
+		file = pick[_rng.randi() % pick.size()]
 	return _load_file("res://audio/%s/%s" % [n, file], loop)
 
 

@@ -21,3 +21,6 @@ Not required for a friends-only game, but cheap to keep (and essential if we eve
 | **REA** | Reverse engineering | Not needed for the main game; available for side experiments |
 | *Audio* | `game/sfx.gd` | All sounds are made from code (footsteps, stomps, wind, chime, clunk, bell); no sound files. Ask before any paid audio tool. |
 
+## Not AI-made
+
+- **Recorded sounds** in `game/audio/` are real recordings from Kenney and Freesound (CC0). See `game/audio/CREDITS.md`.

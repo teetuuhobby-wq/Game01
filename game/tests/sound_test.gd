@@ -45,6 +45,22 @@ func _ready() -> void:
 	made.save_to_wav("user://sound_test.wav")
 	var loaded: AudioStream = sfx._load_file("user://sound_test.wav", false)
 	results.append(["a .wav recording loads while the game runs", loaded != null and loaded.get_length() > 0.1, "%.2f s" % (loaded.get_length() if loaded else 0.0)])
+	# Every recording in game/audio/ loads (both .ogg and .mp3), and the sets are found
+	var bad := []
+	var count := 0
+	for n in sfx.SOUNDS:
+		var paths: Array = sfx._files[n].duplicate()
+		for s in sfx._sets[n]:
+			paths.append_array(sfx._sets[n][s])
+		for p in paths:
+			count += 1
+			var st: AudioStream = sfx._load_file("res://audio/%s/%s" % [n, p], sfx.SOUNDS[n][2] == "loop")
+			if st == null or st.get_length() <= 0.0:
+				bad.append(n + "/" + p)
+	results.append(["every recording in game/audio/ loads", bad.is_empty() and count > 0, "%d files, failed: %s" % [count, str(bad)]])
+	results.append(["footstep sets are found and stone is the starting choice",
+			sfx._sets["footstep"].size() >= 3 and sfx.settings["footstep"]["choice"] == "set: stone",
+			"%s, choice %s" % [str(sfx._sets["footstep"].keys()), sfx.settings["footstep"]["choice"]]])
 	var ok := true
 	for r in results:
 		print("%s  %s  (%s)" % ["PASS" if r[1] else "FAIL", r[0], r[2]])
