@@ -40,6 +40,7 @@ var _files := {}     # name -> [file names] found in audio/<name>/
 var _sets := {}      # name -> {set name: [paths inside audio/<name>/]} from its subfolders
 var _cache := {}     # file path -> AudioStream
 var _loops := {}     # name -> AudioStreamPlayer for looping sounds
+var _loop_choice := {}   # name -> the choice each loop is playing ("all", "set: x" or a file)
 var _market_t := 2.0
 var _creak_wait := 0.0   # seconds until the city may creak again
 var _rng := RandomNumberGenerator.new()
@@ -201,10 +202,11 @@ func _load_file(path: String, loop: bool) -> AudioStream:
 
 
 ## Plays a one-off sound by name, with its volume and a little pitch variety.
-func play(n: String, extra_db := 0.0) -> void:
+## Gives back the player it started (null if the sound is off).
+func play(n: String, extra_db := 0.0) -> AudioStreamPlayer:
 	var stream := _stream(n)
 	if stream == null:
-		return
+		return null
 	var v: float = settings[n]["variety"]
 	var p := AudioStreamPlayer.new()
 	p.stream = stream
@@ -213,15 +215,20 @@ func play(n: String, extra_db := 0.0) -> void:
 	add_child(p)
 	p.finished.connect(p.queue_free)
 	p.play()
+	return p
 
 
-## Restarts a looping sound with its current choice and volume.
+## Restarts a looping sound when its choice changed, and sets its volume.
+## Only a new choice restarts it: "all" and sets pick a random recording each time,
+## so moving the volume slider mustn't pick again.
 func refresh_loop(n: String) -> void:
 	if not _loops.has(n):
 		return
 	var p: AudioStreamPlayer = _loops[n]
-	var stream := _stream(n)
-	if p.stream != stream:
+	var c: String = settings[n]["choice"]
+	if _loop_choice.get(n, "") != c:
+		_loop_choice[n] = c
+		var stream := _stream(n)
 		p.stop()
 		p.stream = stream
 		if stream != null:
