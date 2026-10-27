@@ -15,6 +15,12 @@ const Person := preload("res://person.gd")
 const Beetle := preload("res://beetle.gd")
 const Sfx := preload("res://toy_sfx.gd")
 
+# The beetle's shape (metres): a round body, and a round head in front of it
+const BODY_R := 1.45
+const HEAD_AHEAD := 2.3          # how far in front of its middle the head is
+const HEAD_R := 0.95
+const SNAP_FROM := 1.6           # the bite fan starts this far in front of its middle
+
 var arena: Node3D
 var sfx: Node
 var cam: Camera3D
@@ -52,6 +58,7 @@ var b_lunge_cd := 1.5
 var b_burrow_cd := 0.0
 var b_target := Vector3.ZERO      # where it will burst out of the sand
 var b_dig := Vector3.ZERO          # where it is under the sand
+var b_lunge_left := 0.0            # metres of the charge still to go
 var b_step_t := 0.0
 var enraged := false
 
@@ -68,6 +75,8 @@ var dodged_t := 0.0       # just rolled through an attack (so it's only counted 
 
 var _prev_attack := false
 var _prev_dodge := false
+var _attack_buf := 0.0    # a click waiting to be used (seconds left to use it)
+var _dodge_buf := 0.0     # a roll waiting to be used
 var _strip: MeshInstance3D
 var _cone: MeshInstance3D
 var _circle: MeshInstance3D
@@ -144,6 +153,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	var inp := read_input()
+	# Remember presses for a moment, so a click or roll pressed during the hit-freeze,
+	# a stagger or the end of a swing isn't thrown away (used in _update_player).
+	if inp["attack"]:
+		_attack_buf = T.A_INPUT_BUFFER
+	if inp["dodge"]:
+		_dodge_buf = T.A_INPUT_BUFFER
 	if freeze > 0.0:
 		freeze -= delta
 		_sync_visuals(delta)
@@ -173,11 +188,14 @@ func _update_player(delta: float, inp: Dictionary) -> void:
 	right = right.normalized()
 	var want: Vector3 = right * inp["move"].x + fwd * inp["move"].y
 	var vel := Vector3.ZERO
+	var attack := _attack_buf > 0.0
+	var dodge := _dodge_buf > 0.0
 	# A swing in progress
 	if swing_t >= 0.0:
 		swing_t += delta
-		if inp["attack"]:
+		if attack:
 			queued = true
+			_attack_buf = 0.0
 		if not swing_landed and swing_t >= T.A_SWING_TIME * 0.4:
 			swing_landed = true
 			_sword_hits()
@@ -192,7 +210,8 @@ func _update_player(delta: float, inp: Dictionary) -> void:
 		vel = dodge_dir * T.A_DODGE_SPEED
 	elif stagger_t <= 0.0:
 		var can_act := swing_t < 0.0 or swing_landed
-		if inp["dodge"] and dodge_cd <= 0.0 and can_act:
+		if dodge and dodge_cd <= 0.0 and can_act:
+			_dodge_buf = 0.0
 			swing_t = -1.0
 			queued = false
 			dodge_dir = want.normalized() if want.length() > 0.2 else -p_face
@@ -201,7 +220,8 @@ func _update_player(delta: float, inp: Dictionary) -> void:
 			p_face = dodge_dir
 			sfx.play("dodge")
 			Fx.dust(self, p_pos + Vector3(0, 0.2, 0), 8, 1.5)
-		elif inp["attack"] and swing_t < 0.0:
+		elif attack and swing_t < 0.0:
+			_attack_buf = 0.0
 			_start_swing(combo + 1 if combo_window > 0.0 and combo < 2 else 0)
 		elif swing_t < 0.0:
 			vel = want * T.A_PLAYER_SPEED
@@ -211,6 +231,10 @@ func _update_player(delta: float, inp: Dictionary) -> void:
 				if step_t <= 0.0:
 					step_t = 0.34
 					sfx.play("step")
+	# Waiting presses fade, but not while you're staggered (or frozen: this doesn't run then)
+	if stagger_t <= 0.0:
+		_attack_buf -= delta
+		_dodge_buf -= delta
 	knock = knock.move_toward(Vector3.ZERO, 22.0 * delta)
 	p_pos += (vel + knock) * delta
 	_keep_apart()
@@ -333,22 +357,29 @@ func _update_beetle(delta: float) -> void:
 				_turn_toward(to_p, 4.0, delta)
 				b_dir = _b_fwd()
 			beetle.set_pose(0.6, 0.8, 1.0 + 2.2 * k)
+			b_lunge_left = T.A_LUNGE_SPEED * T.A_LUNGE_TIME
 			_show_strip(k)
 			if b_t <= 0.0:
 				_set_state("lunge", T.A_LUNGE_TIME)
+				_show_strip(1.0)
 				sfx.play("beetle_step", 8.0)
 				Fx.dust(self, b_pos, 20, 4.0)
 		"lunge":
 			beetle.set_pose(-0.15, 0.9, 3.0)
-			b_pos += b_dir * T.A_LUNGE_SPEED * delta
+			# It charges exactly the length of the strip it showed (no more, no less)
+			var step := minf(T.A_LUNGE_SPEED * delta, b_lunge_left)
+			b_pos += b_dir * step
+			b_lunge_left -= step
 			walk = 9.0
-			_strip.visible = false
-			for c in _beetle_circles():
-				var v: Vector3 = p_pos - c[0]
-				v.y = 0
-				if v.length() < c[1] + 0.45:
-					var side := v - b_dir * v.dot(b_dir)
-					_hurt_player(side.normalized() * 0.6 + b_dir)
+			_show_strip(1.0)     # the strip stays on, showing what's still ahead of it
+			# Hit if you're on the red, between its middle and the tip of its head
+			if _on_strip(p_pos, HEAD_AHEAD + HEAD_R):
+				var rel := p_pos - b_pos
+				rel.y = 0
+				var side := rel - b_dir * rel.dot(b_dir)
+				_hurt_player(side.normalized() * 0.6 + b_dir)
+				if over:
+					return    # that knocked you out: the fight is over, leave the beetle as it is
 			if Vector2(b_pos.x, b_pos.z).length() > Arena.RADIUS + 0.5:
 				# Slammed into the rocks: stuck for longer
 				var r := Vector2(b_pos.x, b_pos.z).normalized() * (Arena.RADIUS + 0.5)
@@ -358,7 +389,7 @@ func _update_beetle(delta: float) -> void:
 				Fx.dust(self, b_pos + _b_fwd() * 2.5, 30, 5.0)
 				_set_state("stuck", T.A_STUCK_TIME * 1.5)
 				_on_stuck()
-			elif b_t <= 0.0:
+			elif b_lunge_left <= 0.0:
 				_set_state("stuck", T.A_STUCK_TIME)
 				_on_stuck()
 		"stuck":
@@ -376,11 +407,12 @@ func _update_beetle(delta: float) -> void:
 				_cone.visible = false
 				beetle.set_pose(-0.1, 0.0, 2.0)
 				sfx.play("hit_big", 0.0, 1.3)
-				var head := b_pos + _b_fwd() * 1.8
-				var v := p_pos - head
-				v.y = 0
-				if v.length() < T.A_SNAP_RANGE - 0.4 and (v.length() < 1.0 or _b_fwd().angle_to(v.normalized()) < deg_to_rad(55)):
-					_hurt_player(v + _b_fwd())
+				if _in_snap_fan(p_pos):
+					var v := p_pos - b_pos
+					v.y = 0
+					_hurt_player(v.normalized() + _b_fwd())
+					if over:
+						return
 				b_snap_cd = 1.4
 				_set_state("recover", 0.6)
 		"recover":
@@ -427,8 +459,11 @@ func _update_beetle(delta: float) -> void:
 				sfx.play("burrow", 4.0, 0.8)
 				shake = 0.5
 				var v := p_pos - b_target
-				if v.length() < 2.6:
+				v.y = 0
+				if v.length() <= T.A_ERUPT_RADIUS:
 					_hurt_player(v if v.length() > 0.1 else Vector3.BACK)
+					if over:
+						return    # knocked out: don't call it "stuck" over the end screen
 				b_burrow_cd = T.A_BURROW_EVERY
 				_set_state("stuck", T.A_STUCK_TIME * 1.3)
 				_on_stuck()
@@ -474,7 +509,24 @@ func _turn_toward(d: Vector3, rate: float, delta: float) -> void:
 
 ## The beetle's shape for hits and pushing: [centre, radius] for its body and its head.
 func _beetle_circles() -> Array:
-	return [[b_pos, 1.45], [b_pos + _b_fwd() * 2.3, 0.95]]
+	return [[b_pos, BODY_R], [b_pos + _b_fwd() * HEAD_AHEAD, HEAD_R]]
+
+
+## Is the point on the charge's red strip, between the beetle's middle and `ahead` metres in front?
+## The strip on the sand is drawn from the same numbers (see _show_strip).
+func _on_strip(p: Vector3, ahead: float) -> bool:
+	var rel := p - b_pos
+	rel.y = 0
+	var along := rel.dot(b_dir)
+	var side := (rel - b_dir * along).length()
+	return side <= T.A_LUNGE_HALF_WIDTH and along >= 0.0 and along <= ahead
+
+
+## Is the point inside the red bite fan? (Drawn from the same numbers in _show_cone.)
+func _in_snap_fan(p: Vector3) -> bool:
+	var v := p - (b_pos + _b_fwd() * SNAP_FROM)
+	v.y = 0
+	return v.length() <= T.A_SNAP_RANGE and _b_fwd().angle_to(v) <= deg_to_rad(T.A_SNAP_ANGLE)
 
 
 func _nearest_beetle_point() -> Vector3:
@@ -513,7 +565,7 @@ func _win() -> void:
 	freeze = 0.25
 	shake = 0.6
 	sfx.play("hit_big", 4.0, 0.5)
-	get_tree().create_timer(0.5).timeout.connect(func() -> void: sfx.play("win"))
+	create_tween().tween_callback(sfx.play.bind("win")).set_delay(0.5)   # a tween ends with the toy; a timer could fire after you left
 	Fx.dust(self, b_pos, 40, 6.0)
 	_show_result("THE BEETLE IS BEATEN!", "%d s · %d hits · hurt %d times" % [int(fight_time), hits_landed, hits_taken])
 
@@ -588,16 +640,16 @@ func _make_danger_marks() -> void:
 	_danger_mat.albedo_color = Color(1.0, 0.15, 0.08, 0.4)
 	_strip = MeshInstance3D.new()
 	var pm := PlaneMesh.new()
-	pm.size = Vector2(2.8, T.A_LUNGE_SPEED * T.A_LUNGE_TIME + 3.0)
+	pm.size = Vector2(T.A_LUNGE_HALF_WIDTH * 2.0, 1.0)    # 1 m long: stretched to length in _show_strip
 	_strip.mesh = pm
 	_strip.material_override = _danger_mat
 	add_child(_strip)
 	_cone = MeshInstance3D.new()
-	_cone.mesh = _fan(T.A_SNAP_RANGE, deg_to_rad(55))
+	_cone.mesh = _fan(T.A_SNAP_RANGE, deg_to_rad(T.A_SNAP_ANGLE))
 	_cone.material_override = _danger_mat
 	add_child(_cone)
 	_circle = MeshInstance3D.new()
-	_circle.mesh = _fan(2.6, PI)
+	_circle.mesh = _fan(T.A_ERUPT_RADIUS, PI, 64)
 	_circle.material_override = _danger_mat
 	add_child(_circle)
 	for m in [_strip, _cone, _circle]:
@@ -626,9 +678,8 @@ func _make_danger_marks() -> void:
 
 
 ## A flat fan on the ground (a slice of a circle), pointing along -z.
-func _fan(radius: float, half_angle: float) -> ArrayMesh:
+func _fan(radius: float, half_angle: float, steps := 28) -> ArrayMesh:
 	var v := PackedVector3Array()
-	var steps := 28
 	for i in steps:
 		var a0 := -half_angle + 2.0 * half_angle * i / steps
 		var a1 := -half_angle + 2.0 * half_angle * (i + 1) / steps
@@ -651,17 +702,20 @@ func _danger_alpha(k: float) -> float:
 	return a
 
 
+## The charge's red strip: from the beetle's middle to where the tip of its head will end up
+## (the charge still to go, plus its head). The same box _on_strip() hits you in.
 func _show_strip(k: float) -> void:
-	var len := T.A_LUNGE_SPEED * T.A_LUNGE_TIME + 3.0
+	var len := b_lunge_left + HEAD_AHEAD + HEAD_R
 	_strip.visible = true
-	_strip.position = b_pos + b_dir * (len * 0.5 + 1.0) + Vector3(0, 0.05, 0)
+	_strip.position = b_pos + b_dir * (len * 0.5) + Vector3(0, 0.05, 0)
 	_strip.rotation.y = _yaw_of(b_dir)
+	_strip.scale = Vector3(1, 1, len)
 	_danger_mat.albedo_color.a = _danger_alpha(k)
 
 
 func _show_cone(k: float) -> void:
 	_cone.visible = true
-	_cone.position = b_pos + _b_fwd() * 1.6 + Vector3(0, 0.05, 0)
+	_cone.position = b_pos + _b_fwd() * SNAP_FROM + Vector3(0, 0.05, 0)
 	_cone.rotation.y = b_yaw
 	_danger_mat.albedo_color.a = _danger_alpha(k)
 

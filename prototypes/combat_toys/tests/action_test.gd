@@ -1,6 +1,8 @@
 extends "res://action.gd"
 ## ACTION TOY TEST: a bot plays the fight with simulated input.
-##   -- --bot smart   reads the warnings, rolls away, hits it while it's stuck: must WIN
+##   -- --bot smart   plays like a careful person: steps just off the red charge strip (not a
+##                    mile away), rolls through bites at the last moment, clicks about 6 times a
+##                    second while it's stuck. Must WIN, and must have rolled through at least one attack.
 ##   -- --bot idle    stands still: must LOSE (so the beetle is a real challenge)
 ## Add --shots to save screenshots of key moments to shots/ (run it with tools/godot_offscreen.ps1).
 ## Run:  <godot_console.exe> --headless --path prototypes/combat_toys res://tests/action_test.tscn -- --bot smart
@@ -10,7 +12,7 @@ var shots := false
 var _seen := {}
 var _limit := 240.0
 var _done := false
-var _attack_flip := false
+var _click_wait := 0      # frames until the bot clicks again
 var _states := {}
 
 
@@ -34,19 +36,24 @@ func read_input() -> Dictionary:
 	to_b.y = 0
 	var dist := to_b.length()
 	match b_state:
-		"lunge_windup":
-			# Step off the line it will charge along
+		"lunge_windup", "lunge":
+			# Once the strip stops turning, step just off the red (a little past its edge, the
+			# way a person who trusts the warning would). Roll only if there's no time to walk.
 			var rel := p_pos - b_pos
+			rel.y = 0
 			var along := rel.dot(b_dir)
 			var side := rel - b_dir * along
-			var k := 1.0 - b_t / (T.A_LUNGE_WINDUP * (0.8 if enraged else 1.0))
-			want = side.normalized() if side.length() > 0.1 else b_dir.cross(Vector3.UP)
-			if side.length() < 2.6 and along > -1.0 and k > 0.6:
-				dodge = true
+			var out_dir := side.normalized() if side.length() > 0.1 else b_dir.cross(Vector3.UP)
+			var locked := b_state == "lunge" or b_t < T.A_LUNGE_WINDUP * (0.8 if enraged else 1.0) * 0.35
+			if locked and along > -1.0 and side.length() < T.A_LUNGE_HALF_WIDTH + 0.3:
+				want = out_dir
+				if (b_state == "lunge" or b_t < 0.08) and side.length() < T.A_LUNGE_HALF_WIDTH + 0.05:
+					dodge = true
 		"snap_windup":
-			want = -to_b.normalized()
-			var k := 1.0 - b_t / (T.A_SNAP_WINDUP * (0.8 if enraged else 1.0))
-			if dist < T.A_SNAP_RANGE + 0.6 and k > 0.45:
+			# Stand your ground and roll sideways through the bite at the last moment
+			# (the roll's safe frames carry you through it)
+			if b_t < 0.1 and _in_snap_fan(p_pos):
+				want = to_b.normalized().cross(Vector3.UP)
 				dodge = true
 		"erupt_warn":
 			var away := p_pos - b_target
@@ -63,8 +70,11 @@ func read_input() -> Dictionary:
 			if v.length() > 2.6:
 				want = v.normalized()
 			else:
-				_attack_flip = not _attack_flip
-				attack = _attack_flip
+				# Click about 6 times a second, like a person (some clicks land during the hit-freeze)
+				_click_wait -= 1
+				if _click_wait <= 0:
+					_click_wait = 10
+					attack = true
 		_:
 			# Keep a safe distance and circle it, poking it if it walks into reach
 			if dist < 5.5:
@@ -121,8 +131,8 @@ func _report() -> void:
 	print("beetle states (frames): ", _states)
 	var ok := false
 	if bot == "smart":
-		ok = won
-		print("%s  the smart bot beats the beetle  (%s after %d s: %d hits, hurt %d times, %d dodges, beetle health %d)" % [
+		ok = won and dodges > 0
+		print("%s  the smart bot beats the beetle, rolling through at least one attack  (%s after %d s: %d hits, hurt %d times, %d dodges, beetle health %d)" % [
 				"PASS" if ok else "FAIL", "won" if won else "lost", int(fight_time), hits_landed, hits_taken, dodges, b_hp])
 	else:
 		ok = over and not won
