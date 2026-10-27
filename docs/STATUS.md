@@ -1,5 +1,7 @@
 # STATUS: start here
 
+> ⚠️ **This is an experiment branch (`experiment/city-10x`). Its docs are an older copy.** The up-to-date docs live on `main`: run `git show main:docs/STATUS.md` (or switch to `main`) before trusting anything here, and update docs on `main` only.
+
 **New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/`.
 
 _Last updated: 2026-10-26, session 02 (work laptop): code review and fixes, hidden test runs. The open questions below are still unasked._
