@@ -1,5 +1,5 @@
 extends "res://world/blocks.gd"
-## THE WORLD, layer 2 of 10: the sky, the sun and the desert.
+## THE WORLD, layer 2 of 12: the sky, the sun and the desert.
 ## The light settings (changed live by mood.gd), the desert floor that repeats so the
 ## walk never ends, and the bones and wrecks lying in it.
 

@@ -15,6 +15,7 @@
 | Mood | `mood.gd` | The light and colour in plain values; presets; `mood.json`. |
 | Sound | `sfx.gd` | Every sound by name; recordings in `audio/<name>/`; `audio/sound_settings.json`. |
 | Panels | `panel_base.gd`, `sound_board.gd` (F4), `mood_panel.gd` (F5) | Tools for the user to direct the game with sliders. |
+| Using things | `interact.gd`, `dialogue.gd`, `town_data.gd` | E to talk, read, sit and look; which line each resident says next; the cast and their lines as plain data. |
 | Errand | `errand.gd` | Mira's job, the goal text, the marker and the speech. |
 | Playtest tools | `recorder.gd`, `replay.gd`, `bot.gd` | Recording every session, replaying it exactly, and the test bot. |
 | Tuning | `tuning.gd` | Numbers the user can safely change. |
@@ -30,10 +31,13 @@
 | 3 | `buildings.gd` | Templates: paving, houses (windows, doors, balconies, roofs), lamps, parasols, trees |
 | 4 | `city.gd` | The layout: deck, hull, wall, terraces, stairs, plaza, tower, homes, trees, underside |
 | 5 | `errand_sites.gd` | Bram's workshop and the rain-catcher |
-| 6 | `market.gd` | The market street: shops, stalls, signs, lanterns, the crowd's path |
-| 7 | `legs.gd` | The six legs and how they walk |
-| 8 | `people.gd` | Building people, neighbours, the market crowd |
-| 9 | `walk_map.gd` | Where people can stand, line-of-sight checks, route finding |
+| 6 | `facility_kit.gd` | The building kit: walls, doorways, signs, windows, lanterns, seats; the lists of things to use and where residents stand |
+| 7 | `facilities.gd` | The walk-in buildings: guild hall, tavern, store, bathhouse, the workshop's inside, the lookout |
+| 8 | `market.gd` | The market street: shops, stalls, signs, lanterns, the crowd's path |
+| 9 | `legs.gd` | The six legs and how they walk |
+| 10 | `people.gd` | Building people, neighbours, the market crowd |
+| 11 | `cast.gd` | The named residents (from `town_data.gd`), their props and habits, the regulars |
+| 12 | `walk_map.gd` | Where people can stand, line-of-sight checks, route finding |
 
 ## Rules
 
@@ -48,6 +52,6 @@
 5. **Game rules separate from visuals.** New gameplay (combat, health, inventory, requests) keeps its state and rules in plain scripts that run and test without graphics. The visuals read that state; they don't own it.
 6. **All input through `controls.gd`.** Never read the keyboard or mouse anywhere else, or recording and replay break.
 7. **Every system gets a test.** It's a headless test in `game/tests/`, listed in `tools/run_tests.ps1`. Visual changes also get a screenshot scene (hidden run) and a separate critic pass.
-8. **Prove refactors change nothing.** Run `tools/world_fingerprint.gd` before and after (it prints a fingerprint of every block, the walk map, the shops and the people) and compare. Then run all the tests.
+8. **Prove refactors change nothing.** Run `tools/world_fingerprint.gd` (with `--fixed-fps 20`, or the people's positions depend on frame timing) before and after (it prints a fingerprint of every block, the walk map, the shops and the people) and compare. Then run all the tests.
 9. **Tests run hidden** (`tools/godot_offscreen.ps1`, or `--headless`). The game never pops up on the user's screen.
 10. **Sounds are named in `sfx.SOUNDS`.** Recordings go in `audio/<name>/` and get a line in `audio/CREDITS.md` (source, author, licence; CC0 preferred).

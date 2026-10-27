@@ -1,5 +1,5 @@
 extends "res://world/market.gd"
-## THE WORLD, layer 8 of 10: the six giant legs.
+## THE WORLD, layer 9 of 12: the six giant legs.
 ## Their meshes, the dust when a foot lands, and the walk itself: each foot is planted
 ## or swinging, and the knee bends to fit (a two-bone reach).
 
