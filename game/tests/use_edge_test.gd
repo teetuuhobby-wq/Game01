@@ -5,7 +5,8 @@ extends "res://main.gd"
 #   - sitting down while holding a walk key doesn't stand you straight back up;
 #     you stand when you let go and walk again
 #   - sitting lowers your first-person eyes, and the valve you carry stays in your hand
-#   - a named resident (Dorran) right in front of the camera is hidden, like everyone else
+#   - a named resident (Dorran) right in front of the camera is hidden, like everyone else,
+#     but not in first person when you're just talking to him across the bar
 # Run: <godot_console.exe> --headless --path game res://tests/use_edge_test.tscn -- --no-record
 
 const T := preload("res://tuning.gd")
@@ -71,6 +72,18 @@ func _process(_delta: float) -> void:
 			world._hide_close_residents()
 			_results.append(["a named resident right in front of the camera is hidden (and shown again)",
 					hidden and dorran.visible, ""])
+			# Through your own eyes, pressed up against the bar to talk, he stays in view;
+			# only standing right inside him hides him
+			var fp: float = camera.first_person
+			camera.first_person = 1.0
+			camera.global_position = world.city.to_global(dorran.position + Vector3(-1.1, T.EYE_HEIGHT, 0))
+			world._hide_close_residents()
+			var seen := dorran.visible
+			camera.global_position = world.city.to_global(dorran.position + Vector3(-0.2, T.EYE_HEIGHT, 0))
+			world._hide_close_residents()
+			_results.append(["in first person, a resident you talk to across the bar stays in view (hidden only from inside him)",
+					seen and not dorran.visible, ""])
+			camera.first_person = fp
 			var ok := true
 			for r in _results:
 				print("%s  %s  (%s)" % ["PASS" if r[1] else "FAIL", r[0], r[2]])

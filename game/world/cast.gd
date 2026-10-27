@@ -108,6 +108,7 @@ func _item_mesh(kind: String, top: float) -> MeshInstance3D:
 
 const HABIT_SPEEDS := {"run": 2.6, "stroll": 0.7, "pace": 0.6}   # metres per second
 const NOTICE_YOU := 2.6           # metres: residents turn to you (and walkers stop) this close
+const FIRST_PERSON_NEAR_HIDE := 0.45   # metres: in first person, a resident this close is hidden (you're inside them)
 
 var _cast_rng := RandomNumberGenerator.new()   # the cast's own, so it never reshuffles the crowd
 var cast_nodes := {}    # cast id -> Node3D (the named residents)
@@ -230,7 +231,14 @@ func _hide_close_residents() -> void:
 		pw["node"].visible = _mk_clear_of_camera(pw["node"].position, cam)
 	for e in _extra_nodes:
 		e["node"].visible = _mk_clear_of_camera(e["node"].position, cam)
-	# The named residents and Mira too, or walking into the barkeep fills the screen
+	# The named residents and Mira too, or walking into the barkeep fills the screen.
+	# Through your own eyes (first person) you talk to them face to face, about a metre
+	# away, so then only someone you're standing right inside of is hidden.
+	var fp = camera.get("first_person")   # camera_rig.gd: 1 = through your eyes
+	var eyes: bool = fp != null and fp > 0.5
 	for id in cast_nodes:
 		var n: Node3D = cast_nodes[id]
-		n.visible = _mk_clear_of_camera(n.position, cam)
+		if eyes:
+			n.visible = Vector2(n.position.x - cam.x, n.position.z - cam.z).length() > FIRST_PERSON_NEAR_HIDE
+		else:
+			n.visible = _mk_clear_of_camera(n.position, cam)
