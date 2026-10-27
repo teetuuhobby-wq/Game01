@@ -18,8 +18,13 @@ func _ready() -> void:
 	if mood == null or panel == null:
 		_finish(results)
 		return
-	results.append(["the game starts golden hour (unless a saved look exists)",
-			FileAccess.file_exists(mood.SAVED) or is_equal_approx(world.sun.light_energy, 2.0), "sun %.2f" % world.sun.light_energy])
+	# The sky starts with a sun colour of its own; only the mood gives it the warmth from
+	# its values, so this shows the mood really was put on the world at start-up.
+	var want_colour: Color = mood._sun_colour(mood.values["sun_warmth"])
+	var applied: bool = world.sun.light_color.is_equal_approx(want_colour) and is_equal_approx(world.sun.light_energy, mood.values["sun_brightness"])
+	var golden: bool = FileAccess.file_exists(mood.SAVED) or mood.values == mood.PRESETS["Golden hour"]
+	results.append(["the game starts golden hour (unless a saved look exists), put on by the mood",
+			applied and golden, "sun %.2f, colour %s" % [world.sun.light_energy, world.sun.light_color]])
 	var ev := InputEventAction.new()
 	ev.action = "mood"
 	ev.pressed = true
