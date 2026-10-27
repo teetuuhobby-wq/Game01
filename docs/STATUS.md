@@ -9,7 +9,7 @@ _Last updated: 2026-10-27, the long night at the end of session 03 (home PC): fi
 1. `git pull` on `main`, then `git fetch` so the experiment branches arrive too (`git switch experiment/<name>` then works).
 2. **Docs live on `main` only.** The copies of `docs/` on experiment branches are older (each has a ⚠️ banner saying so); when you're on a branch, read `git show main:docs/STATUS.md`. Update docs on `main`. **When merging a branch into `main`, keep `main`'s version of `docs/STATUS.md` and the other living docs** (never bring in the banner or the old text); `docs/ARCHITECTURE.md` from `tidy` is the exception: it is newer.
 3. Give the user the recap from the morning report (part 2 below), and ask what they played and what to merge.
-4. **On the work laptop:** try `experiment/laptop-speed` (`game/run_low.bat`, or F6 in the game; F3 shows FPS). Note the FPS in high and low here: it's the one thing only the laptop can answer.
+4. ~~**On the work laptop:** measure `experiment/laptop-speed`~~ Done 2026-10-27 (session 04), see part 2, item 5: low quality is about **2x faster** on the laptop. Still worth the user playing it there to say if low *looks* acceptable.
 5. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
 
 ## 🌅 Morning report, part 2 (the long night, 2026-10-27)
@@ -54,7 +54,7 @@ More in `docs/screens/2026-10-27_town_*.jpg` and `..._dusk_*.jpg`.
 
 ### 5. Laptop speed (branch `experiment/laptop-speed`; `game/run_low.bat`, or F6 in the game)
 - Lower 3D resolution with sharp upscaling, no soft extras, simpler shadows, shorter view, distant people hidden.
-- **On this PC: 40-80% faster.** On the laptop: maybe 1.5-2x, **but only a run there will tell.**
+- **On this PC: 40-80% faster.** **On the laptop (measured 2026-10-27, `game/tests/fps_check.tscn`, hidden run): about 2x.** High → low FPS: plaza 16-18 → 36-39, market street 19-20 → 38, guild row 13 → 22-24 (the guild row is the heaviest spot). Low makes the laptop comfortably playable except near the guild row. Not yet judged by eye: whether low looks acceptable.
 
 ### 6. Tidy-up (branch `experiment/tidy`)
 - The world code is now 13 layer files, none over 600 lines. Proved to build the same world, and all tests pass.
@@ -181,7 +181,7 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 | `experiment/facilities` | The buildings and residents before the tidy-up. Superseded by `tidy`. | Kept for history |
 | `experiment/dusk` | **Dusk look test:** `game/dusk.bat`, keys 1 / 2 / 3, R replays. The city kneels, lowers a lift, lights its lamps. | Waiting for the user's pick |
 | `experiment/bug-hunt` | An hour-long walkabout bot (nothing found) and a 5-minute version for the tests. | Merge any time |
-| `experiment/laptop-speed` | **Low quality for the laptop:** `game/run_low.bat`, or F6 in the game. | Needs a run on the laptop |
+| `experiment/laptop-speed` | **Low quality for the laptop:** `game/run_low.bat`, or F6 in the game. Measured on the laptop: about 2x faster (13-20 → 22-39 FPS). | Merge if the user is happy with how low looks |
 | `experiment/combat-toys` | **The two combat toys** (overnight, 2026-10-27): `prototypes/combat_toys/`. Double-click its `run.bat`, pick 1 (action) or 2 (turn-based). Tests: `prototypes/combat_toys/run_tests.ps1`. Tuning: `prototypes/combat_toys/tuning.gd`. Doesn't touch the game. | Waiting for the user to play both |
 | `experiment/polish-01` | **Polish pass** (overnight): varied residents and a softer default golden hour, then a mouth on faces and looser market groups. Before/after: `docs/screens/2026-10-27_polish_*.jpg`. Already inside `tidy`. | If the user likes it: merge into `main` (or merge `tidy`) |
 | `experiment/market-street` | The Market Street test (session 03). **Merged into `main`** after the user played it ("the city feels a lot better"). | Done, kept for history |
