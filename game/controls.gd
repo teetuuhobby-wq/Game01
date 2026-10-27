@@ -14,9 +14,9 @@ var use_pressed := false      # E pressed this very frame
 var look := Vector2.ZERO      # mouse movement this frame, in pixels
 var zoom_steps := 0.0         # mouse wheel and + / - (positive = zoom out)
 var turn := 0.0               # Z / X keys, -1 to 1
-var flag_pressed := false     # F8 pressed this frame
+var flag_pressed := false     # F2 pressed this frame
 
-var typing := false           # the F8 note box is open: game keys are ignored
+var typing := false           # the F2 note box is open: game keys are ignored
 var replaying := false        # a replay is setting the snapshot instead of the keyboard
 
 var _mouse := Vector2.ZERO

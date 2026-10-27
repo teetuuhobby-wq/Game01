@@ -2,7 +2,7 @@ extends Node
 ## REPLAY: plays a recorded playtest back exactly (the same keys, mouse and frame
 ## timings), so Claude can see what you saw. Run it hidden, always at 60 FPS:
 ##   tools/godot_offscreen.ps1 game --fixed-fps 60 -- --replay playtests/<session folder> [--shots]
-## With --shots it saves the camera's view at every event in events.csv (your F8 flags,
+## With --shots it saves the camera's view at every event in events.csv (your F2 flags,
 ## getting stuck, the camera jumping in, errand steps): one shot a third of a second
 ## before, one at the moment. They go in the session's replay/ folder.
 ## At the end it prints how closely the replay matched the recording.

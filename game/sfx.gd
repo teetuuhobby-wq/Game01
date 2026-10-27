@@ -39,7 +39,8 @@ func _ready() -> void:
 	_clink = _wav(_make_clink())
 	_knock = _wav(_make_knock())
 	_chatter = AudioStreamPlayer.new()
-	_chatter.stream = _wav(_make_chatter(), true)
+	if T.CHATTER_ON:
+		_chatter.stream = _wav(_make_chatter(), true)
 	_chatter.volume_db = -80.0
 	_chatter.autoplay = true
 	add_child(_chatter)
@@ -47,7 +48,7 @@ func _ready() -> void:
 
 ## The market's sound follows you: loud in the street, fading over about 25 m.
 func _process(delta: float) -> void:
-	if world == null or player == null or not world.has_method("market_distance"):
+	if not T.CHATTER_ON or world == null or player == null or not world.has_method("market_distance"):
 		return
 	var d: float = world.market_distance(player.position)
 	var k := clampf(1.0 - (d - 3.0) / 25.0, 0.0, 1.0)

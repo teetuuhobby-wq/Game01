@@ -38,4 +38,5 @@ const FOOTSTEP_DB := -10.0
 const STOMP_DB := -11.0          # the city's footsteps (was -2: too loud, playtest 1)
 const WIND_DB := -20.0
 const EFFECTS_DB := -4.0
+const CHATTER_ON := false        # off: the code-made murmur sounded like static (session 03 playtest)
 const CHATTER_DB := -12.0        # the market crowd's murmur, in the middle of the street

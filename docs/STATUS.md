@@ -17,6 +17,8 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 
 ## Open questions for the user (ask one or two at a time)
 
+0. **Sound plan (raised in session 03, ask first).** Market playtest: "the city feels a lot better", but the sounds are bad. Stomps are ok, footsteps aren't great, and the crowd murmur was static (now off). Claude's proposal: real recorded sounds from free CC0 libraries (Kenney packs, Freesound CC0) for footsteps, crowds and ambience; code-made sounds only for simple tones; optionally one paid AI sound-effect tool later for one-off sounds (ask first, budget $20–60/mo); and a "sound board" tool so the user can audition and set volumes themselves (Claude can't hear). Downloads need the user's OK each time. Also still to decide: **merge `experiment/market-street` into `main`?** (The user liked it.)
+
 1. **What kind of combat?** The user postponed this at the end of session 02. Options: (a) action, real time; (b) turn-based tactics like Chrono Ark (a game they love; it makes AI companions easy); (c) real time with pause to order the party. Ask "what part?" (the rush of reflexes, a clever plan, or the party's spectacle). *Claude's suggestion: two tiny combat toys on a branch (an afternoon each), one action and one turn-based, against the same desert creature. Let the user play both and react.*
 2. **Companions:** the user wants a party of AI companions (neighbours, guild members). *Claude's lean: the first expedition solo, then one simple companion who follows, talks, carries and warns at dawn (no fighting), and fighting companions once combat exists.* Not confirmed.
 3. **Fail state when stranded:** the user said "catch up on a vehicle, or game over and reload." *Claude suggested softer (a caravan rescues you, you lose your haul) and no vehicles in the first version (a sprint on foot after the rising city).* Not confirmed.
@@ -37,7 +39,7 @@ Settle question 1 (combat style). Then propose the first Phase 4 milestone with 
 - Don't build Huge things. Ask before paid tools.
 - **Tests run hidden.** The game must never pop up on the user's screen or grab their mouse and keyboard while Claude tests. Use `tools/godot_offscreen.ps1`, or `--headless` for logic. Open a visible window only when the user asks to see it.
 - **After every change to `game/`, run `tools/run_tests.ps1`.** When a test fails after a change, check whether the test or the game is wrong before "fixing" either.
-- **Playtests are the main feedback loop.** The user plays and presses F8; Claude reads the logs, replays the session to see the flagged moments, fixes, and proves the fix with a test that reproduces the user's exact situation.
+- **Playtests are the main feedback loop.** The user plays and presses F2 (was F8 until session 03); Claude reads the logs, replays the session to see the flagged moments, fixes, and proves the fix with a test that reproduces the user's exact situation.
 - **Save only the conversation to `docs/history/`** (`--chat-only`): the user wants later sessions to read between the lines, not the commands.
 
 ## Art status
@@ -79,12 +81,12 @@ Settle question 1 (combat style). Then propose the first Phase 4 milestone with 
 
 ## How to run things
 
-- **Play the game:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms (all the way in = first person), Z X turn. F8 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning numbers: `game/tuning.gd`.
+- **Play the game:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms (all the way in = first person), Z X turn. F2 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning numbers: `game/tuning.gd`.
 - **All tests (Claude, after every change):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/run_tests.ps1`. Headless, about 35 s. It runs the bot errand plus key, stairs, first-person and flower tests (`game/tests/`). Exit code 0 = all passed.
 - **Hidden runs with pictures:** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot_offscreen.ps1 <project_dir> [godot args] [-- game args]`. Godot runs on a separate, never-shown Windows desktop with sound off; screenshots and FPS match a visible run. Add `--fixed-fps 60` for repeatable screenshots. It stops at once if a script fails to load.
   - Bot errand with screenshots: `... godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots` (into `game/shots/`).
 - **Playtests (recorded automatically):** every normal play session writes `game/playtests/<date_time>/`. It's git-ignored, so it stays on the machine it was played on.
-  - `events.csv`: start here. The user's **F8 flags** with notes and a screenshot (`flag_NN.png`), plus automatic flags: `stuck`, `camera_jump`, `low_fps`, errand steps.
+  - `events.csv`: start here. The user's **F2 flags** with notes and a screenshot (`flag_NN.png`), plus automatic flags: `stuck`, `camera_jump`, `low_fps`, errand steps.
   - `log.csv`: 10 times a second: position, floor, camera (zoom; negative = first person), FPS, errand step.
   - `inputs.csv`: every frame's keys and mouse, for replay.
   - `session.txt`: machine, tuning values, and the **game version (git commit)**.

@@ -1,7 +1,7 @@
 extends Node3D
 ## STRIDER HOME, first playable toy: walk your town while it walks.
 ## Double-click run.bat to play. Tuning numbers are in tuning.gd.
-## Every normal play session is recorded to playtests/ (see recorder.gd): F8 flags a
+## Every normal play session is recorded to playtests/ (see recorder.gd): F2 flags a
 ## moment, F3 shows debug info.
 ## Test options (after "--"): --autoplay lets a bot play the errand and quits when
 ## it's done; --shots saves screenshots to shots/ along the way;
@@ -113,7 +113,7 @@ func _setup_input() -> void:
 		"run": [KEY_SHIFT], "interact": [KEY_E, KEY_ENTER],
 		"turn_left": [KEY_Z], "turn_right": [KEY_X],
 		"zoom_in": [KEY_EQUAL, KEY_KP_ADD, KEY_PAGEUP], "zoom_out": [KEY_MINUS, KEY_KP_SUBTRACT, KEY_PAGEDOWN],
-		"quit": [KEY_ESCAPE], "flag": [KEY_F8], "debug": [KEY_F3],
+		"quit": [KEY_ESCAPE], "flag": [KEY_F2], "debug": [KEY_F3],
 	}
 	for action in keys:
 		if not InputMap.has_action(action):

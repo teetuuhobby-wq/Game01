@@ -3,10 +3,10 @@ extends Node
 ## game/playtests/ (named by date and time) so Claude can study the session afterwards:
 ##   inputs.csv   every frame's keys and mouse, so Claude can replay the session exactly
 ##   log.csv      ten times a second: where you are, the camera, frame rate, errand step
-##   events.csv   moments worth a look: your F8 flags (with your note and a screenshot),
+##   events.csv   moments worth a look: your F2 flags (with your note and a screenshot),
 ##                and automatic ones: stuck, camera jumping in, low frame rate, errand steps
 ##   session.txt  which computer, and the tuning numbers used
-## F8 = "that felt off": saves a screenshot, and you can type a short note.
+## F2 = "that felt off": saves a screenshot, and you can type a short note.
 ## F3 = debug info on screen. Nothing is uploaded; playtests/ is kept out of git.
 
 const T := preload("res://tuning.gd")
@@ -156,7 +156,7 @@ func _git_commit() -> String:
 	return head if head != "" else "unknown"
 
 
-# ---------- F8: "that felt off" ----------
+# ---------- F2: "that felt off" ----------
 
 func _start_flag() -> void:
 	_flags += 1
@@ -239,6 +239,6 @@ func _update_overlay(_delta: float) -> void:
 		"FPS %d" % Engine.get_frames_per_second(),
 		"You: %.1f, %.1f m   floor %d (%s)%s" % [p.x, p.z, f, level, "   STUCK?" if _stuck_noted else ""],
 		("Camera: FIRST PERSON" if camera.first_person > 0.5 else "Camera: zoom %.2f   %.1f m away   lift %.0f deg   pulled in to %d%%" % [camera.zoom, camera.distance, rad_to_deg(camera.lift), roundi(camera.pull * 100)]),
-		"Errand step %d   F8 flags %d" % [errand.step, _flags],
+		"Errand step %d   F2 flags %d" % [errand.step, _flags],
 		"Recording to %s" % folder.get_file(),
 	])
