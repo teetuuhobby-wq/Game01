@@ -2,7 +2,7 @@ extends CanvasLayer
 ## A panel of buttons and sliders over the game (the sound board and the mood panel).
 ## Its key opens and closes it. While it's open the mouse is free for clicking (you
 ## can still walk with the keys, and the mouse wheel scrolls the panel instead of
-## zooming), and Esc closes it.
+## zooming), and Esc closes it. Only one panel is open at a time.
 
 var controls: Node          # controls.gd
 var toggle_action := ""     # the key's action name, set by each panel
@@ -69,18 +69,38 @@ func is_open() -> bool:
 
 
 func set_open(on: bool) -> void:
-	_root.visible = on
+	var was_open: bool = controls.menu_open   # was any panel open before this?
+	if on:
+		# One panel at a time: opening this one closes any other, or it would hide behind this one
+		for p in get_tree().get_nodes_in_group("game_panels"):
+			if p != self and p.is_open():
+				p._show(false)
+	_show(on)
 	var any := false
 	for p in get_tree().get_nodes_in_group("game_panels"):
 		any = any or p.is_open()
 	controls.menu_open = any
+	if on and not was_open:
+		# Remember if the game had the mouse, to hand it back when the panels close
+		controls.mouse_was_captured = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	if on:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	elif was_open and not any and controls.mouse_was_captured:
+		# The last panel closed: back to mouse look, so the next Esc only frees the
+		# mouse again (with the mouse free, Esc quits the game)
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+## Shows or hides just this panel.
+func _show(on: bool) -> void:
+	_root.visible = on
 	_note.text = ""
 	_on_open(on)
 
 
 func _input(event: InputEvent) -> void:
+	if controls.typing:
+		return   # the F2 note box is open: Esc and the keys are for it
 	if event.is_action_pressed(toggle_action):
 		set_open(not is_open())
 		get_viewport().set_input_as_handled()
@@ -132,6 +152,7 @@ func slider(text: String, lo: float, hi: float, step: float, value: float, on_ch
 	s.value = value
 	s.custom_minimum_size.x = 220
 	s.focus_mode = Control.FOCUS_NONE
+	s.scrollable = false   # the mouse wheel scrolls the panel, not the slider under it
 	var shown := Label.new()
 	shown.custom_minimum_size.x = 70
 	shown.text = fmt % value

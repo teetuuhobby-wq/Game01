@@ -18,6 +18,7 @@ var flag_pressed := false     # F2 pressed this frame
 
 var typing := false           # the F2 note box is open: game keys are ignored
 var menu_open := false        # a panel (sound board, mood) is open: clicks and the wheel are for it
+var mouse_was_captured := false   # the game had the mouse when a panel opened: it gets it back when they close
 var replaying := false        # a replay is setting the snapshot instead of the keyboard
 
 var _mouse := Vector2.ZERO
