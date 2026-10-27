@@ -94,9 +94,23 @@ func _add_residents() -> void:
 	_add_market_crowd()
 
 
+## Where the camera is, on the city (far away if there's no camera yet).
+func _camera_on_city() -> Vector3:
+	if camera == null:
+		return Vector3(INF, INF, INF)
+	return city.to_local(camera.global_position)
+
+
+## False for people further than people_view from the camera (low quality hides them).
+func _within_view(p: Vector3, cam: Vector3) -> bool:
+	return (p + Vector3(0.0, 1.0, 0.0)).distance_to(cam) < people_view
+
+
 func _update_walkers(delta: float) -> void:
+	var cam := _camera_on_city()
 	for w in walkers:
 		var node: Node3D = w["node"]
+		node.visible = _within_view(node.position, cam)
 		if _notice(w, node):
 			continue
 		if w["wait"] > 0.0:
@@ -151,8 +165,10 @@ func _promenade_point(pw: Dictionary, a: float) -> Vector3:
 
 
 func _update_promenaders(delta: float) -> void:
+	var cam := _camera_on_city()
 	for pw in promenaders:
 		var node: Node3D = pw["node"]
+		node.visible = _within_view(node.position, cam)
 		if _notice(pw, node):
 			continue
 		if pw["wait"] > 0.0:
@@ -298,19 +314,18 @@ func _mk_point(s: float, lane: float) -> Vector3:
 	return market_path[int(k.x)].lerp(market_path[int(k.x) + 1], k.y) + _mk_normal(s) * lane
 
 
-## People closer than 0.9 m to the camera are hidden, so nobody's head fills the screen.
+## People closer than 0.9 m to the camera are hidden, so nobody's head fills the screen
+## (and, like everyone, people further than people_view).
 func _mk_clear_of_camera(p: Vector3, cam: Vector3) -> bool:
 	var d := (p + Vector3(0.0, 1.0, 0.0)).distance_to(cam)
-	return d > 0.9 and d < people_view
+	return d > 0.9 and _within_view(p, cam)
 
 
 func _update_market(delta: float) -> void:
 	var you := Vector2(INF, INF)
 	if player != null:
 		you = Vector2(player.position.x, player.position.z)
-	var cam := Vector3(INF, INF, INF)
-	if camera != null:
-		cam = city.to_local(camera.global_position)
+	var cam := _camera_on_city()
 	for pp in market_people:
 		var node: Node3D = pp["node"]
 		var s: float = pp["s"]
