@@ -1,4 +1,4 @@
-# Session 03: market street, sounds, panels, and an overnight run (2026-10-26/27)
+# Session 03: market street, sounds, panels, an overnight run and the long night (2026-10-26/27)
 
 Cleaned transcript of a Claude Code session: the user's messages and Claude's replies.
 Only the conversation is kept: Claude's final reply each turn, with no tool calls, tool output or system text.
@@ -950,7 +950,7 @@ Once the files are in place, tell me. I'll add credits, wire up the new creak an
 Instead of search links, are you able to give me the exact links you want me to download instead?
 
 
----
+_(Here the conversation got long and was summarised for Claude; the summary is left out.)_
 
 ### 🤖 Claude
 
@@ -1060,5 +1060,584 @@ Do all three in your order (sounds, combat toys, polish) with all your defaults,
 
 ### 🤖 Claude
 
-Polish branch is done and pushed. Now finishing the docs, saving the conversation history, and pushing `main`.
+Good morning! ☀️ All three jobs are done and everything is pushed to GitHub. All tests pass, but nobody has played or heard any of it yet, so you'll be the first.
+
+## 1. Sounds (in the main game now)
+- Your downloads are in: **desert wind, town life, a real bell, and 4 creaks**.
+- **New:** the city now **creaks and groans** as it steps (on about half of the giant steps). **Town life** plays everywhere except the market and fades out as the market crowd fades in.
+- The full-size originals are in `audio_originals/`, which git ignores. The game uses trimmed copies with seamless loops. The town file went from 29 MB to 7.7 MB.
+- **Your part:** listen in-game and balance the volumes with **F4**. I can't hear any of it.
+
+## 2. Two combat toys (branch `experiment/combat-toys`)
+Both are night fights against the same giant **dune beetle**, picked from a menu:
+- **1, Action:** WASD to move, Space to roll, click to strike. A red mark on the sand warns you before each attack. Hit it hard while it's stuck after a charge. Below half health it gets angry and starts burrowing under you.
+- **2, Turn-based:** you and Bram share one hand of cards. The beetle shows what it will do, at whom, and **when**: at the end of your turn, or right after your 2nd card. So the order you play cards in matters, a bit like Chrono Ark.
+- **Tests:** a smart test bot beats both. In the action toy, standing still loses. In the turn-based toy, a bot that plays carefully wins 93% of fights and one playing at random wins 10%.
+- **Review:** a separate critic scored the first versions. I fixed its main complaints, including a beetle that was too dark, a floating horn and overlapping numbers. The fixed versions haven't been re-scored.
+
+## 3. Polish (branch `experiment/polish-01`)
+- **Varied people:** different heights, dresses, aprons, long hair, buns, headscarves, beards. Faces now have a nose.
+- **Softer golden hour:** less glare. Your old light is still there as the F5 preset "Golden hour (strong)".
+- **No giant torsos:** anyone within 1.3 m of the camera is hidden, so nobody fills the screen in first person.
+- **Critic, before → after:** people 4 → 6, light 5 → 6.5, overall 5.5 → 6.5.
+
+**How to try the branches:** run `git switch experiment/combat-toys`, then double-click `prototypes/combat_toys/run.bat`. Run `git switch main` when you're done. The polish is the same idea: switch to `experiment/polish-01` and use `game/run.bat`.
+
+**What I learned about you:** you're happy to do small, clear jobs for the project, as long as the ask is exact. And you like waking up to things you can play.
+
+**Next time:** play both toys and tell me which one you'd want more of, and what part of it hooked you. That decides the combat style, which unlocks the "One night out" milestone.
+
+Small note: making the history file left a 153 MB transcript export in your Downloads folder (`session-export-1793084523767.zip`). You can delete it.
+
+
+---
+
+## 🧑 User
+
+I'm actually still awake, but you finish much earlier then expected. Can you think of ways to keep yourself busy until I wake up? Tell me and then i'll decide what to do before I sleep.
+
+
+### 🤖 Claude
+
+Good to hear! First, an idea: **if you have 10 minutes before bed, play each combat toy for about 5 minutes.** Even a one-line reaction ("A was fun, B was boring") lets me spend the night improving the one you actually like, instead of guessing.
+
+Here's what I could do overnight, with your toy reaction or without it:
+
+| # | Idea | Size | Why |
+|---|---|---|---|
+| 1 | **Improve the combat toy you liked**: more moves or cards, a second creature, better feel | Medium | Only useful if you've played them. It's the best use of the night if you have. |
+| 2 | **"Dusk" look test:** the city kneels at sunset, the cargo lift lowers, lanterns come on, the desert turns dark and dangerous. A short scene to watch, nothing to play. | Medium | It previews the "One night out" moment and your core desire (a safe home in a dangerous world), without deciding the combat style for you. |
+| 3 | **Laptop speed:** a "low" quality setting so the game runs well on your work laptop (now about 20–28 FPS) | Medium | You switch between machines, so this helps every session on the laptop. |
+| 4 | **Quick polish fixes the critic suggested:** eyebrows and a neck on people, crisper colours from above, market crowds that don't stand in queues | Small | Safe, visible improvements to the city's look. |
+| 5 | **A third combat toy: real time with pause** (you order a small party, the action plays out, you pause to give new orders) | Medium | It's the one combat style we haven't tried. The catch: three toys might be more than you want to compare. |
+| 6 | **A build you can send friends** (a zipped Windows version) | Small | **Needs your OK:** it means downloading Godot's export templates (an official free download, around 1 GB). |
+
+**My pick:**
+- **If you play the toys first:** #1 for the one you liked, then #4.
+- **If you go straight to bed:** #2, then #4.
+
+The dusk scene is the kind of thing you react to instantly, and it doesn't lock in any decision.
+
+Same rules as before: everything new goes on its own branch, nothing gets merged, and I'll leave a morning report. It only uses your Claude plan; if I hit a usage limit, the work just pauses.
+
+Which ones do you want, and in what order?
+
+
+---
+
+## 🧑 User
+
+I don't plan on play testing anything until much later. So what do you suggest now?
+
+
+### 🤖 Claude
+
+Then I'd do this, in order:
+
+1. **The dusk look test** (Medium, its own branch). The city kneels at sunset, the cargo lift lowers, the lanterns come on and the desert goes dark. You can judge it in seconds from screenshots in the morning report, without playing anything. It also previews the moment the next milestone is built around.
+2. **Quick polish fixes** (Small, on the existing polish branch): eyebrows and a neck on people, crisper colours from above, and market crowds that don't stand in queues. A separate critic will compare before and after.
+3. **Laptop speed** (Medium, its own branch), if there's time left: a "low" quality setting, checked by measuring FPS with the laptop's limits in mind. You'd test it whenever you're next on the laptop.
+
+**Why this mix:** you won't be playtesting for a while, so I'd avoid piling up more things you have to *play* to judge. All three can be checked from screenshots and numbers, and none of them makes a decision that's yours (combat style, companions, fail state).
+
+**Skipping for now:** a third combat toy, which would be one more thing to play, and the friends build, which needs your OK for a download.
+
+Same rules as before: nothing gets merged, everything is on a branch, and you'll get a morning report with pictures. Want me to go ahead?
+
+
+---
+
+## 🧑 User
+
+This doesn't seem like you'll keep yourself busy for long. Is it a bad idea to have you keep working for the next several hours?
+
+
+### 🤖 Claude
+
+It's not a bad idea, as long as it's the right kind of work. The risk isn't the hours, it's *what* I'd fill them with:
+
+- **Work that needs your taste goes stale without your feedback.** If I build five things you haven't reacted to, I'm guessing five times in a row. Some of that will be wasted, and you'll wake up to a pile to review.
+- **Usage:** a long unattended run uses a big chunk of your Claude plan. I can't give an exact number. If I hit a limit, the work just pauses, with everything finished so far already saved and pushed.
+
+So the good long-run jobs are ones that are **useful whatever you decide**, or that give you **things to react to quickly** without having to play. Here's a longer queue in that spirit, in order:
+
+1. **Dusk look test:** the city kneels, the lift lowers, the lanterns come on. Two or three lighting variants for you to pick from.
+2. **Facility gallery:** 4–5 code-built buildings with a purpose (a guild hall, a tavern, a workshop, a general store, a bathhouse), shown side by side for you to pick favourites. This answers the open question "which facilities first?" by showing you, and fits what "bigger city" means to you: places with a purpose. *This is the big one.*
+3. **Polish fixes** from the critic (faces, crisper colours from above, market crowds that aren't queues), with a before/after review.
+4. **Bug hunt:** a bot walks every street for an hour, logging spots where it gets stuck, falls through the ground or drops frames. I fix what it finds, with a test for each fix.
+5. **Laptop speed:** a "low" quality setting, measured.
+6. **Code tidy-up** against the architecture rules, proven to change nothing (same world fingerprint, all tests pass).
+
+That's realistically several hours. **Stop rule:** when the queue is done, I stop and write the morning report. I won't start new big things I invent along the way; extra ideas go into IDEAS.md for you.
+
+**My recommendation:** run the whole queue. Everything goes on branches, nothing gets merged, and the morning report puts the things you need to look at (dusk and facilities) first.
+
+Shall I start?
+
+
+---
+
+## 🧑 User
+
+Will you also fully build and polish each building (guild hall, tavern, etc)? I should be able to walk inside them and interact with stuff.
+
+
+### 🤖 Claude
+
+I like where this is going: you want buildings that feel **lived-in**, places you walk into and *do* something, not just pretty boxes. That's exactly what "places with a purpose" means. But I need to be honest about the size.
+
+**Why all five, fully done, is too much for one night:**
+- Each walk-in building is an outside, a furnished inside, lighting, people inside and a few things to use, all checked by a critic. That's **Medium per building**, so five is **Large** (several sessions).
+- Some interactions need systems the game doesn't have yet. A real shop needs money and an inventory, and a real guild needs a quest system. Building those overnight, without asking you, would be quietly starting big systems you haven't chosen.
+- Done unattended in one night, five buildings would each come out half-finished. Two good ones beat five rough ones.
+
+**What I'd do instead (recommended):**
+- **Two fully built and polished: the guild hall and the tavern.** Placed in the real city (on a branch), so you just walk in during normal play. Doors, a furnished, lamplit inside, people inside. Interactions are **clever fakes** that need no new systems:
+  - **Guild hall:** a request board (press E to read 3 requests), a clerk who talks to you, a rank board on the wall.
+  - **Tavern:** sit on stools and benches, the barkeep talks to you, a crackling hearth, regulars chatting at tables.
+- **The other three (workshop, general store, bathhouse): outside finished, inside simple.** They're walkable with basic furniture, ready to grow once you've picked favourites.
+- The dusk test, bug hunt and other items from the queue still fit around this if there's time. The buildings come first.
+
+**Other options:**
+- **B: all five walk-in, but simpler** (furnished, one interaction each, less polish).
+- **C: guild hall only**, done as well as I can.
+
+My pick is the recommended plan above: the guild hall is the heart of your loop (take requests, go out at night), and the tavern is the cozy home side. Want me to go with that?
+
+
+---
+
+## 🧑 User
+
+I think it's fine to just do all of the buildings. We can always review and polish them later. What do you think:
+
+
+### 🤖 Claude
+
+I think that's a fair call. "First pass on all five, polish later" is a different job from "fully polished": it's wide rather than deep, and that suits a night without you. You'd wake up to the whole set to react to, and we polish the ones you like. That fits how you work best.
+
+**One honest warning:** expect **first drafts**, not finished buildings. Some interiors will feel a bit plain, and the interactions will be simple fakes (read a board, sit down, talk to someone). Nothing needs money, inventory or quest systems, since those are big decisions that stay yours.
+
+**How I'd run it (my defaults; say if any are wrong):**
+- **Order:** guild hall, tavern, workshop, general store, bathhouse. If the night runs out, the most important ones are done first.
+- **Where:** in the real city, on a new branch, replacing some ordinary houses near the plaza and market. You'd just walk in during normal play.
+- **Each building gets:**
+  - an outside with a sign
+  - a door you walk through
+  - a furnished, lamplit inside with people
+  - one or two things to use with E:
+    - **guild:** a request board and a clerk
+    - **tavern:** seats, a barkeep and a hearth
+    - **workshop:** a workbench and Bram
+    - **store:** a counter and a shopkeeper
+    - **bathhouse:** a pool you can sit in, steam
+- **Checks:** tests that every door and inside is walkable and every interaction works, plus a critic pass on screenshots of all five.
+- **After the buildings:** the dusk test, then the bug hunt, polish and laptop items, as time allows.
+- **Stop rule:** when the list is done, I stop and write the morning report. New ideas go into IDEAS.md.
+
+Shall I start?
+
+
+---
+
+## 🧑 User
+
+Since you'll be working non-stop without my input for a long time keep in mind that you are free to make as many decisions on your own as you want. Is that okay?
+
+
+### 🤖 Claude
+
+Yes, that's okay, and it helps: I won't stall waiting on small choices. I've saved it as a working rule so future sessions know too.
+
+**What I'll decide on my own:**
+- the layout, look and furniture of each building
+- which houses they replace
+- what the people inside say
+- how the interactions work
+- lighting and tuning
+- fixing whatever the tests and critics turn up
+- the order of the leftover jobs
+
+**How I'll keep that safe:**
+- **Everything on branches**, nothing merged into `main`, so any decision is easy to undo.
+- **Every decision logged** in DECISIONS.md, marked as mine, so later nobody mistakes my picks for your wishes.
+- **The morning report** lists the bigger calls I made, so you can overrule any of them in one line.
+
+**What I'll still leave for you:**
+- **The big direction:** combat style, companions, the fail state, the core loop.
+- **Spending or sign-ups:** anything that costs money or needs a new account.
+- **Downloads** you haven't already OK'd.
+- **Deleting** any of your work.
+- **Anything public.**
+
+If I hit one of those, I'll park it in the report instead of guessing.
+
+
+---
+
+## 🧑 User
+
+Give me the full plan details again so I can review it.
+
+
+### 🤖 Claude
+
+Here's the whole overnight plan in one place.
+
+## Ground rules
+- **Branches only.** Nothing gets merged into `main`. Each job gets its own branch, so any of it is easy to throw away.
+- **I decide the details myself:** looks, layout, wording, tuning, fixes. Every decision is logged in DECISIONS.md, marked as mine.
+- **Still yours:**
+  - combat style, companions, the fail state and the core loop
+  - anything that costs money or needs a new account
+  - downloads you haven't OK'd
+  - deleting your work
+  - anything public
+- **Tests run hidden.** Nothing pops up on your screen. All game tests run after every change, and nothing is called done until it passes.
+- **Looks are judged by a separate critic** from screenshots, not by me.
+- **Stop rule:** when the list is done, I stop. New ideas go into IDEAS.md, not into new work.
+- **Usage:** a long run uses a big chunk of your Claude plan. If I hit a limit, the work pauses, and everything finished so far is already saved and pushed.
+
+## 1. Five walk-in buildings (branch `experiment/facilities`): the main job
+- **Placement:** in the real city, near the plaza and market, replacing some ordinary houses.
+- **Done in order of importance:** if time runs out, the most important are finished.
+- **Every building has:**
+  - an outside that fits the city's style
+  - a sign
+  - a doorway you walk through
+  - a furnished inside with warm lamplight
+  - people inside
+  - interactions with **E**
+- **Quality level:** first drafts. We polish the ones you like later.
+
+| # | Building | Inside | Things to do (E) |
+|---|---|---|---|
+| 1 | **Guild hall** | Long hall, counter, benches, banners, trophy wall | Read the **request board** (3 requests, flavour text); talk to the **clerk**; look at the **rank board** |
+| 2 | **Tavern** | Bar, tables, stools, hearth, barrels | **Sit** on stools and benches; talk to the **barkeep**; regulars chat; the hearth crackles |
+| 3 | **Workshop** | Workbench, tools on the walls, gears and pipes, forge glow | Use the **workbench**; talk to **Bram** (Mira's errand keeps working) |
+| 4 | **General store** | Counter, shelves of goods, sacks, crates | Talk to the **shopkeeper**; look over the **shelves** (no buying: no money system yet) |
+| 5 | **Bathhouse** | Tiled pool, steam, benches, lanterns | **Sit in the pool**; talk to the **attendant** |
+
+- **Tests:**
+  - every doorway and inside can be walked
+  - every interaction triggers
+  - Mira's errand still works
+  - the market and stairs tests still pass
+- **Critic pass:** screenshots of all five, then one round of fixes.
+
+## 2. Dusk look test (branch `experiment/dusk`)
+A short scene to watch, not play:
+- The city slows and kneels at sunset.
+- The cargo lift lowers to the sand.
+- Lanterns come on.
+- The desert goes dark and dangerous.
+
+It comes in 2–3 lighting variants for you to pick from, with screenshots in the report.
+
+## 3. Bug hunt (branch `experiment/bug-hunt`)
+A bot walks every street and stair for about an hour of game time, logging:
+- where it gets stuck
+- where it falls through
+- where the frame rate drops
+
+I fix what it finds, each fix with a test.
+
+## 4. Polish fixes (existing `experiment/polish-01`)
+These come from the critic's notes:
+- eyebrows and a neck on faces
+- crisper colours in the bird's-eye view
+- market crowds that cluster instead of queueing
+
+Then a before/after critic check.
+
+## 5. Laptop speed (branch `experiment/laptop-speed`)
+- A "low" quality setting: shorter view distance, cheaper shadows and fewer distant people.
+- It's measured with hidden FPS runs, and you test it on the laptop next time you're there.
+
+## 6. Code tidy-up (branch `experiment/tidy`), if there's time
+- A check against the rules in ARCHITECTURE.md, plus small cleanups.
+- Proven to change nothing: the same world fingerprint, and all tests pass.
+
+## Morning report
+- In `docs/STATUS.md` and in chat, things to *look at* first: building and dusk screenshots.
+- Then what was fixed, then any big calls I made for you to overrule.
+- How to try each branch.
+- Honest notes on anything that didn't work or wasn't finished.
+
+Anything you'd like to change before I start?
+
+
+---
+
+## 🧑 User
+
+Let's add one more thing to the plans. What do you think about also adding characters to the plan? Designing them, creating them, etc...
+
+
+### 🤖 Claude
+
+Good addition, and it fits your core desires well: everyday life among people, and being "merely one resident" of a living town. It also slots neatly into the buildings job, since each building already needs someone inside.
+
+**What I'd do (Medium, part of the buildings branch):**
+- **A cast of about 8 named residents:**
+  - **The five building keepers:** a guild clerk, a barkeep, a shopkeeper, a bath attendant, and **Bram** at the workshop.
+  - **Mira**, who already gives you the errand.
+  - **Two townsfolk:** for example an old lookout who watches the desert from the wall, and a kid who runs errands around the market.
+- **Each one gets:**
+  - **A distinct look you can spot from a distance:** height, build, hair, clothes, and one signature item (the clerk's ledger, the lookout's spyglass, Bram's goggles).
+  - **A personality in a few words, plus 4–6 short lines** they say when you talk to them, some of which change after Mira's errand is done.
+  - **A home spot:** where they stand or work, plus a small habit (the barkeep polishes cups, the kid runs a loop round the market).
+- **`docs/CHARACTERS.md`:** one short card per character (look, personality, role, lines), so you can review and change them.
+- **A "line-up" screenshot** of the whole cast side by side, plus each one in their spot.
+- **A critic pass on both** the looks and the dialogue. AI-written dialogue tends to be bland, so a second opinion helps.
+
+**Where I'd draw the line:**
+- **No story secrets or big backstories.** The story payoff is the part you asked never to see spoiled. Characters stay everyday-level (jobs, habits, opinions about the town), so they can't give anything away or box the story in later.
+- **They're residents, not companions.** Who joins your party, and how companions work, is still your call. Some of these people could become companions later, once you decide.
+- **No day/night schedules yet.** The game doesn't have a clock, so "routines" are small loops in one place for now.
+
+**Plan change:** step 1 becomes **"Five buildings + the cast that lives in them,"** done together, building by building (guild hall and its clerk, then the tavern and its barkeep, and so on). Characters cost a little extra time, so the later jobs (tidy-up, maybe laptop speed) are more likely to be cut. They stay on the list and the report will say what got done.
+
+Sound good? If so, I'll start.
+
+
+---
+
+## 🧑 User
+
+How do you plan on reviewing all of the different works you'll be doing by the way?
+
+
+### 🤖 Claude
+
+Good question. Here's how each piece gets checked, from cheapest to most judgment-heavy.
+
+**1. Automated tests (after every change)**
+- Every test runs hidden after each change, and nothing is called done until it passes.
+- New tests for tonight's work:
+  - **Buildings:** every doorway and interior can be walked, you can't get stuck inside, and every **E** interaction triggers.
+- **Characters:** everyone stands in their spot, nobody blocks a door or a stair, every character has their lines, and their talk changes after the errand.
+- **Bug hunt:** each bug found gets a test that reproduces it before it's fixed.
+- **Tidy-up:** the "world fingerprint" proves the city is identical before and after.
+
+**2. Simulated play**
+- A bot plays like a person would: walks to each building, goes inside, uses everything, talks to everyone, and still finishes Mira's errand.
+- If it can't reach something, that counts as a bug.
+
+**3. Screenshots from the real game camera**
+- Taken hidden: first person (how you mostly play), over the shoulder, and from above.
+- I look at every one myself for obvious problems: things floating, clipping, too dark, hard to read.
+
+**4. Separate critics (not me)**
+- I built it, so I'm biased. Each piece goes to a fresh reviewer that didn't make it:
+  - **Look critic:** each building inside and out, the cast line-up, the dusk variants. It gives scores and its top 5 problems.
+  - **Dialogue critic:** reads every character's lines and flags bland or same-sounding voices, anything that sounds like a story secret, and anything off-tone for a cozy town.
+  - **Code reviewer:** checks each branch against the architecture rules and looks for bugs.
+- One round of fixes, then a **re-score** this time, so the report shows before → after numbers. Last night's combat fixes weren't re-scored.
+
+**5. Numbers**
+- **Speed:** frame rate before and after each branch on this PC. The buildings and characters mustn't make the city noticeably slower.
+- **Laptop job:** measured gains, plus a note that the real test is you on the laptop.
+
+**What I can't review (left for you):**
+- **Fun and feel:** only you can judge those.
+- **Sound:** I can't hear.
+- **Taste:** whether the buildings and characters are what *you* imagined. The critics catch obvious problems, but they're AI too.
+- **Real laptop speed.**
+
+**In the morning report, each job gets:**
+- what was done
+- test results
+- critic scores (before → after)
+- screenshots
+- known problems
+- what needs you
+
+Happy with that? If so, I'll start.
+
+
+---
+
+## 🧑 User
+
+Regarding the critics, what do you think about doing it dynamically? For example certain pieces get certain critics that fit the reviewing process?
+
+
+### 🤖 Claude
+
+Yes, I like that. A single general critic gives general notes. A critic set up for the specific job catches the things that matter for that piece. Here's how I'd match them:
+
+| Piece | Critics | What each one looks for |
+|---|---|---|
+| **Building outsides** | **Art director** | Fits the city's style and colours? Strong outline? Looks like it belongs, not pasted in? |
+| | **Street-level resident** | Seen from 20 m in first person: can you tell it's a tavern? Is the door obvious? |
+| **Building insides** | **Set dresser** | Cozy? Warm light, enough clutter to feel lived-in, but not messy? |
+| | **Level designer** | Easy to walk round, nothing in the way, can you find what to use? |
+| **Interactions** | **Usability critic** | Is it clear what you can press, and is there feedback when you do? |
+| **Characters (looks)** | **Character designer** | Each one recognisable from a distance? Signature item reads? Stands out from the crowd? |
+| **Dialogue** | **Editor** | Distinct voices, nothing bland or same-y, short enough |
+| | **Spoiler guard** | Nothing that sounds like a story secret or pins down the story (kept blind, like your story rule) |
+| **Dusk scene** | **Cinematographer** | Mood, light, which variant is strongest |
+| **Bug fixes, tidy-up** | **Code reviewer** | Real bugs, the architecture rules, nothing else broken |
+| **Laptop setting** | **Performance analyst** | Real gains, and what got uglier in exchange |
+| **Everything, at the end** | **Taste check** | Reads your TASTE.md, then judges whether tonight's work fits your core desires, so it's grounded in *you* |
+
+**How I'd run it:**
+- **2 critics per piece at most**, each one fresh and with its own checklist.
+- **One fix round, then a re-score** by the same critics, so before → after is fair.
+- **If critics disagree,** I make the call and note it in the report.
+- **Cost:** about 20–25 critic runs over the night. Each is short, but they add up on your plan. If usage gets tight, I'll cut the lower-value ones first (code tidy, laptop), not the buildings or characters.
+
+The "taste check" is the one I'm most keen on. The other critics judge quality; that one judges whether the work fits *you*.
+
+That's the full plan now: five buildings plus their cast, dusk, bug hunt, polish, laptop speed and tidy-up, with matched critics. Ready when you are.
+
+
+---
+
+## 🧑 User
+
+Give me the updated full plan
+
+
+### 🤖 Claude
+
+Here's the complete overnight plan.
+
+## Ground rules
+- **Branches only.** Nothing gets merged into `main`. Each job has its own branch.
+- **I make the detail decisions myself.** Each one is logged in DECISIONS.md, marked as mine, and the bigger calls are listed in the morning report for you to overrule.
+- **Still yours:**
+  - combat style, companions, the fail state, the core loop, the story
+  - anything that costs money or needs a new account
+  - downloads you haven't OK'd
+  - deleting your work
+  - anything public
+- **Hidden testing.** Nothing pops up on your screen. All tests run after every change, and nothing counts as done until it passes.
+- **Stop rule:** when the list is done, I stop. New ideas go into IDEAS.md.
+- **Usage:** a long run uses a big chunk of your Claude plan. If I hit a limit, the work pauses, and everything finished is already saved and pushed. If usage gets tight, I cut from the bottom of the list.
+
+## 1. Five buildings and their cast (branch `experiment/facilities`): the main job
+- **Placement:** in the real city near the plaza and market, replacing some ordinary houses. Each building is done together with its keeper, in this order, so the most important ones finish first.
+- **Every building has:**
+  - an outside with a sign
+  - a doorway you walk through
+  - a furnished inside with warm lamplight
+  - its keeper, plus regulars
+  - interactions with **E**
+
+| # | Building + keeper | Inside | Things to do (E) |
+|---|---|---|---|
+| 1 | **Guild hall** + the clerk | Long hall, counter, benches, banners, trophy wall | Read the **request board** (3 requests, flavour only); talk to the **clerk**; look at the **rank board** |
+| 2 | **Tavern** + the barkeep | Bar, tables, stools, hearth, barrels | **Sit** on stools and benches; talk to the **barkeep**; regulars chat |
+| 3 | **Workshop** + **Bram** | Workbench, tools on the walls, gears, forge glow | Use the **workbench**; talk to Bram (Mira's errand keeps working) |
+| 4 | **General store** + the shopkeeper | Counter, shelves, sacks, crates | Talk to the **shopkeeper**; look over the **shelves** (no buying yet) |
+| 5 | **Bathhouse** + the attendant | Tiled pool, steam, benches, lanterns | **Sit in the pool**; talk to the **attendant** |
+
+- **Three more characters:**
+  - **Mira**, restyled; she already gives you the errand.
+  - **An old lookout** on the wall, with a spyglass.
+  - **A market kid** who runs errands.
+- **Each character gets:**
+  - a distinct look you can spot from a distance (height, build, hair, clothes and one signature item)
+  - a personality in a few words
+  - 4–6 short lines, some of which change after the errand
+  - a home spot and a small habit
+- **Character limits:** everyday-level only. No story secrets or big backstories, they're residents rather than companions, and there are no day/night schedules yet.
+- **`docs/CHARACTERS.md`:** one card per character (look, personality, role, lines) for you to review and edit.
+- **Tests:**
+  - every doorway and inside can be walked
+  - nobody gets stuck
+  - every interaction triggers
+  - characters stand in their spots, block no doors or stairs, and have their lines
+  - Mira's errand and the market and stairs tests still pass
+- **Bot playthrough:** the bot visits each building, uses everything, talks to everyone, and finishes the errand.
+- **Frame rate:** checked before and after; the city mustn't get noticeably slower.
+- **Screenshots:** first person, over the shoulder and from above, plus a **cast line-up**.
+
+## 2. Dusk look test (branch `experiment/dusk`)
+A short scene to watch, not play:
+- the city slows and kneels at sunset
+- the cargo lift lowers
+- lanterns come on
+- the desert goes dark and dangerous
+
+There are 2–3 lighting variants for you to pick from, with screenshots.
+
+## 3. Bug hunt (branch `experiment/bug-hunt`)
+A bot walks every street and stair for about an hour of game time, logging stuck spots, falls through the ground and frame-rate drops. Every bug gets a test that reproduces it, then the fix.
+
+## 4. Polish fixes (existing `experiment/polish-01`)
+Eyebrows and a neck on faces, crisper colours from above, and market crowds that cluster instead of queueing.
+
+## 5. Laptop speed (branch `experiment/laptop-speed`)
+A "low" quality setting (shorter view distance, cheaper shadows, fewer distant people), measured with hidden FPS runs. The real test is you on the laptop.
+
+## 6. Code tidy-up (branch `experiment/tidy`), if there's time
+A check against ARCHITECTURE.md plus small cleanups, proven to change nothing (the same world fingerprint, and all tests pass).
+
+## Review: matched critics
+Each piece gets **up to 2 fresh critics** that didn't build it, each with its own checklist. Then one round of fixes and a **re-score** by the same critics.
+
+| Piece | Critics |
+|---|---|
+| Building outsides | **Art director** (fits the city's style, strong outline); **street-level resident** (in first person from 20 m, can you tell what it is and where the door is?) |
+| Building insides | **Set dresser** (cozy, lived-in, good light); **level designer** (easy to walk, nothing in the way, you can find what to use) |
+| Interactions | **Usability critic** (clear what to press, feedback when you do) |
+| Characters' looks | **Character designer** (recognisable from a distance, the signature item reads, stands out from the crowd) |
+| Dialogue | **Editor** (distinct voices, not bland, short); **spoiler guard** (kept blind: no story secrets) |
+| Dusk | **Cinematographer** (mood, light, best variant) |
+| Bug fixes, tidy-up | **Code reviewer** (real bugs, architecture rules) |
+| Laptop | **Performance analyst** (real gains, what got uglier) |
+| Everything, at the end | **Taste check** (reads your TASTE.md, then judges whether tonight's work fits your core desires) |
+
+- **If critics disagree,** I decide and say so in the report.
+- **About 20–25 critic runs.** If usage gets tight, the code and laptop critics are cut first.
+
+## Morning report (in `docs/STATUS.md` and in chat)
+1. **Things to look at first:** building, cast and dusk screenshots.
+2. **For each job:**
+   - what was done
+   - test results
+   - critic scores (before → after)
+   - known problems
+   - what needs you (fun, sound, taste, the laptop)
+3. **The bigger decisions I made,** for you to overrule.
+4. **How to try each branch.**
+5. **Honest notes** on anything unfinished or that didn't work.
+
+Then the usual end-of-session steps: update the docs, save the history, commit and push.
+
+Say go and I'll start.
+
+
+---
+
+## 🧑 User
+
+Go
+
+
+### 🤖 Claude
+
+You've hit your session limit · resets 5:10am (America/Chicago)
+
+
+---
+
+## 🧑 User
+
+I hit my usage limit while you were working, but it has reset now. Please continue from where you left off.
+
+
+### 🤖 Claude
+
+All 9 buildings checks pass. Adding a small test for the two bugs the reviewer found (one E press doing two things, and standing up straight after sitting), so they can't come back.
+
+
+_(Here the conversation got long and was summarised for Claude; the summary is left out.)_
+
+### 🤖 Claude
+
+Docs are in. Committing them, then saving the conversation history.
 
