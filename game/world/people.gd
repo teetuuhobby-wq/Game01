@@ -5,42 +5,114 @@ extends "res://world/legs.gd"
 ## the right, browsers, kids, people carrying crates, chatting groups, shopkeepers.
 
 
-func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color) -> MeshInstance3D:
+## A person made of blocks, facing +x. `look` changes the build (all optional):
+##   legs 2 (short) or 3; torso 3 or 4 (tall); dress (a skirt instead of legs);
+##   apron; belly; sash (a coloured belt, Color); beard;
+##   hair: "short", "long", "bun", "bald" or "scarf" (a headscarf, with "scarf_colour").
+## The mesh remembers how tall it is (meta "top", metres), for hats and carried crates.
+func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color, look := {}) -> MeshInstance3D:
 	var pts := []    # plain Arrays: lambdas would copy packed arrays
 	var cols := []
 	var add := func(x: int, y: int, z: int, c: Color) -> void:
 		pts.append(Vector3((x - 0.5) * VS, (y + 0.5) * VS, z * VS))
 		cols.append(c)
-	for y in 3:
-		for x in 2:
-			add.call(x, y, -1, pants)
-			add.call(x, y, 1, pants)
-	for y in range(3, 6):
+	var legs: int = look.get("legs", 3)
+	var torso: int = look.get("torso", 3)
+	var neck := legs + torso                 # first row of the head
+	var hair_style: String = look.get("hair", "short")
+	var top_hair := hair
+	if hair_style == "scarf":
+		top_hair = look.get("scarf_colour", Color(0.85, 0.30, 0.25))
+	var dress: bool = look.get("dress", false)
+	var apron: bool = look.get("apron", false)
+	var apron_c := Color(0.95, 0.94, 0.88)
+	# Legs, or a skirt down to the ground
+	for y in legs:
+		if dress:
+			for x in 2:
+				for z in range(-1, 2):
+					add.call(x, y, z, apron_c if (apron and x == 1 and z == 0) else pants)
+		else:
+			for x in 2:
+				var c := pants
+				if y == 0:
+					c = pants.darkened(0.35)        # shoes
+				add.call(x, y, -1, c)
+				add.call(x, y, 1, c)
+	# Body and arms
+	for y in range(legs, neck):
 		for x in 2:
 			for z in range(-1, 2):
-				add.call(x, y, z, shirt)
-		add.call(1 if y == 3 else 0, y, -2, skin if y == 3 else shirt)
-		add.call(1 if y == 3 else 0, y, 2, skin if y == 3 else shirt)
-	for y in range(6, 9):
+				var c := shirt
+				if y == legs and look.has("sash"):
+					c = look["sash"]
+				if apron and x == 1 and z == 0:
+					c = apron_c
+				add.call(x, y, z, c)
+		var hand := y == legs
+		add.call(1 if hand else 0, y, -2, skin if hand else shirt)
+		add.call(1 if hand else 0, y, 2, skin if hand else shirt)
+	if look.get("belly", false):
+		add.call(2, legs + 1, 0, shirt)
+	# Head: face toward +x (x = 1), hair on top and at the back
+	for y in range(neck, neck + 3):
 		for x in 2:
 			for z in range(-1, 2):
 				var c := skin
-				if y == 8 or x == 0:
-					c = hair
-				elif y == 7 and x == 1 and z != 0:
+				var row := y - neck                # 0 chin, 1 eyes, 2 top
+				if row == 2 or x == 0:
+					c = top_hair if hair_style != "bald" else (hair if (x == 0 and row < 2) else skin)
+				elif row == 1 and x == 1 and z != 0:
 					c = Color(0.15, 0.12, 0.10)
+				elif row == 0 and x == 1 and look.get("beard", false):
+					c = hair
+				if hair_style == "scarf" and absi(z) == 1 and row >= 1 and x == 0:
+					c = top_hair
 				add.call(x, y, z, c)
-	return _mi(_cubes(PackedVector3Array(pts), PackedColorArray(cols), VS, true))
+	match hair_style:
+		"long":
+			for y in range(neck - 2, neck + 2):
+				for z in range(-1, 2):
+					add.call(-1, y, z, hair)
+		"bun":
+			add.call(-1, neck + 2, 0, hair)
+		"scarf":
+			for y in range(neck - 1, neck + 2):
+				add.call(-1, y, 0, top_hair)
+	var mi := _mi(_cubes(PackedVector3Array(pts), PackedColorArray(cols), VS, true))
+	mi.mesh.set_meta("top", (neck + 3) * VS)
+	return mi
 
 
 func _random_person() -> MeshInstance3D:
 	var shirts := [Color(0.16, 0.55, 0.58), Color(0.82, 0.30, 0.26), Color(0.94, 0.80, 0.40),
-			Color(0.96, 0.95, 0.90), Color(0.40, 0.52, 0.78), Color(0.55, 0.70, 0.40)]
+			Color(0.96, 0.95, 0.90), Color(0.40, 0.52, 0.78), Color(0.55, 0.70, 0.40),
+			Color(0.62, 0.36, 0.62), Color(0.88, 0.55, 0.30)]
 	var pants := [Color(0.30, 0.24, 0.20), Color(0.24, 0.28, 0.38), Color(0.55, 0.48, 0.38)]
-	var hairs := [Color(0.20, 0.13, 0.08), Color(0.45, 0.30, 0.15), Color(0.10, 0.09, 0.08), Color(0.80, 0.70, 0.45)]
+	var dresses := [Color(0.72, 0.24, 0.30), Color(0.26, 0.46, 0.66), Color(0.84, 0.70, 0.40),
+			Color(0.36, 0.56, 0.42), Color(0.92, 0.90, 0.84)]
+	var hairs := [Color(0.20, 0.13, 0.08), Color(0.45, 0.30, 0.15), Color(0.10, 0.09, 0.08), Color(0.80, 0.70, 0.45),
+			Color(0.62, 0.60, 0.58), Color(0.62, 0.28, 0.14)]
 	var skins := [Color(0.92, 0.75, 0.62), Color(0.78, 0.58, 0.42), Color(0.55, 0.38, 0.26)]
-	return _make_person(shirts[rng.randi() % shirts.size()], pants[rng.randi() % pants.size()],
-			hairs[rng.randi() % hairs.size()], skins[rng.randi() % skins.size()])
+	var scarves := [Color(0.85, 0.30, 0.25), Color(0.95, 0.80, 0.35), Color(0.30, 0.55, 0.70), Color(0.96, 0.95, 0.90)]
+	var look := {}
+	var r := rng.randf()
+	if r < 0.15:
+		look["legs"] = 2
+	elif r < 0.32:
+		look["torso"] = 4
+	look["dress"] = rng.randf() < 0.3
+	look["apron"] = rng.randf() < 0.12
+	look["belly"] = rng.randf() < 0.15
+	look["beard"] = not look["dress"] and rng.randf() < 0.25
+	if rng.randf() < 0.2:
+		look["sash"] = scarves[rng.randi() % scarves.size()]
+	var h := rng.randf()
+	look["hair"] = "short" if h < 0.42 else ("long" if h < 0.62 else ("bun" if h < 0.74 else ("bald" if h < 0.86 else "scarf")))
+	look["scarf_colour"] = scarves[rng.randi() % scarves.size()]
+	var bottom: Color = dresses[rng.randi() % dresses.size()] if look["dress"] else pants[rng.randi() % pants.size()]
+	return _make_person(shirts[rng.randi() % shirts.size()], bottom,
+			hairs[rng.randi() % hairs.size()], skins[rng.randi() % skins.size()], look)
 
 
 func _ring_radius() -> float:
@@ -192,7 +264,7 @@ func _add_market_crowd() -> void:
 		return
 	_mk_len = (market_path.size() - 1) * 0.5
 	var looks := []
-	for i in 16:
+	for i in 32:
 		looks.append(_random_person().mesh)
 	var crates := []
 	for c in [P.WOOD, P.RED, P.AWN1, P.LEAF]:
@@ -219,7 +291,7 @@ func _add_market_crowd() -> void:
 		if not kid and rng.randf() < T.MARKET_CARRY:
 			var crate := MeshInstance3D.new()
 			crate.mesh = crates[rng.randi() % crates.size()]
-			crate.position = Vector3(0.0, 1.95, 0.0)
+			crate.position = Vector3(0.0, float(node.get_child(0).mesh.get_meta("top", 1.8)) + 0.15, 0.0)
 			node.add_child(crate)
 		var dir := 1 if rng.randf() < 0.5 else -1
 		var lane := _mk_lane(dir)
@@ -266,7 +338,8 @@ func _mk_hat(node: Node3D, hats: Array) -> void:
 	if rng.randf() < 0.45:
 		var hat := MeshInstance3D.new()
 		hat.mesh = hats[rng.randi() % hats.size()]
-		hat.position = Vector3(0.0, 1.8 + hat.mesh.size.y * 0.5, 0.0)
+		var top: float = node.get_child(0).mesh.get_meta("top", 1.8)
+		hat.position = Vector3(0.0, top + hat.mesh.size.y * 0.5, 0.0)
 		node.add_child(hat)
 
 

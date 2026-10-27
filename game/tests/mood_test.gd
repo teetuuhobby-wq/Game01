@@ -19,7 +19,7 @@ func _ready() -> void:
 		_finish(results)
 		return
 	results.append(["the game starts golden hour (unless a saved look exists)",
-			FileAccess.file_exists(mood.SAVED) or is_equal_approx(world.sun.light_energy, 2.0), "sun %.2f" % world.sun.light_energy])
+			FileAccess.file_exists(mood.SAVED) or is_equal_approx(world.sun.light_energy, mood.PRESETS["Golden hour"]["sun_brightness"]), "sun %.2f" % world.sun.light_energy])
 	var ev := InputEventAction.new()
 	ev.action = "mood"
 	ev.pressed = true
