@@ -300,7 +300,8 @@ func _mk_point(s: float, lane: float) -> Vector3:
 
 ## People closer than 0.9 m to the camera are hidden, so nobody's head fills the screen.
 func _mk_clear_of_camera(p: Vector3, cam: Vector3) -> bool:
-	return (p + Vector3(0.0, 1.0, 0.0)).distance_to(cam) > 0.9
+	var d := (p + Vector3(0.0, 1.0, 0.0)).distance_to(cam)
+	return d > 0.9 and d < people_view
 
 
 func _update_market(delta: float) -> void:

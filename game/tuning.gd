@@ -33,6 +33,9 @@ const MARKET_CARRY := 0.2        # share of walkers carrying a crate or basket
 const USE_DISTANCE := 1.8        # how close you need to be to use something (metres)
 const FIX_TIME := 1.5            # seconds to hold E to fit the valve
 
+# --- Graphics ---
+const QUALITY := "high"          # "high" for the home PC, "low" for a weaker laptop (F6 switches in the game)
+
 # --- Sound ---
 # Volumes, variety and which recording to use are set in the game with the sound board
 # (press F4), and saved in audio/sound_settings.json. The built-in values are in sfx.gd.
