@@ -107,7 +107,9 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _menu == null or not (event is InputEventKey) or not event.pressed:
+	# event.echo: a key held down repeats. Ignore the repeats, or holding Esc to leave a toy
+	# would carry on and quit the whole program from the menu.
+	if _menu == null or not (event is InputEventKey) or not event.pressed or event.echo:
 		return
 	match event.physical_keycode:
 		KEY_1:
