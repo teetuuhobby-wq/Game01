@@ -252,7 +252,7 @@ func _hurt_beetle(dmg: int, at: Vector3) -> void:
 		dmg *= T.A_STUCK_MULTIPLIER
 	b_hp -= dmg
 	hits_landed += 1
-	beetle.flash(Color(1.0, 0.85, 0.6), 0.5 if stuck else 0.3)
+	beetle.flash(Color(1.0, 0.8, 0.55), 0.22 if stuck else 0.15)
 	var hit_at := at.lerp(p_pos, 0.45) + Vector3(0, 1.1, 0)
 	Fx.burst(self, hit_at, Color(1.0, 0.75, 0.35), 22 if stuck else 12, 6.0)
 	Fx.popup(self, hit_at + Vector3(0, 0.4, 0), str(dmg), Color(1.0, 0.85, 0.4) if not stuck else Color(1.0, 0.5, 0.25), 72 if stuck else 56)
@@ -560,12 +560,12 @@ func _update_camera(delta: float) -> void:
 	var back := Vector3(sin(cam_yaw), 0, cos(cam_yaw))
 	var look := p_pos.lerp(focus, 0.45) + Vector3(0, 0.9, 0)
 	var side := back.cross(Vector3.UP)    # a little over your right shoulder, so you don't hide the beetle
-	var want := p_pos + back * 7.5 - side * 1.6 + Vector3(0, 4.6, 0)
+	var want := p_pos + back * 9.0 - side * 1.6 + Vector3(0, 5.8, 0)
 	if over:
 		# Look at the beetle from the open middle of the arena
 		var inward := -Vector3(b_pos.x, 0, b_pos.z).normalized() if b_pos.length() > 3.0 else back
-		want = b_pos + inward.rotated(Vector3.UP, sin(fight_time * 0.0 + Time.get_ticks_msec() * 0.0002) * 0.6) * 8.5 + Vector3(0, 3.5, 0)
-		look = b_pos.lerp(p_pos, 0.3) + Vector3(0, 0.8, 0)
+		want = b_pos + inward.rotated(Vector3.UP, sin(Time.get_ticks_msec() * 0.0002) * 0.6) * 7.0 + Vector3(0, 6.0, 0)
+		look = b_pos + Vector3(0, 0.5, 0)
 	# Stay inside the ring of rocks: if you're at the edge, look down from higher up instead
 	var flat := Vector2(want.x, want.z)
 	if flat.length() > Arena.RADIUS - 0.5:
@@ -682,6 +682,11 @@ func _make_hud() -> void:
 	_hurt_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_hurt_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.add_child(_hurt_overlay)
+	var back := ColorRect.new()
+	back.color = Color(0, 0, 0, 0.45)
+	back.position = Vector2(18, 18)
+	back.size = Vector2(T.A_PLAYER_HEARTS * 40 + 14, 76)
+	_hud.add_child(back)
 	for i in T.A_PLAYER_HEARTS:
 		var h := ColorRect.new()
 		h.size = Vector2(30, 30)
@@ -723,8 +728,8 @@ func _make_hud() -> void:
 	_hud.add_child(_result)
 	var shade := ColorRect.new()
 	shade.color = Color(0, 0, 0, 0.45)
-	shade.anchor_top = 0.38
-	shade.anchor_bottom = 0.62
+	shade.anchor_top = 0.14
+	shade.anchor_bottom = 0.40
 	shade.anchor_right = 1.0
 	_result.add_child(shade)
 	_result_label = Label.new()
@@ -733,7 +738,9 @@ func _make_hud() -> void:
 	_result_label.add_theme_constant_override("outline_size", 10)
 	_result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_result_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_result_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_result_label.anchor_right = 1.0
+	_result_label.anchor_top = 0.14
+	_result_label.anchor_bottom = 0.40
 	_result.add_child(_result_label)
 
 

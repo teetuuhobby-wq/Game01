@@ -42,6 +42,7 @@ var _pile_label: Label
 var _log: Label
 var _end_button: Button
 var _prompt: Label
+var _help: Label
 var _result: Control
 var _result_label: Label
 var _ring: MeshInstance3D
@@ -172,11 +173,11 @@ func _play_events(ev: Array) -> void:
 			"hit":
 				await _show_hit(e)
 			"block":
-				Fx.popup(self, units[e["who"]].position + Vector3(0, 2.3, 0), "+%d Block" % e["amount"], Color(0.55, 0.8, 1.0), 52)
+				Fx.popup(self, units[e["who"]].position + Vector3(0, 1.5, 0.8), "+%d Block" % e["amount"], Color(0.55, 0.8, 1.0), 52)
 				sfx.play("block")
 				await _wait(0.35)
 			"heal":
-				Fx.popup(self, units[e["who"]].position + Vector3(0, 2.3, 0), "+%d" % e["amount"], Color(0.5, 1.0, 0.5), 60)
+				Fx.popup(self, units[e["who"]].position + Vector3(0, 1.5, 0.8), "+%d" % e["amount"], Color(0.5, 1.0, 0.5), 60)
 				Fx.burst(self, units[e["who"]].position + Vector3(0, 1.0, 0), Color(0.4, 1.0, 0.5), 14, 2.5)
 				sfx.play("block", -4.0, 1.4)
 				_say("Bram patches up " + ("you" if e["who"] == R.YOU else "himself"))
@@ -199,7 +200,7 @@ func _play_events(ev: Array) -> void:
 				Fx.popup(self, units[R.BRAM].position + Vector3(0, 2.8, 0), "covered!", Color(1.0, 0.8, 0.5), 44)
 			"shell":
 				Fx.popup(self, units[R.BEETLE].position + Vector3(0, 2.8, 0), "+%d Shell" % e["amount"], Color(0.85, 0.65, 0.4), 56)
-				units[R.BEETLE].flash(Color(0.9, 0.6, 0.3), 0.7)
+				units[R.BEETLE].flash(Color(0.9, 0.6, 0.3), 0.3)
 				sfx.play("block", 0.0, 0.6)
 				await _wait(0.4)
 			"burrow":
@@ -218,7 +219,7 @@ func _play_events(ev: Array) -> void:
 			"intent":
 				pass
 			"enrage":
-				Fx.popup(self, units[R.BEETLE].position + Vector3(0, 3.0, 0), "ENRAGED!", Color(1.0, 0.35, 0.25), 80)
+				Fx.popup(self, units[R.BEETLE].position + Vector3(-1.8, 1.0, 1.6), "ENRAGED!", Color(1.0, 0.35, 0.25), 80)
 				sfx.play("screech", 4.0, 0.8)
 				_say("The beetle is enraged: its attacks hit harder")
 				await _wait(0.6)
@@ -281,7 +282,8 @@ func _show_hit(e: Dictionary) -> void:
 			Fx.burst(self, u.position + Vector3(-1.0, 1.4, 0), Color(0.4, 0.3, 0.2), 16, 5.0, 0.12, false)
 			sfx.play("wrench")
 		if e["dmg"] > 0:
-			u.flash(Color(1.0, 0.85, 0.6), 0.4)
+			u.flash(Color(1.0, 0.8, 0.55), 0.2)
+			_recoil(u, Vector3(0.5, 0, 0))
 			Fx.burst(self, u.position + Vector3(-1.2, 1.3, 0), Color(1.0, 0.75, 0.35), 14, 5.0)
 			Fx.popup(self, top, str(e["dmg"]), Color(1.0, 0.85, 0.4), 72)
 			sfx.play("hit_big" if e["dmg"] >= 8 else "hit")
@@ -293,6 +295,7 @@ func _show_hit(e: Dictionary) -> void:
 	else:
 		if e["dmg"] > 0:
 			u.flash(Color(1.0, 0.3, 0.2), 1.2)
+			_recoil(u, Vector3(-0.6, 0, 0))
 			Fx.popup(self, top, str(e["dmg"]), Color(1.0, 0.4, 0.3), 72)
 			Fx.burst(self, u.position + Vector3(0, 1.2, 0), Color(1.0, 0.3, 0.2), 10, 4.0)
 			sfx.play("hurt")
@@ -368,6 +371,20 @@ func _show_beetle(e: Dictionary) -> void:
 			await _wait(0.2)
 
 
+## Knocked back a little by a hit, then back in place.
+func _recoil(u: Node3D, push: Vector3) -> void:
+	if busy and u == units[R.BEETLE] and u.position.distance_to(HOME[R.BEETLE]) > 0.3:
+		return    # mid-attack: don't fight its own movement
+	var home: Vector3 = u.position
+	var t := create_tween()
+	t.tween_property(u, "position", home + push, 0.06)
+	t.tween_property(u, "position", home, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+func _left(i: int) -> String:
+	return "%d/%d" % [rules.hp[i], rules.max_hp[i]] if rules.alive(i) else "went down"
+
+
 ## After an attack the beetle scuttles back to its spot (while the damage shows).
 func _slide_back_later(b: Node3D) -> void:
 	var t := create_tween()
@@ -387,14 +404,20 @@ func _say(text: String) -> void:
 
 
 func _end_screen(won: bool) -> void:
+	for i in 2:
+		for c in units[i].get_children():
+			if c is Label3D:
+				c.visible = false
+	for n in [_energy_label, _pile_label, _end_button, _help]:
+		n.visible = false
 	if won:
 		units[R.BEETLE].die()
 		for i in [R.YOU, R.BRAM]:
 			if rules.alive(i):
 				units[i].cheer()
 		get_tree().create_timer(0.6).timeout.connect(func() -> void: sfx.play("win"))
-		_result_label.text = "THE BEETLE IS BEATEN!\nIn %d turns · You %d/%d, Bram %d/%d\n\nR: fight again    ·    Esc: back to the menu" % [
-				rules.turn, rules.hp[0], rules.max_hp[0], rules.hp[1], rules.max_hp[1]]
+		_result_label.text = "THE BEETLE IS BEATEN!\nIn %d turns · You %s, Bram %s\n\nR: fight again    ·    Esc: back to the menu" % [
+				rules.turn, _left(0), _left(1)]
 	else:
 		_result_label.text = "YOU BOTH WENT DOWN\nThe beetle had %d of %d health left\n\nR: fight again    ·    Esc: back to the menu" % [rules.hp[2], rules.max_hp[2]]
 	_result.modulate.a = 0.0
@@ -532,11 +555,11 @@ func _make_ui() -> void:
 	_pile_label.anchor_bottom = 1.0
 	_pile_label.offset_left = 40
 	_pile_label.offset_top = -120
-	var help := _text(_ui, "Click a card (or 1-5) to play it\nSpace: end turn   ·   Esc: menu", 16, Color(1, 1, 1, 0.6))
-	help.anchor_top = 1.0
-	help.anchor_bottom = 1.0
-	help.offset_left = 40
-	help.offset_top = -80
+	_help = _text(_ui, "Click a card (or 1-5) to play it\nSpace: end turn   ·   Esc: menu", 16, Color(1, 1, 1, 0.6))
+	_help.anchor_top = 1.0
+	_help.anchor_bottom = 1.0
+	_help.offset_left = 40
+	_help.offset_top = -80
 	_end_button = Button.new()
 	_end_button.text = "END TURN"
 	_end_button.add_theme_font_size_override("font_size", 26)
@@ -681,7 +704,7 @@ func _refresh() -> void:
 		if rules.result != "":
 			_intent_when.text = ""
 		elif n == -1:
-			_intent_when.text = "next turn (it already acted)"
+			_intent_when.text = "on your next turn (it already acted)"
 		elif n == 0:
 			_intent_when.text = "at the end of your turn"
 		else:

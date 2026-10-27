@@ -14,6 +14,8 @@ static func popup(parent: Node, at: Vector3, text: String, color := Color(1, 0.9
 	l.no_depth_test = true
 	l.fixed_size = false
 	l.pixel_size = 0.006
+	# A little sideways jitter so numbers landing together don't sit on top of each other
+	at += Vector3(randf_range(-0.45, 0.45), randf_range(0.0, 0.35), randf_range(-0.2, 0.2))
 	l.position = at
 	parent.add_child(l)
 	l.scale = Vector3.ONE * 0.4

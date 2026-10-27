@@ -37,7 +37,7 @@ func _ready() -> void:
 	add_child(body)
 	# The shell: the top part of a long egg shape, with the split down its back
 	var shell := {}
-	var base := Color(0.24, 0.19, 0.15)
+	var base := Color(0.30, 0.24, 0.19)
 	for x in range(-6, 7):
 		for y in range(-2, 5):
 			for z in range(-8, 9):
@@ -54,7 +54,9 @@ func _ready() -> void:
 				if z == -4:
 					c = Color(0.10, 0.08, 0.07)            # the groove behind the neck
 				if y <= -1:
-					c = Color(0.32, 0.23, 0.16)            # belly
+					c = Color(0.36, 0.27, 0.19)            # belly
+				if y == -2:
+					c = Color(0.62, 0.52, 0.38)            # sand-dusted rim along the bottom
 				elif e > 0.75 and rng.randf() < 0.25:
 					c = Color(0.55, 0.46, 0.33)            # sand caught in the edges
 				shell[Vector3i(x, y, z)] = Vox.vary(c, rng, 0.02)
@@ -67,13 +69,15 @@ func _ready() -> void:
 		for y in range(-2, 3):
 			for z in range(-2, 3):
 				if pow(x / 3.5, 2) + pow(y / 2.6, 2) + pow(z / 2.8, 2) <= 1.0:
-					h[Vector3i(x, y, z)] = Vox.vary(Color(0.14, 0.11, 0.10), rng, 0.02)
+					h[Vector3i(x, y, z)] = Vox.vary(Color(0.22, 0.18, 0.15), rng, 0.02)
 	# The horn: up from the forehead and curving forward
 	for i in 6:
-		var p := Vector3i(0, 2 + i, -1 - int(i * i / 5.0))
-		h[p] = Color(0.20, 0.16, 0.13).lerp(Color(0.72, 0.64, 0.50), i / 6.0)
+		var p := Vector3i(0, 2 + i, -1 - i / 2)    # each block touches the one below
+		var col := Color(0.28, 0.22, 0.17).lerp(Color(0.80, 0.72, 0.56), i / 6.0)
+		h[p] = col
+		h[p + Vector3i(0, -1, 0)] = col
 		if i < 3:
-			h[p + Vector3i(0, 0, 1)] = Color(0.18, 0.14, 0.12)
+			h[p + Vector3i(0, 0, 1)] = Color(0.26, 0.20, 0.16)
 	head.add_child(Vox.node(h, mat))
 	var eyes := {}
 	for sx in [-1, 1]:
@@ -118,7 +122,7 @@ func _leg(side: int) -> Node3D:
 	var hip := Node3D.new()
 	var up := {}
 	for i in 5:
-		up[Vector3i(side * i, i / 2, 0)] = Color(0.15, 0.12, 0.10)
+		up[Vector3i(side * i, i / 2, 0)] = Color(0.24, 0.19, 0.15)
 	hip.add_child(Vox.node(up, mat, Vector3.ZERO, 0.16))
 	var knee := Node3D.new()
 	knee.name = "Knee"
@@ -126,7 +130,7 @@ func _leg(side: int) -> Node3D:
 	hip.add_child(knee)
 	var down := {}
 	for i in 5:
-		down[Vector3i(side * (i / 3), -i, 0)] = Color(0.15, 0.12, 0.10).lerp(Color(0.35, 0.28, 0.20), i / 5.0)
+		down[Vector3i(side * (i / 3), -i, 0)] = Color(0.24, 0.19, 0.15).lerp(Color(0.45, 0.37, 0.27), i / 5.0)
 	knee.add_child(Vox.node(down, mat, Vector3.ZERO, 0.16))
 	return hip
 
@@ -139,7 +143,7 @@ func set_pose(rear: float, jaws: float, eyes := 1.0) -> void:
 	_eye_target = eyes
 
 
-func flash(color := Color.WHITE, strength := 0.4) -> void:
+func flash(color := Color(1.0, 0.8, 0.55), strength := 0.18) -> void:
 	mat.emission = color
 	var t := create_tween()
 	t.tween_property(mat, "emission_energy_multiplier", strength, 0.02)
