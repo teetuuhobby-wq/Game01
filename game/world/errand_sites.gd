@@ -1,5 +1,5 @@
 extends "res://world/city.gd"
-## THE WORLD, layer 5 of 9: the places Mira's errand uses.
+## THE WORLD, layer 5 of 10: the places Mira's errand uses.
 ## Bram's workshop (with the spare valve) and the rain-catcher.
 
 

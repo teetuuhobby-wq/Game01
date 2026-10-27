@@ -77,6 +77,11 @@ func _process(delta: float) -> void:
 	_update_marker()
 
 
+## True when E belongs to the errand right now (interact.gd asks before using E).
+func busy_here() -> bool:
+	return _near()
+
+
 ## True when you're close enough to use the current target.
 func _near() -> bool:
 	var target: Vector3 = world.workshop_use if step == Step.GET_VALVE else world.catcher_use
@@ -200,10 +205,9 @@ func _label(layer: CanvasLayer, pos: Vector2, size: int) -> Label:
 
 ## Mira: a neighbour beside you in the plaza, with a speech bubble at the start.
 func _make_mira() -> void:
-	_mira = Node3D.new()
-	_mira.add_child(world._make_person(Color(0.82, 0.30, 0.26), Color(0.24, 0.28, 0.38),
-			Color(0.10, 0.09, 0.08), Color(0.78, 0.58, 0.42)))
+	_mira = world._make_character(preload("res://town_data.gd").CAST["mira"])
 	world.city.add_child(_mira)
+	world.cast_nodes["mira"] = _mira
 	_mira.position = world.mira_spot
 	var d: Vector3 = player.position - world.mira_spot
 	_mira.rotation.y = atan2(-d.z, d.x)

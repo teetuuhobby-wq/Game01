@@ -21,6 +21,10 @@ var hand: Node3D                 # carried things go here
 var _step_timer := 0.0
 var _walk_phase := 0.0
 var _ring: MeshInstance3D
+var seated := false              # sitting on a stool or in the bath (interact.gd)
+var _seat_body: Node3D           # your sitting pose, made the first time you sit
+var _stand_at := Vector3.ZERO
+var _first_person := false
 
 
 func _ready() -> void:
@@ -64,8 +68,37 @@ func _hat() -> MeshInstance3D:
 
 ## In first person you see through your own eyes, so your body and ring are hidden.
 func set_first_person(on: bool) -> void:
-	body.visible = not on
-	_ring.visible = not on
+	_first_person = on
+	body.visible = not on and not seated
+	_ring.visible = not on and not seated
+	if _seat_body != null:
+		_seat_body.visible = not on and seated
+
+
+## Sit down at `at` (the floor under the seat), facing `dir`. drop lowers you (into
+## the bath water). You stand up at stand_at.
+func sit(at: Vector3, dir: Vector3, stand_at: Vector3, drop := 0.0) -> void:
+	if _seat_body == null:
+		_seat_body = world._make_person(Color(0.16, 0.55, 0.58), Color(0.30, 0.24, 0.20),
+				Color(0.20, 0.13, 0.08), Color(0.92, 0.75, 0.62), {"sitting": true})
+		_seat_body.add_child(_hat())
+		add_child(_seat_body)
+	seated = true
+	moving = false
+	_stand_at = stand_at
+	position = at
+	face(dir)
+	_seat_body.rotation.y = body.rotation.y
+	_seat_body.position.y = drop
+	body.position.y = drop          # the camera's eye height follows the body
+	set_first_person(_first_person)
+
+
+func stand_up() -> void:
+	seated = false
+	position = _stand_at
+	body.position.y = 0.0
+	set_first_person(_first_person)
 
 
 ## Turn to face a direction on the city (used in first person, so you face where you look).
@@ -83,6 +116,8 @@ func set_ring_scale(s: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if seated:
+		return
 	var dir := _input_dir()
 	moving = dir.length() > 0.1
 	if moving:

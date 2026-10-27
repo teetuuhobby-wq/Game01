@@ -1,5 +1,5 @@
 extends "res://world/sky_and_ground.gd"
-## THE WORLD, layer 3 of 9: things built on the deck, as templates.
+## THE WORLD, layer 3 of 10: things built on the deck, as templates.
 ## Paving and stone patterns, houses (walls, windows, shutters, doors, balconies,
 ## ivy, three kinds of roof, chimneys), lamps, parasols and trees.
 

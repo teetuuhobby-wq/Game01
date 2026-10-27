@@ -41,7 +41,8 @@ var _sets := {}      # name -> {set name: [paths inside audio/<name>/]} from its
 var _cache := {}     # file path -> AudioStream
 var _loops := {}     # name -> AudioStreamPlayer for looping sounds
 var _market_t := 2.0
-var _creak_wait := 0.0   # seconds until the city may creak again
+var _creak_wait := 0.0
+var _indoor := 0.0       # 0 outside, 1 inside a building (the wind and town go quiet)   # seconds until the city may creak again
 var _rng := RandomNumberGenerator.new()
 
 
@@ -302,8 +303,18 @@ func _process(delta: float) -> void:
 	var k := market_level()
 	var crowd: AudioStreamPlayer = _loops["crowd"]
 	crowd.volume_db = float(settings["crowd"]["db"]) + linear_to_db(maxf(k * k, 0.0001))
+	# Indoors the wind and the town go quiet; the tavern has its own crowd
+	var inside := ""
+	if world != null and player != null and world.has_method("facility_at"):
+		inside = world.facility_at(player.position)
+	_indoor = lerpf(_indoor, 1.0 if inside != "" and inside != "workshop" else 0.0, minf(1.0, 3.0 * delta))
+	if inside == "tavern":
+		k = maxf(k, 0.55)
+		crowd.volume_db = float(settings["crowd"]["db"]) - 4.0 + linear_to_db(maxf(k * k, 0.0001))
 	var town: AudioStreamPlayer = _loops["town"]
-	town.volume_db = float(settings["town"]["db"]) + linear_to_db(maxf(1.0 - 0.85 * k, 0.0001))
+	town.volume_db = float(settings["town"]["db"]) + linear_to_db(maxf(1.0 - 0.85 * k, 0.0001)) - 10.0 * _indoor
+	var wind: AudioStreamPlayer = _loops["wind"]
+	wind.volume_db = float(settings["wind"]["db"]) - 14.0 * _indoor
 	if k > 0.6:
 		_market_t -= delta
 		if _market_t <= 0.0:

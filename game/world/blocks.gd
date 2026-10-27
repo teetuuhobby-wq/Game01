@@ -1,5 +1,5 @@
 extends Node3D
-## THE WORLD, layer 1 of 9: the block grid everything is built from.
+## THE WORLD, layer 1 of 10: the block grid everything is built from.
 ## Shared numbers and state, the colour palette, materials, turning blocks into
 ## meshes (only the faces you can see), placing blocks (sv, gv, box3, fp...), and
 ## the deck's shape (its edge, the terraces, where the legs attach).

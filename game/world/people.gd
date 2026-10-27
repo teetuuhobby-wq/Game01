@@ -1,5 +1,5 @@
 extends "res://world/legs.gd"
-## THE WORLD, layer 8 of 9: the city's people.
+## THE WORLD, layer 9 of 10: the city's people.
 ## How a person is built from blocks, the neighbours round the plaza and along the
 ## terraces (they stop to look at you), and the market crowd: strollers keeping to
 ## the right, browsers, kids, people carrying crates, chatting groups, shopkeepers.
@@ -9,6 +9,7 @@ extends "res://world/legs.gd"
 ##   legs 2 (short) or 3; torso 3 or 4 (tall); dress (a skirt instead of legs);
 ##   apron; belly; sash (a coloured belt, Color); beard;
 ##   hair: "short", "long", "bun", "bald" or "scarf" (a headscarf, with "scarf_colour").
+##   sitting: thighs forward and shins down, to sit on a stool or bench.
 ## The mesh remembers how tall it is (meta "top", metres), for hats and carried crates.
 func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color, look := {}) -> MeshInstance3D:
 	var pts := []    # plain Arrays: lambdas would copy packed arrays
@@ -26,8 +27,20 @@ func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color, look := 
 	var dress: bool = look.get("dress", false)
 	var apron: bool = look.get("apron", false)
 	var apron_c := Color(0.95, 0.94, 0.88)
-	# Legs, or a skirt down to the ground
+	# Legs, or a skirt down to the ground, or sitting
+	var sitting: bool = look.get("sitting", false)
 	for y in legs:
+		if sitting:
+			for z in [-1, 1]:
+				if y == legs - 1:
+					for x in range(0, 4):
+						add.call(x, y, z, pants if not dress else pants)
+				else:
+					add.call(3, y, z, pants.darkened(0.35) if y == 0 else pants)
+			if dress and y == legs - 1:
+				for x in range(0, 4):
+					add.call(x, y, 0, pants)
+			continue
 		if dress:
 			for x in 2:
 				for z in range(-1, 2):
@@ -115,8 +128,13 @@ func _random_person() -> MeshInstance3D:
 	look["hair"] = "short" if h < 0.42 else ("long" if h < 0.62 else ("bun" if h < 0.74 else ("bald" if h < 0.86 else "scarf")))
 	look["scarf_colour"] = scarves[rng.randi() % scarves.size()]
 	var bottom: Color = dresses[rng.randi() % dresses.size()] if look["dress"] else pants[rng.randi() % pants.size()]
-	return _make_person(shirts[rng.randi() % shirts.size()], bottom,
-			hairs[rng.randi() % hairs.size()], skins[rng.randi() % skins.size()], look)
+	var shirt: Color = shirts[rng.randi() % shirts.size()]
+	var hair: Color = hairs[rng.randi() % hairs.size()]
+	var skin: Color = skins[rng.randi() % skins.size()]
+	var mi := _make_person(shirt, bottom, hair, skin, look)
+	for k in ["shirt", "bottom", "hair", "skin", "look"]:
+		mi.set_meta(k, {"shirt": shirt, "bottom": bottom, "hair": hair, "skin": skin, "look": look}[k])
+	return mi
 
 
 func _ring_radius() -> float:
@@ -383,6 +401,174 @@ func _mk_clear_of_camera(p: Vector3, cam: Vector3) -> bool:
 	return (p + Vector3(0.0, 1.0, 0.0)).distance_to(cam) > NEAR_HIDE
 
 
+## Something a character carries, as its own small mesh (person faces +x, feet at 0).
+## Half-size blocks, so props can be finer than people.
+func _item_mesh(kind: String, top: float) -> MeshInstance3D:
+	var pts := []
+	var cols := []
+	var h := VS * 0.5
+	var add := func(x: float, y: float, z: float, c: Color) -> void:
+		pts.append(Vector3(x, y, z) * h)
+		cols.append(c)
+	var hand_y := top / h * 0.36          # roughly hand height, in half-blocks
+	match kind:
+		"ledger":      # a fat book held against the chest
+			for x in range(2, 4):
+				for y in range(0, 4):
+					for z in range(-2, 2):
+						add.call(x, hand_y + y + 2, z, Color(0.55, 0.22, 0.18) if x == 3 or z == -2 else Color(0.95, 0.92, 0.82))
+		"mug":         # a frothy mug in the right hand
+			for y in range(0, 3):
+				add.call(2, hand_y + y, 4, Color(0.62, 0.42, 0.22))
+			add.call(2, hand_y + 3, 4, Color(0.98, 0.95, 0.85))
+			add.call(3, hand_y + 1, 4, Color(0.62, 0.42, 0.22))
+		"goggles":     # brass goggles pushed up on the forehead
+			var gy := top / h - 2.0
+			for z in range(-3, 4):
+				add.call(1.6, gy, z, Color(0.80, 0.62, 0.30))
+			for z in [-2, 2]:
+				add.call(2.4, gy, z, Color(0.45, 0.75, 0.85))
+		"feather_hat": # a wide straw hat with a red feather
+			var ty := top / h + 0.5
+			for x in range(-3, 5):
+				for z in range(-4, 5):
+					add.call(x, ty, z, Color(0.94, 0.82, 0.50))
+			for x in range(-1, 3):
+				for z in range(-2, 3):
+					add.call(x, ty + 1, z, Color(0.88, 0.76, 0.44))
+			for i in 4:
+				add.call(-1 - i * 0.5, ty + 2 + i, -2, Color(0.85, 0.22, 0.20))
+		"towels":      # a stack of folded towels in both arms
+			for y in range(0, 4):
+				for x in range(2, 4):
+					for z in range(-2, 2):
+						add.call(x, hand_y + 1 + y, z, Color(0.95, 0.95, 0.92) if y % 2 == 0 else Color(0.40, 0.65, 0.78))
+		"watering_can":
+			for y in range(0, 3):
+				for x in range(1, 3):
+					add.call(x, hand_y - 2 + y, 5, Color(0.72, 0.45, 0.25))
+			add.call(3, hand_y, 5, Color(0.72, 0.45, 0.25))
+			add.call(4, hand_y + 1, 5, Color(0.72, 0.45, 0.25))
+		"spyglass":    # a long brass spyglass held up
+			for i in 6:
+				add.call(2 + i, hand_y + 3 + i * 0.4, 4, Color(0.80, 0.62, 0.30) if i < 5 else Color(0.45, 0.75, 0.85))
+		"satchel":     # a bag on a strap
+			for y in range(0, 3):
+				for x in range(-1, 2):
+					add.call(x, hand_y - 1 + y, -5, Color(0.52, 0.34, 0.20))
+			for i in 6:
+				add.call(0, hand_y + 2 + i, -4 + i * 1.2, Color(0.36, 0.24, 0.15))
+	var mesh := _cubes(PackedVector3Array(pts), PackedColorArray(cols), h, false)
+	return _mi(mesh)
+
+
+var cast_nodes := {}    # cast id -> Node3D (the named residents)
+var _cast := []         # [{"id", "node", "spot", "habit", "base_yaw", "k", "wait", "phase"}]
+var _extra_nodes := []
+
+
+## The named residents (town_data.gd), each in their spot from the buildings, plus the
+## unnamed regulars sitting at tables and soaking in the bath. Mira is made by the errand.
+func _add_cast() -> void:
+	var Town := preload("res://town_data.gd")
+	for id in Town.CAST:
+		if id == "mira" or not cast_spots.has(id):
+			continue
+		var c: Dictionary = Town.CAST[id]
+		var node := _make_character(c)
+		var spot: Dictionary = cast_spots[id]
+		node.position = spot["pos"]
+		var f: Vector3 = spot["face"]
+		node.rotation.y = atan2(-f.z, f.x)
+		city.add_child(node)
+		cast_nodes[id] = node
+		_cast.append({"id": id, "node": node, "spot": spot, "habit": c["habit"], "base_yaw": node.rotation.y,
+				"k": 0, "wait": rng.randf_range(0.5, 2.0), "phase": rng.randf() * TAU})
+	for e in extras:
+		var node := Node3D.new()
+		var mi := _random_person_sitting()
+		node.add_child(mi)
+		node.position = e["pos"] + (Vector3(0, -0.36, 0) if e["pose"] == "soak" else Vector3.ZERO)
+		var f: Vector3 = e["face"]
+		node.rotation.y = atan2(-f.z, f.x)
+		city.add_child(node)
+		_extra_nodes.append({"node": node, "phase": rng.randf() * TAU, "yaw": node.rotation.y})
+
+
+func _make_character(c: Dictionary) -> Node3D:
+	var node := Node3D.new()
+	var mi := _make_person(c["shirt"], c["bottom"], c["hair"], c["skin"], c["look"])
+	node.add_child(mi)
+	var top: float = mi.mesh.get_meta("top", 1.8)
+	if c.has("item"):
+		node.add_child(_item_mesh(c["item"], top))
+	if c.get("kid", false):
+		node.scale = Vector3.ONE * 0.72
+	return node
+
+
+## A random regular, sitting down (same variety as everyone else).
+func _random_person_sitting() -> MeshInstance3D:
+	var mi := _random_person()
+	var look: Dictionary = mi.get_meta("look", {})
+	look["sitting"] = true
+	look["legs"] = 3
+	return _make_person(mi.get_meta("shirt"), mi.get_meta("bottom"), mi.get_meta("hair"), mi.get_meta("skin"), look)
+
+
+## Little habits: the clerk writes, the barkeep polishes and glances round, Bram hammers,
+## Pell paces behind the counter, Tamsin strolls round the pool, Wendel scans the
+## horizon, Pip runs errands. Anyone turns to face you when you come close.
+func _update_cast(delta: float) -> void:
+	var you := Vector3(INF, INF, INF)
+	if player != null:
+		you = player.position
+	for c in _cast:
+		var node: Node3D = c["node"]
+		c["phase"] += delta
+		var ph: float = c["phase"]
+		var to_you: Vector3 = you - node.position
+		to_you.y = 0.0
+		var near := to_you.length() < 2.6
+		var loop: Array = c["spot"].get("loop", [])
+		if not loop.is_empty() and not near:
+			var speed := {"run": 2.6, "stroll": 0.7, "pace": 0.6}.get(c["habit"], 0.8) as float
+			if c["wait"] > 0.0:
+				c["wait"] -= delta
+			else:
+				var goal: Vector3 = loop[c["k"]]
+				var d := goal - node.position
+				d.y = 0.0
+				if d.length() < 0.1:
+					c["k"] = (c["k"] + 1) % loop.size()
+					c["wait"] = rng.randf_range(0.3, 1.2) if c["habit"] == "run" else rng.randf_range(1.0, 3.5)
+				else:
+					var step := d.normalized() * minf(speed * delta, d.length())
+					node.position += step
+					node.rotation.y = lerp_angle(node.rotation.y, atan2(-step.z, step.x), minf(1.0, 10.0 * delta))
+					node.position.y = loop[0].y + absf(sin(ph * speed * 6.0)) * 0.04
+			continue
+		var yaw: float = c["base_yaw"]
+		if near and to_you.length() > 0.2:
+			yaw = atan2(-to_you.z, to_you.x)
+		match c["habit"]:
+			"write":
+				node.position.y = c["spot"]["pos"].y - absf(sin(ph * 1.7)) * 0.03
+			"polish":
+				if not near:
+					yaw += sin(ph * 0.6) * 0.35
+			"hammer":
+				node.position.y = c["spot"]["pos"].y + (absf(sin(ph * 9.0)) * 0.05 if fmod(ph, 4.0) < 1.6 else 0.0)
+			"scan":
+				if not near:
+					yaw += sin(ph * 0.25) * 0.9
+		node.rotation.y = lerp_angle(node.rotation.y, yaw, minf(1.0, 4.0 * delta))
+	for e in _extra_nodes:
+		e["phase"] += delta
+		var n: Node3D = e["node"]
+		n.rotation.y = e["yaw"] + sin(e["phase"] * 0.4) * 0.25
+
+
 ## The neighbours round the plaza and on the terraces get the same treatment.
 func _hide_close_residents() -> void:
 	if camera == null:
@@ -392,6 +578,8 @@ func _hide_close_residents() -> void:
 		w["node"].visible = _mk_clear_of_camera(w["node"].position, cam)
 	for pw in promenaders:
 		pw["node"].visible = _mk_clear_of_camera(pw["node"].position, cam)
+	for e in _extra_nodes:
+		e["node"].visible = _mk_clear_of_camera(e["node"].position, cam)
 
 
 func _update_market(delta: float) -> void:

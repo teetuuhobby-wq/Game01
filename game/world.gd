@@ -3,7 +3,7 @@ extends "res://world/walk_map.gd"
 ## Built from code at start-up. This file only puts it together (in this order) and
 ## moves it each frame; each part lives in its own file in world/, each one building
 ## on the one before (blocks -> sky_and_ground -> buildings -> city -> errand_sites ->
-## market -> legs -> people -> walk_map -> here). See docs/ARCHITECTURE.md.
+## facilities -> market -> legs -> people -> walk_map -> here). See docs/ARCHITECTURE.md.
 
 
 func _ready() -> void:
@@ -20,6 +20,8 @@ func _ready() -> void:
 	_build_legs()
 	_seed("people")
 	_add_residents()
+	_seed("cast")
+	_add_cast()
 	_build_walk_map()
 
 
@@ -43,6 +45,7 @@ func _build_city() -> void:
 	origin = Vector3i.ZERO
 	plaza_c = Vector3(PLAZA_X, top, 0) * VS
 	_build_errand_sites()
+	_build_facilities()
 	_seed("market")
 	_build_market()
 	_seed("houses")
@@ -55,6 +58,7 @@ func _build_city() -> void:
 		_sphere(hb.x, hb.y, hb.z, 11.0, P.HULL, P.BRASS)
 	_build_struts()
 	_emit_grid()
+	_add_facility_nodes()
 
 
 func _process(delta: float) -> void:
@@ -63,6 +67,7 @@ func _process(delta: float) -> void:
 		_update_walkers(delta)
 		_update_promenaders(delta)
 		_update_market(delta)
+		_update_cast(delta)
 		_hide_close_residents()
 	var period := 2.0 * STEP_LENGTH / CITY_SPEED
 	var body_x := CITY_SPEED * t
