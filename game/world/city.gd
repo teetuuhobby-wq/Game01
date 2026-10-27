@@ -269,14 +269,20 @@ func _build_tower(x0: int, z0: int) -> void:
 			sv(bcx + fx, y + 8 - fy, bcz, P.FLAG)
 
 
-func _place_houses() -> void:
-	# Keep two main streets clear (along x and along z; the stairs are on them), then
-	# pack houses tightly on each terrace; neighbours may share walls like an old
-	# Mediterranean town. The top terrace is kept for the plaza and the tower.
-	for i in range(-45, 46):
+## Keeps the two main streets clear (along x and along z, edge to edge; the stairs
+## are on them). Done before the market and the homes, so nothing is built on them
+## (session 03: a market shop had been built over the north stairs).
+func _reserve_streets() -> void:
+	for i in range(-RXV / RES - 1, RXV / RES + 2):
 		for k in range(-1, 2):
 			streets[Vector2i(i, k)] = true
 			streets[Vector2i(k, i)] = true
+
+
+func _place_houses() -> void:
+	# Pack houses tightly on each terrace, clear of the main streets; neighbours may
+	# share walls like an old Mediterranean town. The top terrace is kept for the
+	# plaza and the tower.
 	var placed := 0
 	for attempt in 30000:
 		if placed >= 320:
@@ -289,6 +295,12 @@ func _place_houses() -> void:
 		for x in range(x0, x0 + w):
 			for z in range(z0, z0 + d):
 				if _e(x * RES, z * RES) > 0.82 or occ.has(Vector2i(x, z)) or streets.has(Vector2i(x, z)):
+					ok = false
+		# A metre's gap to the main streets, so roof overhangs stay off them (session 03:
+		# eaves hung over the east stairs at head height)
+		for x in range(x0 - 1, x0 + w + 1):
+			for z in range(z0 - 1, z0 + d + 1):
+				if streets.has(Vector2i(x, z)):
 					ok = false
 		if not ok:
 			continue

@@ -40,5 +40,6 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
   - Camera with mouse look: scroll all the way in for **first person** (through your eyes), out for over the shoulder, then the diorama. Behind you, it looks over or under things in the way instead of jumping in.
   - Playtest tools: recorder, F2 flags, exact replay, F3 debug info.
   - Sounds made from code: footsteps, giant stomps, wind, chime, clunk, bell.
-  - `game/tuning.gd` for speeds, sway, camera and volumes.
+  - `game/tuning.gd` for speeds, sway and camera.
+  - **Added in session 03:** the bigger city with the market street and crowd; the sound board (F4); the mood and lighting panel (F5).
 - **Out (still to come):** night and expeditions, combat, companions, shops and the guild, building, inventory, real dialogue, saving, a bigger city, and the art polish list.

@@ -16,7 +16,9 @@ func _ready() -> void:
 	_make_world()
 	_build_ground()
 	_build_city()
+	_seed("legs")
 	_build_legs()
+	_seed("people")
 	_add_residents()
 	_build_walk_map()
 
@@ -30,16 +32,22 @@ func _build_city() -> void:
 	_build_wall_ring()
 	_build_terraces()
 	_build_stairs()
+	_reserve_streets()
 	var top: int = LEVELS[LEVELS.size() - 1][1]
 	origin = Vector3i(PLAZA_X, top, 0)
+	_seed("plaza")
 	_build_plaza()
 	origin = Vector3i(0, top, 0)
+	_seed("tower")
 	_build_tower(-62, -13)
 	origin = Vector3i.ZERO
 	plaza_c = Vector3(PLAZA_X, top, 0) * VS
 	_build_errand_sites()
+	_seed("market")
 	_build_market()
+	_seed("houses")
 	_place_houses()
+	_seed("trees")
 	_place_trees()
 	_build_underside()
 	for hip in _hip_positions():

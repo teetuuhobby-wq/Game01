@@ -141,7 +141,7 @@ func _shop_row(along_x: bool, a0: int, a1: int, across: Vector2i, front: int) ->
 func _plot_ok(x0: int, z0: int, wx: int, wz: int) -> bool:
 	for x in range(x0 - 1, x0 + wx + 1):
 		for z in range(z0 - 1, z0 + wz + 1):
-			if not _mk_ground(x, z) or streets.has(Vector2i(_cell(x), _cell(z))):
+			if not _mk_ground(x, z) or streets.has(Vector2i(_cell(x), _cell(z))) or stair_top.has(Vector2i(x, z)):
 				return false
 	for x in range(x0, x0 + wx):
 		for z in range(z0, z0 + wz):

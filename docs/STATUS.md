@@ -2,7 +2,7 @@
 
 **New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 02 is the latest).
 
-_Last updated: 2026-10-26, session 03 (home PC): reviewed session 02's work, tests and hidden runs checked on the AMD card. See "Home PC check after session 02" below._
+_Last updated: 2026-10-26, session 03 (home PC). Session 03: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
 
 ## Where we are
 
@@ -10,14 +10,14 @@ _Last updated: 2026-10-26, session 03 (home PC): reviewed session 02's work, tes
 - ✅ **Phase 2: Pick a direction**: done. **"Strider Home"**: you're one resident of a walking city crossing a dangerous wasteland.
 - ✅ **Phase 3: First playable toy**: done. `game/` is the terraced city: you walk it (first person or behind you), it walks and sways, there are 50 neighbours, and Mira's errand (valve from Bram's workshop to the rain-catcher). Playtested 3 times, with fixes after each.
 - ➡️ **Phase 4: Grow it**: the user reshaped the core loop (see GAME.md): day in town (shops, guild, requests), dangerous night expeditions with combat, then race home at dawn. **The next milestone isn't locked: it waits on the combat-style decision.**
-- 🧪 **Session 03 (home PC):** the user said the city feels too small and the paths cramped, and that a big city means "crowds and bustle". So we built the **Market Street test** on branch `experiment/market-street` (see Branches). The user played it and liked it: **merged into `main`**.
+- 🧪 **Session 03 (home PC):** the user said the city feels too small and the paths cramped, and that a big city means "crowds and bustle". So we built the **Market Street test**; the user liked it, and it's **merged into `main`**. Then: the flag key moved to F2; sound decided (free recorded CC0); the **sound board (F4)** and **mood and lighting panel (F5)** were built; `world.gd` was **split into 9 layer files** (proved identical); and two stairs bugs were found and fixed (a shop on the north stairs, eaves over the east stairs).
 
 ### What session 02 did (short)
 Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x faster mesher; the terraced city; a 10x experiment (branch `experiment/city-10x`, parked); the first playable toy; playtest tools (recorder, F8, exact replay, F3); 3 playtests; first person.
 
 ## Open questions for the user (ask one or two at a time)
 
-0. **Sound plan: decided (free recorded CC0 sounds, see DECISIONS).** Next: the sound board, the mood and lighting panel, and the architecture split (all proposed in session 03). Earlier notes: Market playtest: "the city feels a lot better", but the sounds are bad. Stomps are ok, footsteps aren't great, and the crowd murmur was static (now off). Claude's proposal: real recorded sounds from free CC0 libraries (Kenney packs, Freesound CC0) for footsteps, crowds and ambience; code-made sounds only for simple tones; optionally one paid AI sound-effect tool later for one-off sounds (ask first, budget $20–60/mo); and a "sound board" tool so the user can audition and set volumes themselves (Claude can't hear). Downloads need the user's OK each time. Also still to decide: **merge `experiment/market-street` into `main`?** (The user liked it.)
+0. **Sound recordings: waiting for the user's OK to download** (session 03). The sound board (F4) is built and loads recordings dropped into `game/audio/<sound>/`. Candidates (all CC0): **Kenney Impact Sounds** (130 files, 0.8 MB: footsteps on concrete/wood etc., wood and metal impacts → footsteps, crates) and **Kenney RPG Audio** (50 files, 1.0 MB: footsteps, coins, cloth, wood) from kenney.nl; **market crowd** recordings on Freesound (CC0, but downloading needs a free Freesound account, so the user downloads those or OKs the lower-quality preview MP3s): SamuelGremaud "CROWD" (sounds/545756), bruno.auzet "sophia open air vegetable market" (782314), ilmari_freesound "london market ambience" (659634). After download: put files in `game/audio/<sound>/`, add `audio/CREDITS.md` lines, and the user picks on the sound board. Stomps, wind, chime and bell stay made in code for now (the user said the stomps are ok).
 
 1. **What kind of combat?** The user postponed this at the end of session 02. Options: (a) action, real time; (b) turn-based tactics like Chrono Ark (a game they love; it makes AI companions easy); (c) real time with pause to order the party. Ask "what part?" (the rush of reflexes, a clever plan, or the party's spectacle). *Claude's suggestion: two tiny combat toys on a branch (an afternoon each), one action and one turn-based, against the same desert creature. Let the user play both and react.*
 2. **Companions:** the user wants a party of AI companions (neighbours, guild members). *Claude's lean: the first expedition solo, then one simple companion who follows, talks, carries and warns at dawn (no fighting), and fighting companions once combat exists.* Not confirmed.
@@ -38,13 +38,14 @@ Settle question 1 (combat style). Then propose the first Phase 4 milestone with 
 - **Living world = the clever fake:** residents with routines and reactions, not deep AI.
 - Don't build Huge things. Ask before paid tools.
 - **Tests run hidden.** The game must never pop up on the user's screen or grab their mouse and keyboard while Claude tests. Use `tools/godot_offscreen.ps1`, or `--headless` for logic. Open a visible window only when the user asks to see it.
+- **Read `docs/ARCHITECTURE.md` before changing code, and follow its rules** (one job per file, layers only use what's below them, `_seed("part")` per build part, game rules separate from visuals, a test per system).
 - **After every change to `game/`, run `tools/run_tests.ps1`.** When a test fails after a change, check whether the test or the game is wrong before "fixing" either.
 - **Playtests are the main feedback loop.** The user plays and presses F2 (was F8 until session 03); Claude reads the logs, replays the session to see the flagged moments, fixes, and proves the fix with a test that reproduces the user's exact situation.
 - **Save only the conversation to `docs/history/`** (`--chat-only`): the user wants later sessions to read between the lines, not the commands.
 
 ## Art status
 
-- **The game (`game/world.gd`) is now the reference for the look.** It's the terraced city from the look test, plus: legs attached outside the deck on struts, 2.4 m doors, lamps off the main streets, wade-through plaza flowers, Bram's workshop and the rain-catcher.
+- **The game (`game/world/`) is now the reference for the look.** It's the terraced city from the look test, plus: legs attached outside the deck on struts, 2.4 m doors, lamps off the main streets, wade-through plaza flowers, Bram's workshop and the rain-catcher.
 - **Look tests (frozen, for comparison):** `prototypes/look_test_hd/` (flat, 20 cm blocks), `prototypes/look_test_terraced/`, `prototypes/look_test/` (coarse). Critic scores (terraced vs flat): appeal 7 vs 8, Town to City look 6 vs 8, streets to wander 6 vs 4, awe from outside 7.5 vs 5.5, bustle 6.5 vs 4.5.
 - **Art polish list for later** (from critics): denser rows of houses with shared walls; lanes and arched gates through the terraces; walls with buttresses, niches and windows; stalls round the plaza; taller blocks stepping up to the tower; more detail on the legs and the hull underside.
 - **Screens worth a look:** `docs/screens/2026-10-26_toy_fp_*.jpg` (first person), `..._toy_*.jpg`, `..._city_scale_comparison.jpg`, `..._flat_vs_terraced.jpg`.

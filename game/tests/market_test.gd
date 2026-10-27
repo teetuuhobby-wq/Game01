@@ -20,6 +20,15 @@ func _ready() -> void:
 	results.append(["a route runs from one end of the street to the other", route.size() > 0, "%.0f m" % (route.size() * 0.2)])
 	var people: int = world.market_people.size() + world.market_idlers.size()
 	results.append(["it's busy: at least 150 people in the market", people >= 150, "%d people" % people])
+	var covered := 0
+	var unwalkable := 0
+	for c in world.stair_top:
+		if world._mk_taken.has(c):
+			covered += 1
+		if world.floor_at(Vector3(c.x, 0, c.y) * world.VS) < 0:
+			unwalkable += 1
+	results.append(["no shop stands on the stairs, and every stair step can be walked on (session 03 bug)",
+			covered == 0 and unwalkable == 0, "%d under shops, %d blocked" % [covered, unwalkable]])
 	results.append(["at least 30 shops and stalls", world.shopkeepers.size() >= 30, "%d" % world.shopkeepers.size()])
 	# After 10 s of walking, nobody has wandered off the street
 	for i in 200:

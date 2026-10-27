@@ -14,7 +14,7 @@ The **first playable toy** is done: walk the terraced city in first person while
 
 ## Run it
 
-- **The first playable toy:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, and the mouse wheel zooms (all the way in = first person). F2 flags something that felt off, F3 shows debug info, and Esc frees the mouse (press it again to quit). Every play session is recorded to `game/playtests/` for Claude to study.
+- **The first playable toy:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, and the mouse wheel zooms (all the way in = first person). F2 flags something that felt off, F3 shows debug info, F4 opens the sound board, F5 the mood and lighting panel, and Esc frees the mouse (press it again to quit). Every play session is recorded to `game/playtests/` for Claude to study.
 - **Look test:** install [Godot 4.7.2](https://godotengine.org) (`winget install GodotEngine.GodotEngine`), then double-click `prototypes/look_test_hd/run.bat` (older coarse version: `prototypes/look_test/`).
   Keys: `1`–`6` camera, `Space` pause, `Esc` quit.
 
@@ -31,6 +31,8 @@ The **first playable toy** is done: walk the terraced city in first person while
 | `docs/PITCHES.md` | The three concepts we chose between |
 | `docs/history/` | Past conversations, kept for context |
 | `docs/screens/` | Screenshots worth keeping |
-| `game/` | **The game** (first playable toy). Tuning numbers: `game/tuning.gd` |
+| `game/` | **The game.** Tuning numbers: `game/tuning.gd`. The world's code is in `game/world/` (see `docs/ARCHITECTURE.md`) |
+| `game/audio/` | Recorded sounds, their credits, and your sound board settings |
+| `docs/ARCHITECTURE.md` | How the code is organised, and the rules for keeping it clean |
 | `prototypes/` | Throwaway experiments (look tests) |
 | `tools/` | Helper scripts: `run_tests.ps1` (all tests), `godot_offscreen.ps1` (hidden runs), `to_jpg.gd`, `transcript_to_md.py` |

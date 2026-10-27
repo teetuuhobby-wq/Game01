@@ -228,6 +228,12 @@ var t := 2.0
 var paused := false
 
 
+## Starts the shared random numbers afresh for one part of the build (houses, market,
+## people...), so changing one part never reshuffles another.
+func _seed(part: String) -> void:
+	rng.seed = hash("%d:%s" % [SEED, part])
+
+
 func _init_palette() -> void:
 	PAL.resize(P.size())
 	PAL[P.EMPTY] = Color.BLACK
