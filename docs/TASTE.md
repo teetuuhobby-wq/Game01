@@ -41,6 +41,12 @@ _Last updated: 2026-10-26 (end of session 02: street level, first person, facili
 
 - **Going out with people you know.** For expeditions they picture a party of **neighbours or guild members as AI companions**. Read: they want bonds with the town's people to carry into the adventure, not just a lone hero. Confidence: medium (fits desire #2, and the earlier soft signal of "clever plans with friends").
 
+## New signals (home PC playtest, session 03)
+
+- **"Still feels too small"**: now the 4th time (end of session 01, twice in session 02, now). Confidence: **high** that "small" is a real, lasting feeling, not a whim.
+- **"The paths to get around are very narrow."** Measured: 40% of path length is under 2 m wide, 75% under 3 m, and the whole walkable city is ~3,000 m². They play 72% in first person, where narrow lanes between 2-storey houses and terrace walls feel like corridors. **My read:** part of "too small" is really **"cramped"**: you can't see far or move freely. Wide streets, open squares and long views toward the desert make a place feel big, even before adding area. Not confirmed yet; ask what part.
+- The home PC runs the toy at 240 FPS (screen-capped), so size is limited by the laptop, not by this PC.
+
 ## Other signals
 
 - **Discovery: finding secret places.** low. One pick in Round 1 and nothing since. It would fit naturally (what's out in the wasteland?).
