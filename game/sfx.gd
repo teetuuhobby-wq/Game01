@@ -1,6 +1,7 @@
 extends Node
 ## SOUND: every sound in the toy is made here from code, so there are no sound files.
-## Footsteps, the city's giant stomps, wind, and the errand's chime, clunk and bell.
+## Footsteps, the city's giant stomps, wind, the errand's chime, clunk and bell, and the
+## market crowd: a murmur of voices that grows as you get closer, with coins and crates.
 
 const T := preload("res://tuning.gd")
 const RATE := 22050
@@ -11,7 +12,14 @@ var _chime: AudioStreamWAV
 var _clunk: AudioStreamWAV
 var _tick: AudioStreamWAV
 var _bell: AudioStreamWAV
+var _clink: AudioStreamWAV
+var _knock: AudioStreamWAV
+var _chatter: AudioStreamPlayer
+var _market_t := 2.0
 var _rng := RandomNumberGenerator.new()
+
+var world: Node3D    # set by main.gd, for how close you are to the market
+var player: Node3D
 
 
 func _ready() -> void:
@@ -28,6 +36,28 @@ func _ready() -> void:
 	wind.volume_db = T.WIND_DB
 	wind.autoplay = true
 	add_child(wind)
+	_clink = _wav(_make_clink())
+	_knock = _wav(_make_knock())
+	_chatter = AudioStreamPlayer.new()
+	_chatter.stream = _wav(_make_chatter(), true)
+	_chatter.volume_db = -80.0
+	_chatter.autoplay = true
+	add_child(_chatter)
+
+
+## The market's sound follows you: loud in the street, fading over about 25 m.
+func _process(delta: float) -> void:
+	if world == null or player == null or not world.has_method("market_distance"):
+		return
+	var d: float = world.market_distance(player.position)
+	var k := clampf(1.0 - (d - 3.0) / 25.0, 0.0, 1.0)
+	_chatter.volume_db = T.CHATTER_DB + linear_to_db(maxf(k * k, 0.0001))
+	if k > 0.6:
+		_market_t -= delta
+		if _market_t <= 0.0:
+			_market_t = _rng.randf_range(1.0, 4.0)
+			var db := T.EFFECTS_DB - 14.0 + _rng.randf_range(-4.0, 2.0)
+			_play(_clink if _rng.randf() < 0.6 else _knock, db, _rng.randf_range(0.85, 1.2))
 
 
 func footstep() -> void:
@@ -171,4 +201,59 @@ func _make_bell() -> PackedFloat32Array:
 		for p in parts:
 			v += sin(TAU * 392.0 * p[0] * tt) * p[1] * exp(-tt * p[2])
 		s[i] = v * 0.25 * minf(1.0, tt * 400.0)
+	return s
+
+
+## A crowd murmur: several voices, each a buzzing tone shaped into vowel-ish
+## sounds, in short syllables with pauses, mixed so they blur into chatter.
+func _make_chatter() -> PackedFloat32Array:
+	var n := _samples(3.0)
+	var size := n.size()
+	for v in 7:
+		var f0 := _rng.randf_range(95.0, 230.0)
+		var phase := 0.0
+		var low := 0.0
+		var band := 0.0
+		var syl := 0.0
+		var amp := 0.0
+		var target := 0.0
+		var f := 0.2
+		for i in size:
+			syl -= 1.0 / RATE
+			if syl <= 0.0:
+				syl = _rng.randf_range(0.08, 0.22)
+				target = 0.0 if _rng.randf() < 0.25 else _rng.randf_range(0.4, 1.0)
+				f = 2.0 * sin(PI * [380.0, 520.0, 700.0, 900.0, 1200.0][_rng.randi() % 5] / RATE)
+				f0 = clampf(f0 * _rng.randf_range(0.94, 1.06), 85.0, 260.0)
+			amp += (target - amp) * 0.0025
+			phase = fmod(phase + f0 / RATE, 1.0)
+			var high := (phase * 2.0 - 1.0) - low - 0.35 * band
+			band += f * high
+			low += f * band
+			n[i] += band * amp * 0.12
+	var s := _samples(3.0)
+	for i in size:
+		# Two copies half a loop apart, faded so the seam can't be heard
+		var w := pow(sin(PI * i / size), 2.0)
+		s[i] = n[i] * w + n[(i + size / 2) % size] * (1.0 - w)
+	return s
+
+
+## A coin dropped on a counter: two bright metal notes.
+func _make_clink() -> PackedFloat32Array:
+	var s := _samples(0.25)
+	for i in s.size():
+		var tt := float(i) / RATE
+		s[i] = (sin(TAU * 2350.0 * tt) * 0.6 + sin(TAU * 3480.0 * tt) * 0.4) * exp(-tt * 28.0) * 0.5
+	return s
+
+
+## A crate set down on stone: a short, dull wooden thud.
+func _make_knock() -> PackedFloat32Array:
+	var s := _samples(0.18)
+	var lp := 0.0
+	for i in s.size():
+		var tt := float(i) / RATE
+		lp += (_rng.randf_range(-1.0, 1.0) - lp) * 0.3
+		s[i] = (sin(TAU * 170.0 * tt) * 0.7 + lp * 0.6) * exp(-tt * 35.0) * 0.8
 	return s

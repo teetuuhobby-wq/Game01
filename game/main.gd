@@ -41,6 +41,8 @@ func _ready() -> void:
 	camera.make_current()
 
 	sfx = preload("res://sfx.gd").new()
+	sfx.world = world
+	sfx.player = player
 	add_child(sfx)
 	player.stepped.connect(sfx.footstep)
 	world.stomped.connect(_on_stomp)

@@ -7,7 +7,7 @@ const RUN_SPEED := 4.5           # while holding Shift
 # --- Camera ---
 const CAMERA_ZOOM_START := 0.4   # 0 = close behind you, 1 = the whole-town diorama view
 const CAMERA_NEAR_DISTANCE := 4.5   # metres, fully zoomed in
-const CAMERA_FAR_DISTANCE := 95.0   # metres, fully zoomed out
+const CAMERA_FAR_DISTANCE := 140.0  # metres, fully zoomed out
 const CAMERA_TURN_SPEED := 1.6   # Z and X keys, how fast the camera turns
 const MOUSE_LOOK := true         # click in the window, then move the mouse to look around
 const MOUSE_SENSITIVITY := 0.0035   # how far the camera turns per bit of mouse movement
@@ -23,6 +23,12 @@ const SWAY := 1.0                # 0 = no swaying, 2 = twice as much
 # --- Neighbours ---
 const NOTICE_DISTANCE := 2.5     # neighbours stop and look at you when you're this close (metres)
 
+# --- The market street ---
+const MARKET_WALKERS := 150      # people strolling and shopping along the market street
+const MARKET_GROUPS := 10        # little groups standing and chatting
+const MARKET_KIDS := 0.12        # share of walkers who are kids running about
+const MARKET_CARRY := 0.2        # share of walkers carrying a crate or basket
+
 # --- The errand ---
 const USE_DISTANCE := 1.8        # how close you need to be to use something (metres)
 const FIX_TIME := 1.5            # seconds to hold E to fit the valve
@@ -32,3 +38,4 @@ const FOOTSTEP_DB := -10.0
 const STOMP_DB := -11.0          # the city's footsteps (was -2: too loud, playtest 1)
 const WIND_DB := -20.0
 const EFFECTS_DB := -4.0
+const CHATTER_DB := -12.0        # the market crowd's murmur, in the middle of the street

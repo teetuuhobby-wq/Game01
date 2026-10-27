@@ -10,6 +10,7 @@ _Last updated: 2026-10-26, session 03 (home PC): reviewed session 02's work, tes
 - ✅ **Phase 2: Pick a direction**: done. **"Strider Home"**: you're one resident of a walking city crossing a dangerous wasteland.
 - ✅ **Phase 3: First playable toy**: done. `game/` is the terraced city: you walk it (first person or behind you), it walks and sways, there are 50 neighbours, and Mira's errand (valve from Bram's workshop to the rain-catcher). Playtested 3 times, with fixes after each.
 - ➡️ **Phase 4: Grow it**: the user reshaped the core loop (see GAME.md): day in town (shops, guild, requests), dangerous night expeditions with combat, then race home at dawn. **The next milestone isn't locked: it waits on the combat-style decision.**
+- 🧪 **Session 03 (home PC):** the user said the city feels too small and the paths cramped, and that a big city means "crowds and bustle". So we built the **Market Street test** on branch `experiment/market-street` (see Branches). **Next:** the user plays it (`git switch experiment/market-street`, then `game/run.bat`), then we decide whether to merge it.
 
 ### What session 02 did (short)
 Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x faster mesher; the terraced city; a 10x experiment (branch `experiment/city-10x`, parked); the first playable toy; playtest tools (recorder, F8, exact replay, F3); 3 playtests; first person.
@@ -97,6 +98,7 @@ Settle question 1 (combat style). Then propose the first Phase 4 milestone with 
 | Branch | What it is | Status |
 |---|---|---|
 | `main` | The project. Always work here. | Active |
+| `experiment/market-street` | **The Market Street test (session 03), waiting for the user to play it.** Bigger outer ring (deck 120 x 88 m), a ~140 m market street with ~35 shops, stalls, lanterns, ~235 people and crowd chatter (see DECISIONS). All 6 test groups pass, including the new `tests/market_test`. ~200–240 FPS uncapped on the home PC; **it will be slow on the laptop.** Screenshots: `game/tests/market_shots.tscn` (hidden run), keepers in `docs/screens/2026-10-26_market_*.jpg`. | If the user likes it: merge into `main`. If not: fix on the branch, or park it. |
 | `experiment/city-10x` | **Look only, don't merge.** The terraced city at 10x its area (265 x 177 m, 4 terraces, 736 houses), built because the user asked to *see* the real scale. Code: `prototypes/look_test_10x/`. 6 FPS and a 33 s start on the laptop, 2.7 GB of memory. | Parked. The user later said even 10x may not be big enough, but what they mean is more *places with a purpose* (see TASTE). |
 
 To look at the 10x city: `git fetch`, `git switch experiment/city-10x`, double-click `prototypes/look_test_10x/run.bat`, then `git switch main`. Commit or stash any work first.
