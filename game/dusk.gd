@@ -4,10 +4,12 @@ extends "res://main.gd"
 ## desert goes dark and something out there opens its eyes.
 ## Three lighting versions to compare: 1 = Ember (warm orange into purple), 2 = Blue
 ## hour (cool blue with warm windows), 3 = Dust (a red, hazy dusk). R plays it again,
-## Esc quits. Run with dusk.bat, or: godot --path game res://dusk.tscn -- --variant 2
-## With --shots it saves four pictures per version to shots/ and quits.
+## Esc quits. Run with dusk.bat, or: godot --path game res://dusk.tscn -- --no-record --variant 2
+## (--no-record: don't save a playtest recording.) --loop plays it again and again.
+## With --shots it saves four pictures of this version to shots/ and quits.
 
 const LENGTH := 48.0     # seconds for the whole scene
+const EYE_CREEP := 1.2   # how fast the creeping eyes drift at most (metres per second)
 
 ## Each version: the light at the start, as night falls, and at full night (mood.gd values),
 ## plus the haze colour and the lamps' glow at night.
@@ -46,7 +48,9 @@ var _caption: Label
 var _stars: MultiMeshInstance3D
 var _ground_lights: Array[OmniLight3D] = []
 var _shot_i := 0
-var _start_x := 0.0
+var _start_t := 0.0          # the city's walk clock when the scene began, for replays
+var _eye_base: Array[Vector3] = []   # where each eye was put down, before creeping
+var _eyes_t := 0.0           # the scene clock when the eyes were put down
 
 
 func _ready() -> void:
@@ -73,6 +77,7 @@ func _ready() -> void:
 	_make_stars()
 	_make_ground_glow()
 	_make_caption()
+	_start_t = world.t
 	_restart()
 
 
@@ -84,13 +89,17 @@ func _hide_game_ui(n: Node) -> void:
 		_hide_game_ui(c)
 
 
+## Back to the start: the scene's clock and the city's walk clock both go back to where
+## they began, so every replay is the same stretch of desert as the first run.
 func _restart() -> void:
 	_t = 0.0
 	_shot_i = 0
 	_eyes_placed = false
+	world.t = _start_t
 	world.walk_rate = 1.0
 	world.kneel = 0.0
-	_start_x = world.city.position.x
+	for leg in world.legs:
+		leg["prev_p"] = 0.0   # as at the start, so the jump back isn't heard as a giant step
 	_caption.text = "Dusk test, version %s: %s     (1 / 2 / 3 switch, R replay, Esc quit)" % [variant, VARIANTS[variant]["name"]]
 
 
@@ -107,6 +116,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	# --loop: once the scene has ended, start again (here, before anything moves this
+	# frame, so the replay's first frame matches the first run's exactly)
+	if _t >= LENGTH and not shots and OS.get_cmdline_user_args().has("--loop"):
+		_restart()
 	_t += delta
 	var k := clampf(_t / LENGTH, 0.0, 1.0)
 	var v: Dictionary = VARIANTS[variant]
@@ -155,8 +168,12 @@ func _process(delta: float) -> void:
 	for i in _eyes.size():
 		var e := _eyes[i]
 		e.visible = eyes_on > 0.05 and fmod(_t * (0.6 + (i / 2) * 0.07) + (i / 2) * 1.3, 4.0) > 0.35
-		if (i / 2) % 3 == 1:
-			e.position.x += sin(_t * 0.3 + i) * 0.02   # a few creep slowly
+		if (i / 2) % 3 == 1 and _eyes_placed:
+			# A few creep slowly back and forth: worked out from the clock, so they creep
+			# the same at any frame rate
+			var t0 := _eyes_t * 0.3 + i
+			var t1 := _t * 0.3 + i
+			e.position.x = _eye_base[i].x + EYE_CREEP / 0.3 * (cos(t0) - cos(t1))
 		(e.material_override as StandardMaterial3D).albedo_color.a = eyes_on
 	_move_camera(k)
 	if shots:
@@ -168,8 +185,6 @@ func _process(delta: float) -> void:
 		if k >= 1.0 and _shot_i >= 4:
 			get_tree().create_timer(0.5).timeout.connect(get_tree().quit)
 			shots = false
-	if k >= 1.0 and not shots and OS.get_cmdline_user_args().has("--loop"):
-		_restart()
 
 
 ## A slow drifting shot: out in the desert ahead of the city, swinging round toward
@@ -302,6 +317,10 @@ func _place_eyes() -> void:
 		c.y = world.ground_at(c.x, c.z) + rng.randf_range(0.5, 1.1)
 		_eyes[i].global_position = c - right * 0.35
 		_eyes[i + 1].global_position = c + right * 0.35
+	_eye_base.clear()
+	for e in _eyes:
+		_eye_base.append(e.position)
+	_eyes_t = _t
 
 
 ## Stars, faded in as night falls.
@@ -378,6 +397,12 @@ func _make_caption() -> void:
 	_caption.offset_left = 20
 	_caption.offset_top = -34
 	layer.add_child(_caption)
+
+
+## main.gd also takes pictures with --shots (the normal game's start, at three zooms).
+## This scene takes its own (below), so main's are switched off here.
+func _start_shots() -> void:
+	pass
 
 
 func _save_dusk_shot(i: int) -> void:
