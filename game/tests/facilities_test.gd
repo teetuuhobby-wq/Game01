@@ -4,6 +4,8 @@ extends "res://main.gd"
 #   - everything you can use (boards, seats, the hearth...) and everyone you can talk to
 #     has a spot in reach that you can walk to
 #   - nobody stands in a doorway or on the stairs
+#   - nobody inside can be talked to from outside, through a wall, and no seat you can
+#     use is under a seated regular
 #   - every resident has enough to say, and the talk changes after Mira's errand
 #   - a bot walks into each building and uses everything there with E (even while
 #     Mira's errand is on, so nothing sits inside the valve's reach), then sits
@@ -41,8 +43,9 @@ func _ready() -> void:
 	player.bot_mode = true
 
 
-## A standable spot within `reach` of `at` that a route from `from` gets to, or null.
-func _reachable_near(at: Vector3, reach: float, from: Vector3, max_dy := 2.0):
+## Standable spots within `reach` of `at` (and at most max_dy above or below it), nearest
+## first, as [distance, position].
+func _cells_near(at: Vector3, reach: float, max_dy := 2.0) -> Array:
 	var cands := []
 	var r := int(reach / world.VS)
 	var cx := roundi(at.x / world.VS)
@@ -61,6 +64,16 @@ func _reachable_near(at: Vector3, reach: float, from: Vector3, max_dy := 2.0):
 				continue
 			cands.append([d, p])
 	cands.sort_custom(func(a, b) -> bool: return a[0] < b[0])
+	return cands
+
+
+## A standable spot within `reach` of `at`, in the room `room` ("" = outside, as E only
+## works in the same room), that a route from `from` gets to, or null.
+func _reachable_near(at: Vector3, reach: float, from: Vector3, room: String, max_dy := 2.0):
+	var cands := []
+	for c in _cells_near(at, reach, max_dy):
+		if world.facility_at(c[1]) == room:
+			cands.append(c)
 	for k in mini(cands.size(), 40):
 		if not world.find_path(from, cands[k][1]).is_empty() or Vector2(from.x - cands[k][1].x, from.z - cands[k][1].z).length() < 0.3:
 			return cands[k][1]
@@ -83,7 +96,7 @@ func _static_checks() -> void:
 	for s in world.interact_spots:
 		var f: Dictionary = world.facilities.get(s["where"], {})
 		var from: Vector3 = f.get("door_in", world.you_spot)
-		if _reachable_near(s["pos"], s.get("reach", _interact.THING_REACH), from) == null:
+		if _reachable_near(s["pos"], s.get("reach", _interact.THING_REACH), from, s["where"]) == null:
 			bad.append(s["id"])
 	results.append(["everything you can use can be reached (%d things)" % world.interact_spots.size(), bad.is_empty(), str(bad)])
 	bad = []
@@ -91,9 +104,20 @@ func _static_checks() -> void:
 		var n: Node3D = world.cast_nodes[id]
 		var f: Dictionary = world.facilities.get(world.cast_spots.get(id, {}).get("where", ""), {})
 		var from: Vector3 = f.get("door_in", world.you_spot)
-		if _reachable_near(n.position, _interact.TALK_REACH, from, 3.0) == null:
+		if _reachable_near(n.position, _interact.TALK_REACH, from, world.facility_at(n.position), 3.0) == null:
 			bad.append(id)
 	results.append(["everyone can be talked to (%d people)" % world.cast_nodes.size(), bad.is_empty() and world.cast_nodes.size() == 8, str(bad)])
+	_check_no_talk_through_walls()
+	bad = []
+	for e in world.extras:
+		if e["pose"] == "stand":
+			continue
+		for s in world.interact_spots:
+			var d: Vector3 = s["pos"] - e["pos"]
+			if s["kind"] == "sit" and Vector2(d.x, d.z).length() < 0.6:
+				bad.append(s["id"])
+	results.append(["every seated regular takes a real seat: no seat you can use is under anyone",
+			bad.is_empty(), str(bad)])
 	bad = []
 	for id in world.cast_spots:
 		var spot: Dictionary = world.cast_spots[id]
@@ -125,6 +149,56 @@ func _static_checks() -> void:
 			and after == Town.CAST["dorran"]["after"][0], ""])
 
 
+## Nobody inside a building can be talked to from outside it, through the wall: from every
+## spot outside in talking reach of them (at each point of their walk), facing them, E
+## would not talk to them. Sabeth, Dorran, Pell and Tamsin all stand near a wall.
+## Bram stands out in front of his open workshop, so he can be talked to from the street.
+func _check_no_talk_through_walls() -> void:
+	var bad := []
+	var tried := {}
+	var keep_pos: Vector3 = player.position
+	var keep_face: Vector3 = player.facing
+	for id in world.cast_nodes:
+		var n: Node3D = world.cast_nodes[id]
+		var room: String = world.facility_at(n.position)
+		if room == "" or world.facilities[room].get("open", false):
+			continue   # out in the street, or in front of Bram's open shed
+		var start := n.position
+		var pts: Array = [start]
+		pts.append_array(world.cast_spots.get(id, {}).get("loop", []))
+		tried[id] = 0
+		for at: Vector3 in pts:
+			n.position = at
+			for c in _cells_near(at, _interact.TALK_REACH, 3.0):
+				var p: Vector3 = c[1]
+				if world.facility_at(p) == room:
+					continue
+				tried[id] += 1
+				player.position = p
+				player.face(at - p)
+				if _interact.find_target().get("id", "") == id:
+					bad.append("%s from %s" % [id, str(p.snapped(Vector3.ONE * 0.1))])
+		n.position = start
+	var near_walls := ["sabeth", "dorran", "pell", "tamsin"].all(func(id) -> bool: return tried.get(id, 0) > 0)
+	results.append(["nobody can be talked to through a wall (%d spots outside tried)" % tried.values().reduce(func(x, y): return x + y, 0),
+			bad.is_empty() and near_walls, str(tried) + " " + str(bad.slice(0, 6))])
+	# Bram, from the street just outside his workshop's front
+	var bram: Vector3 = world.cast_nodes["bram"].position
+	var street = null
+	for c in _cells_near(bram, _interact.TALK_REACH - 0.3, 3.0):
+		if world.facility_at(c[1]) == "":
+			street = c[1]
+			break
+	var ok := false
+	if street != null:
+		player.position = street
+		player.face(bram - street)
+		ok = _interact.find_target().get("id", "") == "bram"
+	results.append(["Bram can be talked to from the street in front of his open workshop", ok, str(street)])
+	player.position = keep_pos
+	player.face(keep_face)
+
+
 ## A tour: into each building, then to each thing and person inside, using each one.
 func _plan_tour() -> void:
 	for k in ["guild", "tavern", "store", "bath", "workshop"]:
@@ -138,7 +212,7 @@ func _plan_tour() -> void:
 				if sat:
 					continue   # one seat per building is enough for the walk
 				sat = true
-			var at = _reachable_near(s["pos"], s.get("reach", _interact.THING_REACH) - 0.15, f["door_in"])
+			var at = _reachable_near(s["pos"], s.get("reach", _interact.THING_REACH) - 0.15, f["door_in"], k)
 			if at != null:
 				_tour.append({"goal": at, "use": s, "what": s["id"]})
 		for id in world.cast_nodes:
@@ -158,7 +232,7 @@ func _start_leg() -> void:
 	var leg: Dictionary = _tour[_i]
 	if leg["goal"] == null:
 		var n: Node3D = world.cast_nodes[leg["use"]["id"]]
-		leg["goal"] = _reachable_near(n.position, _interact.TALK_REACH - 0.15, player.position, 3.0)
+		leg["goal"] = _reachable_near(n.position, _interact.TALK_REACH - 0.15, player.position, world.facility_at(n.position), 3.0)
 		if leg["goal"] == null:
 			_log.append("no spot near " + leg["use"]["id"])
 			_i += 1

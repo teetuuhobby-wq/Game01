@@ -206,8 +206,8 @@ func _build_guild() -> void:
 				box3(x, 5, side_z - 1, x, 6, side_z, P.STONE2)     # a helmet
 			else:
 				box3(x, 5, side_z, x + 1, 6, side_z + 1, P.TERRA3)  # a leather pack
-	# Regulars at the tables
-	for e in [[x0 + 24, zc + 15, -1], [x0 + 32, zc + 15, -1], [x0 + 28, zc - 15, 1], [x1 - 18, zc - 15, 1]]:
+	# Regulars at the tables, each exactly on a stool (every 4 blocks from x0 + 20), so that seat is taken
+	for e in [[x0 + 24, zc + 15, -1], [x0 + 32, zc + 15, -1], [x0 + 28, zc - 15, 1], [x0 + 40, zc - 15, 1]]:
 		extras.append({"pos": _mp(e[0], 0, e[1]), "face": Vector3(0, 0, e[2]), "pose": "sit", "where": "guild"})
 		_remove_spot("guild_seat_%d_%d" % [e[0], e[1]])
 	for lx in [x0 + 16, x0 + 32, x1 - 10]:

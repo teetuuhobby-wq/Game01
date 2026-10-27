@@ -94,7 +94,8 @@ func _build_bath() -> void:
 			interact_spots.append({"id": "bath_seat_%d_%d" % [x, z], "kind": "sit", "pos": _mp(x, 0, z),
 					"label": "sit in the warm water", "face": face,
 					"where": "bath", "soak": true})
-	for e in [[px0 + 10, pz0 + 2, Vector3(0, 0, 1)], [px1 - 8, pz1 - 2, Vector3(0, 0, -1)]]:
+	# Two regulars soaking, each exactly on a seat (every 6 blocks from px0 + 4), so that seat is taken
+	for e in [[px0 + 10, pz0 + 2, Vector3(0, 0, 1)], [px0 + 28, pz1 - 2, Vector3(0, 0, -1)]]:
 		extras.append({"pos": _mp(e[0], 0, e[1]), "face": e[2], "pose": "soak", "where": "bath"})
 		_remove_spot("bath_seat_%d_%d" % [e[0], e[1]])
 	fac_particles.append([_mp(xc, 2, zc), "steam_pool"])
@@ -179,7 +180,8 @@ func _furnish_workshop() -> void:
 	cast_spots["bram"] = {"pos": _mp(x0 + 2, h, z0 - 4), "face": Vector3(0, 0, -1), "where": "workshop"}
 	# Its front is open, so the space just in front counts as inside it too
 	facilities["workshop"] = {"name": "Bram's workshop", "rect": Rect2i(x0, z0 - 6, x1 - x0 + 1, z1 - z0 + 7), "door_out": _mp(cx, h, z0 - 2),
-			"door_in": _mp(cx, h, z0 + 4), "inside": _mp(cx, h, z1 - 9), "level": level_at(cx, z1 - 9)}
+			"door_in": _mp(cx, h, z0 + 4), "inside": _mp(cx, h, z1 - 9), "level": level_at(cx, z1 - 9),
+			"open": true}   # open front: you can talk to Bram from the street
 
 
 # ---------------------------------------------------------------- the lookout and Pip

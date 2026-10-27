@@ -14,7 +14,7 @@ extends "res://world/errand_sites.gd"
 const FAC_DOOR_HALF := 3                     # doorways are 7 blocks (1.4 m) wide
 const FAC_DOOR_TOP := 13                     # and 13 blocks (2.6 m) tall
 
-var facilities := {}      # kind -> {"name", "rect", "door_out", "door_in", "inside", "level"}
+var facilities := {}      # kind -> {"name", "rect", "door_out", "door_in", "inside", "level", "open" (front, if true)}
 var interact_spots := []  # {"id", "kind" (read/look/sit), "pos", "label", "face", "where"}
 var cast_spots := {}      # cast id -> {"pos", "face", "loop" (points, metres), "where"}
 var extras := []          # {"pos", "face", "pose" ("sit"/"soak"/"stand"), "where"}

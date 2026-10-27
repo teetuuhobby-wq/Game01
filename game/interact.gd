@@ -79,15 +79,15 @@ func find_target() -> Dictionary:
 	var best_score := INF
 	var here: Vector3 = player.position
 	var face: Vector3 = player.facing
+	var inside: String = world.facility_at(here)
 	for id in world.cast_nodes:
 		var node: Node3D = world.cast_nodes[id]
 		var c: Dictionary = Town.CAST[id]
 		var s := _score(here, face, node.position, TALK_REACH, 3.0, id) - 0.5   # people first: you came to the bar to talk
-		if s < best_score:
+		if s < best_score and _same_room(node.position, inside):   # never through a wall
 			best_score = s
 			best = {"kind": "talk", "id": id, "label": "talk to %s (%s)" % [c["name"], c["role"]], "pos": node.position,
 					"height": 2.3 * node.scale.y}
-	var inside: String = world.facility_at(here)
 	for spot in world.interact_spots:
 		if spot["where"] != inside:
 			continue   # boards and seats work from the same room only, never through a wall
@@ -98,6 +98,18 @@ func find_target() -> Dictionary:
 			best_score = s
 			best = spot
 	return best
+
+
+## People you can talk to: in the same room as you (or both outside), never through a
+## wall. A place with an open front (Bram's workshop) counts as outside for this, so
+## you can talk to Bram from the street in front of it.
+func _same_room(at: Vector3, inside: String) -> bool:
+	var there: String = world.facility_at(at)
+	return there == inside or _open_front(there) or _open_front(inside)
+
+
+func _open_front(kind: String) -> bool:
+	return world.facilities.get(kind, {}).get("open", false)
 
 
 func _score(here: Vector3, face: Vector3, at: Vector3, reach: float, max_dy: float, id := "") -> float:
