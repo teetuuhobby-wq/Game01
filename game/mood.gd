@@ -25,7 +25,7 @@ const SLIDERS := {
 const PRESETS := {
 	# Softer than before (polish pass): less glare and burned-out highlights on sunny walls
 	"Golden hour": {"sun_height": 28.0, "sun_turn": -30.0, "sun_warmth": 0.6, "sun_brightness": 1.65,
-			"shadow_fill": 0.6, "shadow_warmth": 1.0, "sky_brightness": 0.95, "glare": 0.4, "haze": 0.001,
+			"shadow_fill": 0.6, "shadow_warmth": 1.0, "sky_brightness": 0.95, "glare": 0.4, "haze": 0.0006,
 			"exposure": 0.95, "colour": 1.12, "contrast": 1.06, "miniature": 0.1},
 	# The original golden hour, kept to compare
 	"Golden hour (strong)": {"sun_height": 28.0, "sun_turn": -30.0, "sun_warmth": 0.65, "sun_brightness": 2.0,

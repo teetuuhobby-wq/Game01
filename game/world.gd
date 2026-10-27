@@ -63,6 +63,7 @@ func _process(delta: float) -> void:
 		_update_walkers(delta)
 		_update_promenaders(delta)
 		_update_market(delta)
+		_hide_close_residents()
 	var period := 2.0 * STEP_LENGTH / CITY_SPEED
 	var body_x := CITY_SPEED * t
 	if body_x > 230.0:

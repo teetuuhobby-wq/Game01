@@ -69,11 +69,15 @@ func _make_person(shirt: Color, pants: Color, hair: Color, skin: Color, look := 
 				if hair_style == "scarf" and absi(z) == 1 and row >= 1 and x == 0:
 					c = top_hair
 				add.call(x, y, z, c)
+	add.call(2, neck + 1, 0, skin.darkened(0.12))    # a nose, so the face reads as a face
 	match hair_style:
 		"long":
-			for y in range(neck - 2, neck + 2):
+			# Full at the head, narrowing and darker down the back
+			for y in range(neck, neck + 2):
 				for z in range(-1, 2):
 					add.call(-1, y, z, hair)
+			for y in range(neck - 2, neck):
+				add.call(-1, y, 0, hair.darkened(0.15))
 		"bun":
 			add.call(-1, neck + 2, 0, hair)
 		"scarf":
@@ -371,9 +375,23 @@ func _mk_point(s: float, lane: float) -> Vector3:
 	return market_path[int(k.x)].lerp(market_path[int(k.x) + 1], k.y) + _mk_normal(s) * lane
 
 
-## People closer than 0.9 m to the camera are hidden, so nobody's head fills the screen.
+## People closer than this to the camera are hidden, so nobody's body fills the screen.
+const NEAR_HIDE := 1.3
+
+
 func _mk_clear_of_camera(p: Vector3, cam: Vector3) -> bool:
-	return (p + Vector3(0.0, 1.0, 0.0)).distance_to(cam) > 0.9
+	return (p + Vector3(0.0, 1.0, 0.0)).distance_to(cam) > NEAR_HIDE
+
+
+## The neighbours round the plaza and on the terraces get the same treatment.
+func _hide_close_residents() -> void:
+	if camera == null:
+		return
+	var cam := city.to_local(camera.global_position)
+	for w in walkers:
+		w["node"].visible = _mk_clear_of_camera(w["node"].position, cam)
+	for pw in promenaders:
+		pw["node"].visible = _mk_clear_of_camera(pw["node"].position, cam)
 
 
 func _update_market(delta: float) -> void:
