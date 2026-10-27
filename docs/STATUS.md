@@ -1,5 +1,7 @@
 # STATUS: start here
 
+> ⚠️ **This is an experiment branch (`experiment/bug-hunt`). Its docs are an older copy.** The up-to-date docs live on `main`: run `git show main:docs/STATUS.md` (or switch to `main`) before trusting anything here, and update docs on `main` only.
+
 **New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 03 is the latest, and includes the overnight run).
 
 _Last updated: 2026-10-27, overnight work at the end of session 03 (home PC): new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
