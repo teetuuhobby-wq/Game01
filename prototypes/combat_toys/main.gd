@@ -19,6 +19,12 @@ func _ready() -> void:
 		start(args[i + 1])
 	else:
 		show_menu()
+	if args.has("--menu-shot"):   # for checking the look: save the menu as a picture, then quit
+		await get_tree().create_timer(2.0).timeout
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://shots"))
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("res://shots/menu.png")
+		get_tree().quit()
 
 
 func show_menu() -> void:

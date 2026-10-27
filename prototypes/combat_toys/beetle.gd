@@ -37,7 +37,7 @@ func _ready() -> void:
 	add_child(body)
 	# The shell: the top part of a long egg shape, with the split down its back
 	var shell := {}
-	var base := Color(0.17, 0.13, 0.11)
+	var base := Color(0.24, 0.19, 0.15)
 	for x in range(-6, 7):
 		for y in range(-2, 5):
 			for z in range(-8, 9):
@@ -46,7 +46,7 @@ func _ready() -> void:
 					continue
 				var c := base
 				if y >= 3:
-					c = Color(0.23, 0.24, 0.27)            # moonlit sheen on top
+					c = Color(0.33, 0.35, 0.40)            # moonlit sheen on top
 				if absi(x) == 3 and y >= 1:
 					c = c.lightened(0.12)                   # ridges along the wing cases
 				if x == 0 and z > -4 and y >= 0:

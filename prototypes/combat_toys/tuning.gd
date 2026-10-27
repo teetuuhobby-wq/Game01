@@ -31,5 +31,6 @@ const B_ENERGY := 3                  # energy each turn
 const B_HAND := 5                    # cards drawn each turn
 const B_YOU_HEALTH := 24
 const B_BRAM_HEALTH := 30
-const B_BEETLE_HEALTH := 70
+const B_BEETLE_HEALTH := 80
 const B_BEETLE_SHELL := 6            # shell it starts with (soaks up damage first)
+# The beetle's attacks (damage, when they happen) and the cards are listed at the top of turns_rules.gd.
