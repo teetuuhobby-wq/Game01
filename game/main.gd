@@ -39,6 +39,7 @@ func _ready() -> void:
 	camera.yaw = atan2(-player.facing.z, -player.facing.x)   # start behind you
 	add_child(camera)
 	camera.make_current()
+	world.camera = camera
 
 	sfx = preload("res://sfx.gd").new()
 	sfx.world = world

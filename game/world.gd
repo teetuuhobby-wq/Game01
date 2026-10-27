@@ -68,6 +68,7 @@ var noise := FastNoiseLite.new()
 
 var city: Node3D
 var player: Node3D            # you (set by main.gd); neighbours stop to look at you
+var camera: Camera3D          # set by main.gd: people right in front of it are hidden
 var you_spot := Vector3.ZERO  # where you start, on the city
 var you_yaw := 0.0
 var mira_spot := Vector3.ZERO
@@ -1709,9 +1710,20 @@ func _add_market_crowd() -> void:
 		mat.albedo_color = PAL[c]
 		m.material = mat
 		crates.append(m)
+	var hats := []
+	for h in [[Vector3(0.55, 0.08, 0.55), Color(0.94, 0.82, 0.50)], [Vector3(0.42, 0.16, 0.42), Color(0.80, 0.22, 0.20)],
+			[Vector3(0.42, 0.16, 0.42), Color(0.22, 0.36, 0.62)], [Vector3(0.45, 0.22, 0.45), Color(0.96, 0.95, 0.90)],
+			[Vector3(0.55, 0.08, 0.55), Color(0.40, 0.30, 0.20)]]:
+		var hm := BoxMesh.new()
+		hm.size = h[0]
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = h[1]
+		hm.material = mat
+		hats.append(hm)
 	for i in T.MARKET_WALKERS:
 		var kid := rng.randf() < T.MARKET_KIDS
 		var node := _mk_person(looks, kid)
+		_mk_hat(node, hats)
 		if not kid and rng.randf() < T.MARKET_CARRY:
 			var crate := MeshInstance3D.new()
 			crate.mesh = crates[rng.randi() % crates.size()]
@@ -1731,6 +1743,7 @@ func _add_market_crowd() -> void:
 		for k in n:
 			var a := TAU * k / n + rng.randf_range(-0.3, 0.3)
 			var node := _mk_person(looks, false)
+			_mk_hat(node, hats)
 			node.position = c + Vector3(cos(a), 0.0, sin(a)) * 0.6
 			var to_c := c - node.position
 			node.rotation.y = atan2(-to_c.z, to_c.x)
@@ -1754,6 +1767,15 @@ func _mk_person(looks: Array, kid: bool) -> Node3D:
 		node.scale = Vector3.ONE * 0.72
 	city.add_child(node)
 	return node
+
+
+## Some people wear a hat or a headscarf (a small box on the head).
+func _mk_hat(node: Node3D, hats: Array) -> void:
+	if rng.randf() < 0.45:
+		var hat := MeshInstance3D.new()
+		hat.mesh = hats[rng.randi() % hats.size()]
+		hat.position = Vector3(0.0, 1.8 + hat.mesh.size.y * 0.5, 0.0)
+		node.add_child(hat)
 
 
 ## A lane on your right-hand side of the street for the way you're walking.
@@ -1784,10 +1806,18 @@ func _mk_point(s: float, lane: float) -> Vector3:
 	return market_path[int(k.x)].lerp(market_path[int(k.x) + 1], k.y) + _mk_normal(s) * lane
 
 
+## People closer than 0.9 m to the camera are hidden, so nobody's head fills the screen.
+func _mk_clear_of_camera(p: Vector3, cam: Vector3) -> bool:
+	return (p + Vector3(0.0, 1.0, 0.0)).distance_to(cam) > 0.9
+
+
 func _update_market(delta: float) -> void:
 	var you := Vector2(INF, INF)
 	if player != null:
 		you = Vector2(player.position.x, player.position.z)
+	var cam := Vector3(INF, INF, INF)
+	if camera != null:
+		cam = city.to_local(camera.global_position)
 	for pp in market_people:
 		var node: Node3D = pp["node"]
 		var s: float = pp["s"]
@@ -1840,10 +1870,12 @@ func _update_market(delta: float) -> void:
 		var moving: bool = pp["state"] == Mk.WALK or pp["state"] == Mk.BROWSE_IN
 		var bob := absf(sin(t * (13.0 if kid else 9.0) + s * 3.0)) * 0.05 if moving else 0.0
 		node.position = Vector3(p.x, VS * 0.5 + bob, p.z)
+		node.visible = _mk_clear_of_camera(node.position, cam)
 		if face.length_squared() > 0.0001:
 			node.rotation.y = lerp_angle(node.rotation.y, atan2(-face.z, face.x), minf(1.0, 8.0 * delta))
 	for idl in market_idlers:
 		var node: Node3D = idl["node"]
+		node.visible = _mk_clear_of_camera(node.position, cam)
 		node.rotation.y = float(idl["yaw"]) + sin(t * 0.6 + float(idl["phase"])) * 0.35
 
 
@@ -2053,7 +2085,7 @@ func _plot_ok(x0: int, z0: int, wx: int, wz: int) -> bool:
 ## A shop: a house with an open ground-floor front, an awning, a hanging sign,
 ## goods outside and inside, a counter, shelves and a lantern.
 func _add_shop(x0: int, z0: int, w: int, d: int, door_side: int) -> void:
-	var floors := 2 if rng.randf() < 0.7 else 3
+	var floors := 3 if rng.randf() < 0.6 else 4   # taller than the homes: a proper street canyon
 	_add_house(x0, z0, w, d, floors, door_side)
 	var sd: Array = _sides(x0, z0, x0 + w - 1, z0 + d - 1)[door_side]
 	var o: Vector3i = sd[0]
@@ -2100,16 +2132,31 @@ func _add_shop(x0: int, z0: int, w: int, d: int, door_side: int) -> void:
 					svv(fp(o, a, n, u + du, 1, out), P.WOOD)
 					svv(fp(o, a, n, u + du, 2, out), goods[(u + du + out) % goods.size()])
 		u += 4
-	# A hanging sign on an iron bracket at one corner, with the shop's icon
+	# A big hanging sign on an iron bracket at one corner, sticking out over the
+	# street: a dark frame, the shop's colour, and its icon (3x3) in the middle
 	var su := 0 if rng.randf() < 0.5 else L - 1
-	for out in range(1, 6):
-		svv(fp(o, a, n, su, 18, out), P.IRON)
-	for out in range(2, 6):
-		for y in range(13, 17):
-			var icon := out in [3, 4] and y in [14, 15]
-			svv(fp(o, a, n, su, y, out), (goods[(out + y) % 2]) if icon else P.WOOD_DARK)
-	svv(fp(o, a, n, su, 17, 2), P.IRON)
-	svv(fp(o, a, n, su, 17, 5), P.IRON)
+	var face_col: int = awn if awn != P.IRON else P.GOLD
+	for out in range(1, 8):
+		svv(fp(o, a, n, su, 19, out), P.IRON)
+	for out in range(2, 8):
+		for y in range(12, 18):
+			var edge := out == 2 or out == 7 or y == 12 or y == 17
+			var icon := out in [4, 5] and y in [14, 15]
+			var p: int = P.WOOD_DARK if edge else face_col
+			if icon:
+				p = goods[(out + y) % 2]
+			svv(fp(o, a, n, su, y, out), p)
+	svv(fp(o, a, n, su, 18, 2), P.IRON)
+	svv(fp(o, a, n, su, 18, 7), P.IRON)
+	# Most shops also hang a tall banner down the front, Tokyo style: the shop's
+	# colour with pale marks like a column of lettering
+	if rng.randf() < 0.65:
+		var bu := L - 5 if su == 0 else 2
+		var banner: int = [P.AWN0, P.AWN2, P.CLOTH1, P.PURPLE, P.AWN1][rng.randi() % 5]
+		for du in 3:
+			for y in range(17, 30):
+				var mark := du == 1 and y > 17 and y < 29 and posmod(y, 3) != 0 and _h(su, y, x0 + z0) < 0.8
+				svv(fp(o, a, n, bu + du, y, 1), P.WHITE if mark else banner)
 
 
 ## A market stall: four posts, a striped canopy, a table of goods facing `face`.
@@ -2151,6 +2198,12 @@ func _market_overhead() -> void:
 		for z in range(16, MK_N_STREET.x - 10, 22):
 			_overhead_line(Vector2i(side * (MK_S_STREET.x - 1), z), Vector2i(side * (MK_S_STREET.y + 1), z), k)
 			k += 1
+	# Washing hung out between the upper floors
+	for x in range(-194, 195, 33):
+		_laundry_line(Vector2i(x, MK_N_STREET.x - 1), Vector2i(x, MK_N_STREET.y + 1))
+	for side in [-1, 1]:
+		for z in range(27, MK_N_STREET.x - 10, 33):
+			_laundry_line(Vector2i(side * (MK_S_STREET.x - 1), z), Vector2i(side * (MK_S_STREET.y + 1), z))
 
 
 func _overhead_line(a: Vector2i, b: Vector2i, k: int) -> void:
@@ -2172,6 +2225,22 @@ func _overhead_line(a: Vector2i, b: Vector2i, k: int) -> void:
 				var f: int = flags[(i / 4 + k) % flags.size()]
 				sv(x, y - 1, z, f)
 				sv(x, y - 2, z, f)
+
+
+
+func _laundry_line(a: Vector2i, b: Vector2i) -> void:
+	var n := maxi(absi(b.x - a.x), absi(b.y - a.y))
+	var cloth := [P.CLOTH0, P.CLOTH1, P.CLOTH2, P.WHITE, P.AWN1]
+	for i in range(n + 1):
+		var t := float(i) / n
+		var x := roundi(lerpf(a.x, b.x, t))
+		var z := roundi(lerpf(a.y, b.y, t))
+		var y := 40 - roundi(3.0 * sin(PI * t))
+		sv(x, y, z, P.WOOD_DARK)
+		if i > 3 and i < n - 3 and posmod(i, 6) < 4:
+			var c: int = cloth[(i / 6 + a.x + a.y) % cloth.size()]
+			for dy in range(1, 3 + (i / 6) % 2):
+				sv(x, y - dy, z, c)
 
 
 ## Metres on the city for a block position (the centre of the block's top).
