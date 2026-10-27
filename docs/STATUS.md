@@ -7,7 +7,7 @@ _Last updated: 2026-10-27, the long night at the end of session 03 (home PC): fi
 ## ➡️ Next session (on either machine)
 
 1. `git pull` on `main`, then `git fetch` so the experiment branches arrive too (`git switch experiment/<name>` then works).
-2. **Docs live on `main` only.** The copies of `docs/` on experiment branches are older; when you're on a branch, read `git show main:docs/STATUS.md`. Update docs on `main`.
+2. **Docs live on `main` only.** The copies of `docs/` on experiment branches are older (each has a ⚠️ banner saying so); when you're on a branch, read `git show main:docs/STATUS.md`. Update docs on `main`. **When merging a branch into `main`, keep `main`'s version of `docs/STATUS.md` and the other living docs** (never bring in the banner or the old text); `docs/ARCHITECTURE.md` from `tidy` is the exception: it is newer.
 3. Give the user the recap from the morning report (part 2 below), and ask what they played and what to merge.
 4. **On the work laptop:** try `experiment/laptop-speed` (`game/run_low.bat`, or F6 in the game; F3 shows FPS). Note the FPS in high and low here: it's the one thing only the laptop can answer.
 5. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
