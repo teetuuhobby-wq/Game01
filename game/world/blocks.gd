@@ -225,6 +225,9 @@ var legs := []
 var t := 2.0
 
 
+var life_t := 0.0   # the people's own clock, for their bobbing and fidgeting: unlike t, it never jumps back when the walk loops
+
+
 var paused := false
 
 

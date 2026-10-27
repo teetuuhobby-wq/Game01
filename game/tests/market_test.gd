@@ -1,6 +1,7 @@
 extends "res://main.gd"
 # Market test (headless): the market street is open to walk along its whole length,
-# end to end, and it's busy (enough shops and people).
+# end to end, it's busy (enough shops and people), and its people don't jump when the
+# city's walk loops round.
 # Run all tests with tools/run_tests.ps1, or one: <godot_console.exe> --headless --fixed-fps 20 --path game res://tests/market_test.tscn -- --no-record
 
 func _ready() -> void:
@@ -38,6 +39,21 @@ func _ready() -> void:
 		if world.floor_at(pp["node"].position) != 0:
 			off += 1
 	results.append(["after 10 s, every walker is still on walkable street", off == 0, "%d off the street" % off])
+	# The city's clock jumps back about 54 s each time its walk loops round. The people's
+	# fidgeting mustn't jump with it (shopkeepers and groups used to snap round).
+	world.t = 230.0 / world.CITY_SPEED - 0.12   # a few frames before the loop
+	await get_tree().process_frame
+	var t0: float = world.t
+	var biggest := 0.0
+	for i in 6:
+		var yaws := []
+		for idl in world.market_idlers:
+			yaws.append(idl["node"].rotation.y)
+		await get_tree().process_frame
+		for k in yaws.size():
+			biggest = maxf(biggest, absf(angle_difference(yaws[k], world.market_idlers[k]["node"].rotation.y)))
+	results.append(["when the city's walk loops round, the market's standing people don't snap round",
+			world.t < t0 and biggest < 0.05, "biggest turn in one frame %.0f°" % rad_to_deg(biggest)])
 	var ok := true
 	for r in results:
 		print("%s  %s  (%s)" % ["PASS" if r[1] else "FAIL", r[0], r[2]])

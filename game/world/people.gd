@@ -124,7 +124,7 @@ func _update_walkers(delta: float) -> void:
 			w["r"] += clampf(dr, -0.6 * delta, 0.6 * delta)
 		var a: float = w["a"]
 		r = w["r"]
-		var pos := plaza_c + Vector3(cos(a) * r, VS * 0.5 + absf(sin(t * 9.0 + a * 5.0)) * 0.05, sin(a) * r)
+		var pos := plaza_c + Vector3(cos(a) * r, VS * 0.5 + absf(sin(life_t * 9.0 + a * 5.0)) * 0.05, sin(a) * r)
 		var move := Vector3(pos.x - node.position.x, 0, pos.z - node.position.z)
 		node.position = pos
 		# Face the way they walk (person mesh faces +x)
@@ -147,7 +147,7 @@ func _notice(w: Dictionary, node: Node3D) -> bool:
 ## A point on a promenade (just inside a terrace's edge), with a little walking bob.
 func _promenade_point(pw: Dictionary, a: float) -> Vector3:
 	var p := _round_rect(pw["rx"], pw["rz"], a)
-	return Vector3(p.x, pw["y"] + absf(sin(t * 9.0 + a * 37.0)) * 0.05, p.y)
+	return Vector3(p.x, pw["y"] + absf(sin(life_t * 9.0 + a * 37.0)) * 0.05, p.y)
 
 
 func _update_promenaders(delta: float) -> void:
@@ -360,7 +360,7 @@ func _update_market(delta: float) -> void:
 		pp["lane"] = lane
 		var p := _mk_point(s, lane)
 		var moving: bool = pp["state"] == Mk.WALK or pp["state"] == Mk.BROWSE_IN
-		var bob := absf(sin(t * (13.0 if kid else 9.0) + s * 3.0)) * 0.05 if moving else 0.0
+		var bob := absf(sin(life_t * (13.0 if kid else 9.0) + s * 3.0)) * 0.05 if moving else 0.0
 		node.position = Vector3(p.x, VS * 0.5 + bob, p.z)
 		node.visible = _mk_clear_of_camera(node.position, cam)
 		if face.length_squared() > 0.0001:
@@ -368,4 +368,4 @@ func _update_market(delta: float) -> void:
 	for idl in market_idlers:
 		var node: Node3D = idl["node"]
 		node.visible = _mk_clear_of_camera(node.position, cam)
-		node.rotation.y = float(idl["yaw"]) + sin(t * 0.6 + float(idl["phase"])) * 0.35
+		node.rotation.y = float(idl["yaw"]) + sin(life_t * 0.6 + float(idl["phase"])) * 0.35

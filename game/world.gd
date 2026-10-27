@@ -60,6 +60,7 @@ func _build_city() -> void:
 func _process(delta: float) -> void:
 	if not paused:
 		t += delta
+		life_t += delta
 		_update_walkers(delta)
 		_update_promenaders(delta)
 		_update_market(delta)
