@@ -1,10 +1,64 @@
 # STATUS: start here
 
-**New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 03 is the latest, and includes the overnight run).
+**New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 03 is the latest, and includes the overnight run and the long night).
 
-_Last updated: 2026-10-27, overnight work at the end of session 03 (home PC): new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
+_Last updated: 2026-10-27, the long night at the end of session 03 (home PC): five walk-in buildings and eight named residents, a dusk look test, a bug hunt, a laptop speed setting and a tidy-up, all on branches (part 2 below). Before that, overnight: new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
 
-## 🌅 Morning report (overnight, 2026-10-27)
+## 🌅 Morning report, part 2 (the long night, 2026-10-27)
+
+After the first report, the user asked Claude to keep going all night, decide things on its own, and review everything with matched critics. **Everything is on branches; nothing new is on `main` except docs.**
+
+### Look first
+
+| | |
+|---|---|
+| ![Guild hall](screens/2026-10-27_town_guild_outside.jpg) The Adventurers' Guild | ![Tavern](screens/2026-10-27_town_tavern_inside.jpg) Inside the Kneeling Strider |
+| ![Bathhouse](screens/2026-10-27_town_bath_inside.jpg) Inside the bathhouse (steam, pool seats) | ![Talking](screens/2026-10-27_town_talk_dorran.jpg) Talking to Dorran (E) |
+| ![Cast](screens/2026-10-27_town_cast_lineup.jpg) The eight named residents | ![Dusk](screens/2026-10-27_dusk_blue_nightfall.jpg) Dusk test: knelt, lift down, lamps lit |
+
+More in `docs/screens/2026-10-27_town_*.jpg` and `..._dusk_*.jpg`.
+
+### Things I decided quietly that touch the big picture (overrule any)
+- **The city kneels and lowers a cargo lift at dusk** (dusk test). That's a guess at how expeditions start, not a decision.
+- **Glowing eyes in the dark desert and "sand-crawlers" in people's talk** hint at what's out there. Flavour only; the real enemies are your call.
+- **Sabeth's "bottom of the ledger"** line hints that the guild has ranks. Also flavour; no rank system exists.
+- Where the buildings stand (they replace ~15% of the homes on that side), all names, looks and lines, the tavern's name ("the Kneeling Strider").
+
+### 1. The town's places and people (branch `experiment/tidy`)
+- **Five walk-in places** round the foot of the stairs on the homes side (the workshop stays on the middle terrace): **the Adventurers' Guild** (request board, notices, a beetle-horn trophy, long tables), **the Kneeling Strider tavern** (bar, hearth, regulars), **Pell's Provisions**, **the Bathhouse** (a pool you wade into and sit in, steam, a fountain), and **Bram's workshop**, now furnished. Each has a sign, a hanging picture sign, lamps and people.
+- **Eight named residents** with their own look, prop, habit and 4-7 lines each (`docs/CHARACTERS.md`). Their talk changes after Mira's errand.
+- **E does things now:** talk (lines cycle, "2/4"), read boards, sit on stools, benches or in the bath, look at things. A small gold diamond shows what E will use.
+- **Critics (first draft → after fixes):** outsides: guild 5→7, tavern 7→8, bath 4→7, store 6→6, workshop 5→5. Insides: tavern 7→8, guild 5→6.5, bath 4→6, store 5→5.5, workshop 3→4. Layout 8-9. Interactions: clarity 7→8, feedback 6→8. Spoiler guard: clean.
+- **Weakest spots (honest):** the workshop is still the plainest (tiny, flat red roof); the store's inside is a bit bland.
+- **Code reviewer:** found 8 things, all fixed: one press of E could pick up the valve *and* talk to Bram; sitting down while walking stood you straight back up; boards and seats worked through walls; the buildings test didn't check that each press did something; the cast's randomness reshuffled the crowd; reach and text times were hard-coded (now in `tuning.gd`); one file was over 600 lines (now split); small comment fixes. A new test guards the first two.
+- **Tests:** all 10 groups pass. A bot walks into all 5 places and uses all 15 things. No slowdown (about 310-470 FPS).
+
+### 2. Dusk (branch `experiment/dusk`; double-click `game/dusk.bat`, keys 1 / 2 / 3, R replays)
+- A 48-second scene to watch: the city walks into the sunset, slows, kneels, lowers its cargo lift and lights its lamps; night falls with stars, and eyes open in the dark.
+- Three versions: Ember, **Blue hour** (the critic's pick, 8/8 for mood and "safe home in a dangerous world"), Dust.
+- Not done: more lit windows at night; frame the city larger in the last shot.
+
+### 3. Bug hunt (branch `experiment/bug-hunt`)
+- A bot walked all over the city for an hour of game time (7.9 km): **no stuck spots, falls or height glitches.** A 5-minute version joins the tests.
+
+### 4. Polish round 2 (branch `experiment/polish-01`, already inside `tidy`)
+- A mouth on faces; market groups stand in looser clusters.
+
+### 5. Laptop speed (branch `experiment/laptop-speed`; `game/run_low.bat`, or F6 in the game)
+- Lower 3D resolution with sharp upscaling, no soft extras, simpler shadows, shorter view, distant people hidden.
+- **On this PC: 40-80% faster.** On the laptop: maybe 1.5-2x, **but only a run there will tell.**
+
+### 6. Tidy-up (branch `experiment/tidy`)
+- The world code is now 13 layer files, none over 600 lines. Proved to build the same world, and all tests pass.
+
+### How to try them
+- Commit or stash any work, then `git fetch`, then for example `git switch experiment/tidy` and double-click `game/run.bat`. `git switch main` to go back.
+- **Branch family:** `tidy` (the newest town) ← `facilities` ← `polish-01` ← `main`. `dusk`, `bug-hunt` and `laptop-speed` each branch straight off `main`.
+- **Merging:** say which ones you like and I'll merge them in order.
+
+**Questions for the user (pick one or two):** which building do you walk into first, and what part of it do you like? Blue hour, Ember or Dust? Then the combat toys are still waiting.
+
+## 🌅 Morning report, part 1 (overnight, 2026-10-27)
 
 The user went to sleep and asked Claude to work through the night: **sounds, then two combat toys, then a polish pass** (all defaults accepted). Nothing was merged into `main` except the sounds; nothing was decided for the user.
 
@@ -33,12 +87,12 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 1. **What kind of combat? → play the two toys** (built overnight, branch `experiment/combat-toys`). Then ask "what part?" of the one they liked. The user postponed this at the end of session 02. Options: (a) action, real time; (b) turn-based tactics like Chrono Ark (a game they love; it makes AI companions easy); (c) real time with pause to order the party. Ask "what part?" (the rush of reflexes, a clever plan, or the party's spectacle). *Claude's suggestion: two tiny combat toys on a branch (an afternoon each), one action and one turn-based, against the same desert creature. Let the user play both and react.*
 2. **Companions:** the user wants a party of AI companions (neighbours, guild members). *Claude's lean: the first expedition solo, then one simple companion who follows, talks, carries and warns at dawn (no fighting), and fighting companions once combat exists.* Not confirmed.
 3. **Fail state when stranded:** the user said "catch up on a vehicle, or game over and reload." *Claude suggested softer (a caravan rescues you, you lose your haul) and no vehicles in the first version (a sprint on foot after the rising city).* Not confirmed.
-4. **Which facilities first** (shops, guild, tavern, workshop…) and how the city grows to hold them (district by district).
+4. ~~**Which facilities first**~~ A first pass of all five (guild, tavern, store, bathhouse, workshop) was built in the long night on `experiment/tidy`. **Ask:** which one the user walks into first, and what part they like. Real shops, quests and ranks are still the user's call.
 5. *(Low priority)* **Nano Banana Pro access** for concept art: the Gemini app or an API key? Only matters once we do concept art.
 
 ## Suggested next step
 
-Settle question 1 (combat style). Then propose the first Phase 4 milestone with defaults. Claude's draft is **"One night out"**: a guild request at dusk → the city kneels → ride the cargo lift down → a dangerous desert night with combat → race home as dawn breaks and the legs rise. Keep it one request and one area, and add facilities and companions after.
+**First, the user plays the long night's branches** (part 2 of the morning report) and says what to merge. Then settle question 1 (combat style). Then propose the first Phase 4 milestone with defaults. Claude's draft is **"One night out"**: a guild request at dusk → the city kneels → ride the cargo lift down → a dangerous desert night with combat → race home as dawn breaks and the legs rise. Keep it one request and one area, and add facilities and companions after.
 
 ## Important rules learned (don't break these)
 
@@ -112,8 +166,13 @@ Settle question 1 (combat style). Then propose the first Phase 4 milestone with 
 | Branch | What it is | Status |
 |---|---|---|
 | `main` | The project. Always work here. | Active |
+| `experiment/tidy` | **The newest town** (the long night): five walk-in buildings, eight named residents, E to talk, read, sit and look, code review fixes, the world code in 13 layers. Contains `facilities` and `polish-01`. All 10 test groups pass. | Waiting for the user to play; merge into `main` if liked |
+| `experiment/facilities` | The buildings and residents before the tidy-up. Superseded by `tidy`. | Kept for history |
+| `experiment/dusk` | **Dusk look test:** `game/dusk.bat`, keys 1 / 2 / 3, R replays. The city kneels, lowers a lift, lights its lamps. | Waiting for the user's pick |
+| `experiment/bug-hunt` | An hour-long walkabout bot (nothing found) and a 5-minute version for the tests. | Merge any time |
+| `experiment/laptop-speed` | **Low quality for the laptop:** `game/run_low.bat`, or F6 in the game. | Needs a run on the laptop |
 | `experiment/combat-toys` | **The two combat toys** (overnight, 2026-10-27): `prototypes/combat_toys/`. Double-click its `run.bat`, pick 1 (action) or 2 (turn-based). Tests: `prototypes/combat_toys/run_tests.ps1`. Tuning: `prototypes/combat_toys/tuning.gd`. Doesn't touch the game. | Waiting for the user to play both |
-| `experiment/polish-01` | **Polish pass** (overnight): varied residents and a softer default golden hour. Before/after: `docs/screens/2026-10-27_polish_*.jpg`. All game tests pass. | If the user likes it: merge into `main` |
+| `experiment/polish-01` | **Polish pass** (overnight): varied residents and a softer default golden hour, then a mouth on faces and looser market groups. Before/after: `docs/screens/2026-10-27_polish_*.jpg`. Already inside `tidy`. | If the user likes it: merge into `main` (or merge `tidy`) |
 | `experiment/market-street` | The Market Street test (session 03). **Merged into `main`** after the user played it ("the city feels a lot better"). | Done, kept for history |
 | `experiment/city-10x` | **Look only, don't merge.** The terraced city at 10x its area (265 x 177 m, 4 terraces, 736 houses), built because the user asked to *see* the real scale. Code: `prototypes/look_test_10x/`. 6 FPS and a 33 s start on the laptop, 2.7 GB of memory. | Parked. The user later said even 10x may not be big enough, but what they mean is more *places with a purpose* (see TASTE). |
 

@@ -43,4 +43,5 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
   - `game/tuning.gd` for speeds, sway and camera.
   - **Added in session 03:** the bigger city with the market street and crowd; the sound board (F4); the mood and lighting panel (F5).
   - **Added overnight (2026-10-27):** recorded wind, town life, bell, and the city creaking as it steps. Two combat toys wait on a branch (`experiment/combat-toys`) to settle the combat style.
-- **Out (still to come):** night and expeditions, combat, companions, shops and the guild, building, inventory, real dialogue, saving, a bigger city, and the art polish list.
+  - **Waiting on branches (the long night, 2026-10-27):** five walk-in buildings (guild, tavern, store, bathhouse, workshop) and eight named residents you can talk to with E (`experiment/tidy`, see `docs/CHARACTERS.md`); a dusk look test (`experiment/dusk`); a laptop speed setting (`experiment/laptop-speed`). Not merged until the user plays them.
+- **Out (still to come):** night and expeditions, combat, companions, real shops and guild quests (the buildings are clever fakes), building, inventory, real dialogue, saving, a bigger city, and the art polish list.

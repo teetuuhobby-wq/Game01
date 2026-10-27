@@ -8,6 +8,8 @@ Not required for a friends-only game, but cheap to keep (and essential if we eve
 | Look-test voxel art (city, legs, wasteland) | Claude Code, generated from code (technique C9), no image AI | 2026-10-26 | `prototypes/look_test/main.gd` |
 | HD look-test art (20 cm blocks: houses, plaza, residents, legs) | Claude Code, generated from code (technique C9), no image AI | 2026-10-26 | `prototypes/look_test_hd/main.gd`. Town to City Steam screenshots were viewed as a style reference only; nothing was copied. |
 | Combat toys art (beetle, people, night desert, distant city) | Claude Code, generated from code (technique C9), no image AI | 2026-10-27 | `prototypes/combat_toys/` on branch `experiment/combat-toys`. Sounds there are Kenney CC0 recordings. |
+| Buildings, residents and dusk scene (guild, tavern, store, bathhouse, workshop, 8 named people, kneeling city) | Claude Code, generated from code (technique C9), no image AI | 2026-10-27 | `game/world/facilities.gd`, `outer_places.gd`, `cast.gd` (branch `experiment/tidy`); `game/dusk.gd` (branch `experiment/dusk`) |
+| Residents' names, personalities and lines | Claude Code (written), checked by a blind spoiler-guard critic | 2026-10-27 | `game/town_data.gd`, `docs/CHARACTERS.md` |
 
 ## Toolkit we have (checked 2026-10-25)
 

@@ -100,3 +100,9 @@ _Last updated: 2026-10-26 (end of session 02: street level, first person, facili
 - **Hands-on helper, wants concrete asks.** They offered to make a Freesound account and download sounds, then asked for *exact links* instead of search links. Read: happy to do small, clear jobs; doesn't want to browse or choose blind. Give them short, exact to-do lists. Confidence: medium.
 - **Trusts Claude with autonomy, wants momentum.** "You'll have a lot of time … do a lot more than just sounds", then accepted all defaults. Read: they like waking up to things to play. Keep overnight work to playable, reversible experiments on branches. Confidence: medium.
 
+## New signals (the long night, end of session 03)
+
+- **Breadth first, polish later.** Asked for *all* five buildings fully walk-in ("we can always review and polish them later") rather than two polished ones. Read: they want to see the whole town take shape, then react. Confidence: medium.
+- **People matter, not just places.** They added the characters to the plan themselves. Fits "everyday life" (#2) and "merely one resident". Confidence: medium–high.
+- **Cares about quality control.** Asked how the work would be reviewed, then suggested matching critics to each piece. Read: the "it has to look good" fear again, now as a wish for a process they can trust while away. Confidence: high.
+- **Comfortable handing over decisions** ("free to make as many decisions on your own as you want"), but only on branches. Keep everything reversible and list what was decided for them.
