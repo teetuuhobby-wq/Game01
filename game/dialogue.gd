@@ -19,6 +19,11 @@ func lines_for(id: String, errand_done: bool) -> Array:
 	return out
 
 
+## Which line (1..n) a resident said last, for showing "2/4".
+func said_count(id: String, n: int) -> int:
+	return posmod(_said.get(id, 1) - 1, n) + 1
+
+
 ## The next thing a resident says (and counts it).
 func next_line(id: String, errand_done: bool) -> String:
 	if errand_done and not _knew_done.get(id, false):

@@ -7,9 +7,10 @@ extends Node
 
 const Town := preload("res://town_data.gd")
 const Dialogue := preload("res://dialogue.gd")
-const TALK_REACH := 2.4     # metres from a person you can talk to them
-const THING_REACH := 1.7    # metres from a board, seat or the like
-const SHOW_TIME := 9.0      # seconds a line stays up
+const T := preload("res://tuning.gd")
+const TALK_REACH: float = T.TALK_REACH     # metres from a person you can talk to them
+const THING_REACH: float = T.THING_REACH   # metres from a board, seat or the like
+const CLOSE_DISTANCE := 4.0                # walk this far from what you're reading and it closes
 
 var world: Node3D       # world.gd
 var player: Node3D      # player.gd
@@ -29,6 +30,7 @@ var _prompt: Label
 var _marker: MeshInstance3D   # a small diamond over what E would use
 var _last_id := ""            # last frame's target, kept unless something is clearly better
 var _t := 0.0
+var _wait_release := false    # just sat down holding a walk key: don't stand until it's let go
 var _show_time := 0.0
 var _show_at := Vector3.ZERO
 
@@ -48,7 +50,10 @@ func _process(delta: float) -> void:
 	if player.seated:
 		target = {}
 		_prompt.text = "E or walk: stand up"
-		if controls.use_pressed or controls.move != Vector2.ZERO or player.bot_input != Vector2.ZERO:
+		var walking: bool = controls.move != Vector2.ZERO or player.bot_input != Vector2.ZERO
+		if not walking:
+			_wait_release = false
+		if controls.use_pressed or (walking and not _wait_release):
 			player.stand_up()
 			sfx.play("crate", -16.0)
 		_update_panel(delta)
@@ -82,7 +87,10 @@ func find_target() -> Dictionary:
 			best_score = s
 			best = {"kind": "talk", "id": id, "label": "talk to %s (%s)" % [c["name"], c["role"]], "pos": node.position,
 					"height": 2.3 * node.scale.y}
+	var inside: String = world.facility_at(here)
 	for spot in world.interact_spots:
+		if spot["where"] != inside:
+			continue   # boards and seats work from the same room only, never through a wall
 		var s := _score(here, face, spot["pos"], spot.get("reach", THING_REACH), 2.0, spot["id"])
 		if spot["kind"] == "sit":
 			s += 0.3   # and a seat only when it's clearly the one you mean
@@ -112,7 +120,7 @@ func use(t: Dictionary) -> void:
 			var done: bool = errand.step == errand.Step.DONE
 			var line := talk.next_line(t["id"], done)
 			var n: int = talk.lines_for(t["id"], done).size()
-			var k: int = posmod(talk._said[t["id"]] - 1, n) + 1
+			var k: int = talk.said_count(t["id"], n)
 			_show(t["id"], "%s, %s   (%d/%d)" % [c["name"], c["role"], k, n], line, t["pos"])
 			sfx.play("tick", -6.0)
 		"read":
@@ -133,6 +141,7 @@ func use(t: Dictionary) -> void:
 			var stand: Vector3 = player.position
 			var seat := Vector3(t["pos"].x, stand.y, t["pos"].z)
 			player.sit(seat, t["face"], stand, -0.36 if t.get("soak", false) else 0.0)
+			_wait_release = controls.move != Vector2.ZERO or player.bot_input != Vector2.ZERO
 			sfx.play("crate", -12.0)
 
 
@@ -144,7 +153,7 @@ func _show(id: String, who: String, text: String, at: Vector3, seconds := -1.0) 
 	_text.text = text
 	_hint.text = ""
 	_panel.visible = true
-	_show_time = seconds if seconds > 0.0 else 4.0 + 0.05 * text.length()   # long lines stay longer
+	_show_time = seconds if seconds > 0.0 else T.TEXT_SECONDS + T.TEXT_SECONDS_PER_LETTER * text.length()   # long lines stay longer
 	_show_at = at
 	_fit_panel()
 
@@ -167,7 +176,7 @@ func _update_panel(delta: float) -> void:
 		return
 	_show_time -= delta
 	var d: Vector3 = player.position - _show_at
-	if _show_time <= 0.0 or Vector2(d.x, d.z).length() > 4.0:
+	if _show_time <= 0.0 or Vector2(d.x, d.z).length() > CLOSE_DISTANCE:
 		_close()
 
 

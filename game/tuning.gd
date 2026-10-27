@@ -33,6 +33,12 @@ const MARKET_CARRY := 0.2        # share of walkers carrying a crate or basket
 const USE_DISTANCE := 1.8        # how close you need to be to use something (metres)
 const FIX_TIME := 1.5            # seconds to hold E to fit the valve
 
+# --- Using things (E) ---
+const TALK_REACH := 2.4          # metres from a person you can talk to them
+const THING_REACH := 1.7         # metres from a board, seat or the like
+const TEXT_SECONDS := 4.0        # how long a line stays up...
+const TEXT_SECONDS_PER_LETTER := 0.05   # ...plus this much per letter
+
 # --- Sound ---
 # Volumes, variety and which recording to use are set in the game with the sound board
 # (press F4), and saved in audio/sound_settings.json. The built-in values are in sfx.gd.

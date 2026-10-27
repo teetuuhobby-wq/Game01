@@ -1,5 +1,5 @@
 extends "res://world/people.gd"
-## THE WORLD, layer 11 of 12: the town's named residents.
+## THE WORLD, layer 12 of 13: the town's named residents.
 ## Each one from town_data.gd, built in their spot from the buildings with the things
 ## they carry (a ledger, a mug, goggles...), their little habits, and the regulars
 ## sitting at tables or soaking in the bath. Also hides anyone right in front of the
@@ -106,6 +106,10 @@ func _item_mesh(kind: String, top: float) -> MeshInstance3D:
 	return _mi(mesh)
 
 
+const HABIT_SPEEDS := {"run": 2.6, "stroll": 0.7, "pace": 0.6}   # metres per second
+const NOTICE_YOU := 2.6           # metres: residents turn to you (and walkers stop) this close
+
+var _cast_rng := RandomNumberGenerator.new()   # the cast's own, so it never reshuffles the crowd
 var cast_nodes := {}    # cast id -> Node3D (the named residents)
 var _cast := []         # [{"id", "node", "spot", "habit", "base_yaw", "k", "wait", "phase"}]
 var _extra_nodes := []
@@ -115,6 +119,7 @@ var _extra_nodes := []
 ## unnamed regulars sitting at tables and soaking in the bath. Mira is made by the errand.
 func _add_cast() -> void:
 	var Town := preload("res://town_data.gd")
+	_cast_rng.seed = hash("%d:cast habits" % SEED)
 	for id in Town.CAST:
 		if id == "mira" or not cast_spots.has(id):
 			continue
@@ -127,7 +132,7 @@ func _add_cast() -> void:
 		city.add_child(node)
 		cast_nodes[id] = node
 		_cast.append({"id": id, "node": node, "spot": spot, "habit": c["habit"], "base_yaw": node.rotation.y,
-				"k": 0, "wait": rng.randf_range(0.5, 2.0), "phase": rng.randf() * TAU})
+				"k": 0, "wait": _cast_rng.randf_range(0.5, 2.0), "phase": _cast_rng.randf() * TAU})
 	for e in extras:
 		var node := Node3D.new()
 		var mi := _random_person_sitting()
@@ -136,7 +141,7 @@ func _add_cast() -> void:
 		var f: Vector3 = e["face"]
 		node.rotation.y = atan2(-f.z, f.x)
 		city.add_child(node)
-		_extra_nodes.append({"node": node, "phase": rng.randf() * TAU, "yaw": node.rotation.y})
+		_extra_nodes.append({"node": node, "phase": _cast_rng.randf() * TAU, "yaw": node.rotation.y})
 
 
 func _make_character(c: Dictionary) -> Node3D:
@@ -173,10 +178,10 @@ func _update_cast(delta: float) -> void:
 		var ph: float = c["phase"]
 		var to_you: Vector3 = you - node.position
 		to_you.y = 0.0
-		var near := to_you.length() < 2.6
+		var near := to_you.length() < NOTICE_YOU
 		var loop: Array = c["spot"].get("loop", [])
 		if not loop.is_empty() and not near:
-			var speed := {"run": 2.6, "stroll": 0.7, "pace": 0.6}.get(c["habit"], 0.8) as float
+			var speed := HABIT_SPEEDS.get(c["habit"], 0.8) as float
 			if c["wait"] > 0.0:
 				c["wait"] -= delta
 			else:
@@ -185,7 +190,7 @@ func _update_cast(delta: float) -> void:
 				d.y = 0.0
 				if d.length() < 0.1:
 					c["k"] = (c["k"] + 1) % loop.size()
-					c["wait"] = rng.randf_range(0.3, 1.2) if c["habit"] == "run" else rng.randf_range(1.0, 3.5)
+					c["wait"] = _cast_rng.randf_range(0.3, 1.2) if c["habit"] == "run" else _cast_rng.randf_range(1.0, 3.5)
 				else:
 					var step := d.normalized() * minf(speed * delta, d.length())
 					node.position += step

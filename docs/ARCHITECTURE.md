@@ -32,12 +32,13 @@
 | 4 | `city.gd` | The layout: deck, hull, wall, terraces, stairs, plaza, tower, homes, trees, underside |
 | 5 | `errand_sites.gd` | Bram's workshop and the rain-catcher |
 | 6 | `facility_kit.gd` | The building kit: walls, doorways, signs, windows, lanterns, seats; the lists of things to use and where residents stand |
-| 7 | `facilities.gd` | The walk-in buildings: guild hall, tavern, store, bathhouse, the workshop's inside, the lookout |
-| 8 | `market.gd` | The market street: shops, stalls, signs, lanterns, the crowd's path |
-| 9 | `legs.gd` | The six legs and how they walk |
-| 10 | `people.gd` | Building people, neighbours, the market crowd |
-| 11 | `cast.gd` | The named residents (from `town_data.gd`), their props and habits, the regulars |
-| 12 | `walk_map.gd` | Where people can stand, line-of-sight checks, route finding |
+| 7 | `outer_places.gd` | The bathhouse, the workshop's inside, Old Wendel's lookout, Pip's street |
+| 8 | `facilities.gd` | The guild hall, the tavern and the store; builds all the places in order |
+| 9 | `market.gd` | The market street: shops, stalls, signs, lanterns, the crowd's path |
+| 10 | `legs.gd` | The six legs and how they walk |
+| 11 | `people.gd` | Building people, neighbours, the market crowd |
+| 12 | `cast.gd` | The named residents (from `town_data.gd`), their props and habits, the regulars |
+| 13 | `walk_map.gd` | Where people can stand, line-of-sight checks, route finding |
 
 ## Rules
 

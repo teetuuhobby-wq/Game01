@@ -13,6 +13,8 @@ Tests (in game/tests/ unless noted):
   mood            the mood panel (F5) opens, presets and sliders change the light
   buildings       doors lead in, everything and everyone can be reached and used with E,
                   a bot tours all 5 buildings (guild, tavern, store, bathhouse, workshop)
+  using edges     one press of E does one thing; sitting down while walking doesn't
+                  stand you straight back up
 Exit code 0 = everything passed. Set GODOT to use a different Godot console .exe.
 #>
 # "Continue": Windows PowerShell treats anything Godot prints to stderr (even harmless
@@ -32,7 +34,8 @@ $runs = @(
 	@{ Name = "market"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/market_test.tscn", "--", "--no-record") },
 	@{ Name = "sound"; Args = @("--headless", "--path", $game, "res://tests/sound_test.tscn", "--", "--no-record") },
 	@{ Name = "mood"; Args = @("--headless", "--path", $game, "res://tests/mood_test.tscn", "--", "--no-record") },
-	@{ Name = "buildings"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/facilities_test.tscn", "--", "--no-record") }
+	@{ Name = "buildings"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/facilities_test.tscn", "--", "--no-record") },
+	@{ Name = "using edges"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/use_edge_test.tscn", "--", "--no-record") }
 )
 $failed = 0
 foreach ($r in $runs) {

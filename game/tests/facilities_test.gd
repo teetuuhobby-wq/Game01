@@ -218,12 +218,27 @@ func _process(delta: float) -> void:
 			elif t.get("id", "") == want_id:
 				controls.use_pressed = true
 				_used += 1
-				if u["kind"] == "sit":
-					_stage = "sitting"
-					_wait = 1.0
-					return
+				_stage = "check"
+				_wait = 0.1
+				return
 			else:
 				_log.append("%s: E would use %s instead" % [want_id, t.get("id", "nothing")])
+			_i += 1
+			_start_leg()
+		"check":
+			# The press did what it should: you're seated, or the panel shows that thing
+			_wait -= delta
+			if _wait > 0.0:
+				return
+			var u: Dictionary = leg["use"]
+			var did: bool = player.seated if u["kind"] == "sit" else _interact.showing == u["id"]
+			if not did:
+				_log.append("%s: E didn't do anything" % u["id"])
+				_used -= 1
+			if u["kind"] == "sit" and player.seated:
+				_stage = "sitting"
+				_wait = 1.0
+				return
 			_i += 1
 			_start_leg()
 		"sitting":

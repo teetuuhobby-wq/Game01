@@ -1,5 +1,5 @@
 extends "res://world/buildings.gd"
-## THE WORLD, layer 4 of 12: the city's layout.
+## THE WORLD, layer 4 of 13: the city's layout.
 ## The deck and its hull, the wall round the edge, the raised terraces and their
 ## stairs, the plaza and the bell tower, the homes and trees, and what's underneath
 ## (the boiler, lanterns, and the struts holding the legs).

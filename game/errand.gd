@@ -29,6 +29,7 @@ var _bubble: Label3D
 var _fix := 0.0
 var _tick_time := 0.0
 var _t := 0.0
+var _used_frame := -1   # the frame E last did something for the errand
 
 
 func setup(w: Node3D, p: Node3D, s: Node, cam: Camera3D, c: Node) -> void:
@@ -52,6 +53,7 @@ func _process(delta: float) -> void:
 			_goal.text = "Fetch the spare valve from Bram's workshop  (%s)" % _where(world.workshop_use)
 			_prompt.text = "Press E to pick up the valve" if near else ""
 			if near and (controls.use_pressed or bot_use):
+				_used_frame = Engine.get_process_frames()
 				_pick_up()
 		Step.FIT_VALVE:
 			_goal.text = "Fit the valve on the rain-catcher  (%s)" % _where(world.catcher_use)
@@ -63,6 +65,7 @@ func _process(delta: float) -> void:
 					_tick_time = 0.15
 					sfx.tick()
 				if _fix >= T.FIX_TIME:
+					_used_frame = Engine.get_process_frames()
 					_fit()
 			else:
 				_fix = maxf(0.0, _fix - delta * 2.0)
@@ -77,9 +80,10 @@ func _process(delta: float) -> void:
 	_update_marker()
 
 
-## True when E belongs to the errand right now (interact.gd asks before using E).
+## True when E belongs to the errand right now, or was just used by it this frame
+## (interact.gd asks before using E, so one press never does two things).
 func busy_here() -> bool:
-	return _near()
+	return _near() or _used_frame == Engine.get_process_frames()
 
 
 ## True when you're close enough to use the current target.

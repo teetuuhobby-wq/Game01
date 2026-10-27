@@ -3,7 +3,7 @@ extends "res://world/walk_map.gd"
 ## Built from code at start-up. This file only puts it together (in this order) and
 ## moves it each frame; each part lives in its own file in world/, each one building
 ## on the one before (blocks -> sky_and_ground -> buildings -> city -> errand_sites ->
-## facility_kit -> facilities -> market -> legs -> people -> cast -> walk_map -> here). See docs/ARCHITECTURE.md.
+## facility_kit -> outer_places -> facilities -> market -> legs -> people -> cast -> walk_map -> here). See docs/ARCHITECTURE.md.
 
 
 func _ready() -> void:

@@ -9,7 +9,7 @@ extends RefCounted
 
 ## look: the build options from world/people.gd _make_person (legs, torso, dress,
 ## apron, belly, sash, beard, hair, scarf_colour). items: what they carry or wear
-## (see _item_mesh in world/people.gd). habit: their little idle movement.
+## (see _item_mesh in world/cast.gd). habit: their little idle movement.
 ## lines: what they say when you talk to them, one per press of E, round and round.
 ## before: lines only until Mira's rain-catcher is fixed (said first).
 ## after: lines once it's fixed (said first, then the everyday lines).

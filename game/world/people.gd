@@ -1,5 +1,5 @@
 extends "res://world/legs.gd"
-## THE WORLD, layer 10 of 12: the city's people.
+## THE WORLD, layer 11 of 13: the city's people.
 ## How a person is built from blocks, the neighbours round the plaza and along the
 ## terraces (they stop to look at you), and the market crowd: strollers keeping to
 ## the right, browsers, kids, people carrying crates, chatting groups, shopkeepers.

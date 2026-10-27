@@ -1,5 +1,5 @@
 extends "res://world/errand_sites.gd"
-## THE WORLD, layer 6 of 12: the building kit for the town's places with a purpose.
+## THE WORLD, layer 6 of 13: the building kit for the town's places with a purpose.
 ## Shared pieces the buildings in facilities.gd are made of: walls, floors and beams,
 ## open doorways, signs (name boards and hanging picture signs), windows, lanterns,
 ## barrels, seats you can sit on; and the lists the rest of the game reads:
@@ -15,7 +15,7 @@ const FAC_DOOR_HALF := 3                     # doorways are 7 blocks (1.4 m) wid
 const FAC_DOOR_TOP := 13                     # and 13 blocks (2.6 m) tall
 
 var facilities := {}      # kind -> {"name", "rect", "door_out", "door_in", "inside", "level"}
-var interact_spots := []  # {"id", "kind" (read/look/sit), "pos", "label", "face", "stand", "where"}
+var interact_spots := []  # {"id", "kind" (read/look/sit), "pos", "label", "face", "where"}
 var cast_spots := {}      # cast id -> {"pos", "face", "loop" (points, metres), "where"}
 var extras := []          # {"pos", "face", "pose" ("sit"/"soak"/"stand"), "where"}
 var fac_lights := []      # [position (metres), colour, energy, range]
@@ -173,12 +173,11 @@ func _fac_lantern(x: int, z: int, top: int, low: int) -> void:
 
 
 ## A stool (2 blocks high) that you can sit on. face: the way a sitter looks.
-## stand_front: you get up in front of the seat (benches against a wall), not behind it.
-func _fac_stool(x: int, z: int, face: Vector3, where: String, label := "sit down", p := P.WOOD_DARK, stand_front := false) -> void:
+## (You get up again where you stood when you sat down.)
+func _fac_stool(x: int, z: int, face: Vector3, where: String, label := "sit down", p := P.WOOD_DARK) -> void:
 	box3(x, 1, z, x, 2, z, p)
-	var stand := _mp(x, 0, z) + face * (0.6 if stand_front else -0.6)
 	interact_spots.append({"id": "%s_seat_%d_%d" % [where, x, z], "kind": "sit", "pos": _mp(x, 2, z),
-			"label": label, "face": face, "stand": stand, "where": where})
+			"label": label, "face": face, "where": where})
 
 
 func _fac_record(kind: String, name: String, r: Rect2i, door: Array, level: int) -> void:
