@@ -22,3 +22,6 @@ shots/
 
 # Playtest recordings (big, and only useful on the machine they were made on)
 playtests/
+
+# Full-size original sound downloads (see tools/prepare_sounds.py, which makes the game copies)
+audio_originals/

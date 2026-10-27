@@ -6,6 +6,7 @@ extends Node
 ## The sound board (F4 in the game, sound_board.gd) lets you pick which, and set each
 ## sound's volume and variety; your choices are saved in audio/sound_settings.json.
 
+const Tuning := preload("res://tuning.gd")
 const RATE := 22050
 const SETTINGS := "res://audio/sound_settings.json"
 
@@ -14,7 +15,9 @@ const SETTINGS := "res://audio/sound_settings.json"
 const SOUNDS := {
 	"footstep": ["You", "Your footsteps", "one", -10.0, 0.08],
 	"stomp": ["City", "Giant footsteps", "one", -11.0, 0.06],
+	"creak": ["City", "The city creaking as it steps", "one", -16.0, 0.1],
 	"wind": ["City", "Desert wind", "loop", -20.0, 0.0],
+	"town": ["City", "Town life (away from the market)", "loop", -16.0, 0.0],
 	"crowd": ["Market", "Crowd chatter", "loop", -12.0, 0.0],
 	"coins": ["Market", "Coins", "one", -18.0, 0.15],
 	"crate": ["Market", "Crates set down", "one", -18.0, 0.15],
@@ -25,7 +28,8 @@ const SOUNDS := {
 }
 ## Sounds whose code-made version isn't good enough to play: they stay silent
 ## until a recording is chosen (the crowd murmur sounded like static).
-const CODE_OFF := ["crowd"]
+## Creak and town have no code-made version at all, only recordings.
+const CODE_OFF := ["crowd", "creak", "town"]
 
 var world: Node3D    # set by main.gd, for how close you are to the market
 var player: Node3D
@@ -37,6 +41,7 @@ var _sets := {}      # name -> {set name: [paths inside audio/<name>/]} from its
 var _cache := {}     # file path -> AudioStream
 var _loops := {}     # name -> AudioStreamPlayer for looping sounds
 var _market_t := 2.0
+var _creak_wait := 0.0   # seconds until the city may creak again
 var _rng := RandomNumberGenerator.new()
 
 
@@ -89,7 +94,9 @@ func _audio_in(path: String) -> Array:
 
 ## The choices for a sound, as shown on the sound board.
 func choices(n: String) -> Array:
-	var c := ["off", "code"]
+	var c := ["off"]
+	if not _code.get(n, []).is_empty():
+		c.append("code")
 	var names: Array = _sets[n].keys()
 	names.sort()
 	for s in names:
@@ -109,7 +116,9 @@ func _load_settings() -> void:
 	for n in SOUNDS:
 		var def_choice := "code"
 		if not _sets[n].is_empty():
-			def_choice = choices(n)[2]   # the first set
+			var sets: Array = _sets[n].keys()
+			sets.sort()
+			def_choice = "set: " + sets[0]
 		elif _files[n].size() > 1 and SOUNDS[n][2] == "one":
 			def_choice = "all"
 		elif _files[n].size() > 1:
@@ -148,6 +157,8 @@ func _stream(n: String) -> AudioStream:
 	if c == "off":
 		return null
 	if c == "code":
+		if _code.get(n, []).is_empty():
+			return null
 		return _code[n][_rng.randi() % _code[n].size()]
 	var file := c
 	if c == "all":
@@ -251,8 +262,13 @@ func footstep() -> void:
 	play("footstep")
 
 
+## A giant foot lands. Now and then the city's timber and iron creak with it,
+## a moment later, as the weight settles (how often: tuning.gd).
 func stomp() -> void:
 	play("stomp")
+	if _creak_wait <= 0.0 and _rng.randf() < Tuning.CREAK_CHANCE:
+		_creak_wait = Tuning.CREAK_GAP
+		get_tree().create_timer(_rng.randf_range(0.15, 0.5)).timeout.connect(play.bind("creak", _rng.randf_range(-4.0, 0.0)))
 
 
 func chime() -> void:
@@ -280,10 +296,14 @@ func market_level() -> float:
 
 
 ## The crowd follows you, and now and then a coin drops or a crate is set down.
+## Town life is the other way round: it fades down as the market's noise takes over.
 func _process(delta: float) -> void:
+	_creak_wait -= delta
 	var k := market_level()
 	var crowd: AudioStreamPlayer = _loops["crowd"]
 	crowd.volume_db = float(settings["crowd"]["db"]) + linear_to_db(maxf(k * k, 0.0001))
+	var town: AudioStreamPlayer = _loops["town"]
+	town.volume_db = float(settings["town"]["db"]) + linear_to_db(maxf(1.0 - 0.85 * k, 0.0001))
 	if k > 0.6:
 		_market_t -= delta
 		if _market_t <= 0.0:

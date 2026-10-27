@@ -9,9 +9,10 @@ func _ready() -> void:
 	var results := []
 	var missing := []
 	for n in sfx.SOUNDS:
-		if not sfx.settings.has(n) or sfx._code.get(n, []).is_empty():
+		var code_ok: bool = n in ["creak", "town"] or not sfx._code.get(n, []).is_empty()
+		if not sfx.settings.has(n) or not code_ok:
 			missing.append(n)
-	results.append(["every sound has settings and a made-in-code version", missing.is_empty(), str(missing)])
+	results.append(["every sound has settings, and a made-in-code version unless it's recordings-only", missing.is_empty(), str(missing)])
 	for n in sfx.SOUNDS:
 		if sfx.SOUNDS[n][2] == "one":
 			sfx.play(n)
@@ -61,6 +62,23 @@ func _ready() -> void:
 	results.append(["footstep sets are found and stone is the starting choice",
 			sfx._sets["footstep"].size() >= 3 and sfx.settings["footstep"]["choice"] == "set: stone",
 			"%s, choice %s" % [str(sfx._sets["footstep"].keys()), sfx.settings["footstep"]["choice"]]])
+	var want_rec := {"wind": "825860_vrymaa_dune_loop.wav", "bell": "378799_kgeshev_bell.wav",
+			"town": "818390_sounds_from_palestine_village_loop.wav", "creak": "all"}
+	var wrong := []
+	for n in want_rec:
+		if sfx.settings[n]["choice"] != want_rec[n]:
+			wrong.append("%s = %s" % [n, sfx.settings[n]["choice"]])
+	results.append(["wind, bell, town and creak start on the Freesound recordings", wrong.is_empty(), str(wrong)])
+	results.append(["the city has 4 creaks to pick from", sfx._files["creak"].size() == 4, str(sfx._files["creak"].size())])
+	var town: AudioStreamPlayer = sfx._loops["town"]
+	results.append(["town life is playing, as a seamless loop", town.playing and town.stream is AudioStreamWAV
+			and town.stream.loop_mode == AudioStreamWAV.LOOP_FORWARD, ""])
+	sfx._creak_wait = 0.0
+	var before := sfx.get_child_count()
+	for i in 20:
+		sfx.stomp()
+	await get_tree().create_timer(0.6).timeout
+	results.append(["giant steps make the city creak, but not every time", sfx._creak_wait > 0.0, "%d sounds started" % (sfx.get_child_count() - before)])
 	var ok := true
 	for r in results:
 		print("%s  %s  (%s)" % ["PASS" if r[1] else "FAIL", r[0], r[2]])

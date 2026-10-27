@@ -36,3 +36,5 @@ const FIX_TIME := 1.5            # seconds to hold E to fit the valve
 # --- Sound ---
 # Volumes, variety and which recording to use are set in the game with the sound board
 # (press F4), and saved in audio/sound_settings.json. The built-in values are in sfx.gd.
+const CREAK_CHANCE := 0.5        # chance the city creaks when a giant foot lands (0 = never, 1 = every time)
+const CREAK_GAP := 4.0           # at least this many seconds between creaks
