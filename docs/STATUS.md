@@ -4,6 +4,14 @@
 
 _Last updated: 2026-10-27, the long night at the end of session 03 (home PC): five walk-in buildings and eight named residents, a dusk look test, a bug hunt, a laptop speed setting and a tidy-up, all on branches (part 2 below). Before that, overnight: new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
 
+## ➡️ Next session (on either machine)
+
+1. `git pull` on `main`, then `git fetch` so the experiment branches arrive too (`git switch experiment/<name>` then works).
+2. **Docs live on `main` only.** The copies of `docs/` on experiment branches are older; when you're on a branch, read `git show main:docs/STATUS.md`. Update docs on `main`.
+3. Give the user the recap from the morning report (part 2 below), and ask what they played and what to merge.
+4. **On the work laptop:** try `experiment/laptop-speed` (`game/run_low.bat`, or F6 in the game; F3 shows FPS). Note the FPS in high and low here: it's the one thing only the laptop can answer.
+5. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
+
 ## 🌅 Morning report, part 2 (the long night, 2026-10-27)
 
 After the first report, the user asked Claude to keep going all night, decide things on its own, and review everything with matched critics. **Everything is on branches; nothing new is on `main` except docs.**
@@ -75,6 +83,7 @@ The user went to sleep and asked Claude to work through the night: **sounds, the
 - ✅ **Phase 2: Pick a direction**: done. **"Strider Home"**: you're one resident of a walking city crossing a dangerous wasteland.
 - ✅ **Phase 3: First playable toy**: done. `game/` is the terraced city: you walk it (first person or behind you), it walks and sways, there are 50 neighbours, and Mira's errand (valve from Bram's workshop to the rain-catcher). Playtested 3 times, with fixes after each.
 - ➡️ **Phase 4: Grow it**: the user reshaped the core loop (see GAME.md): day in town (shops, guild, requests), dangerous night expeditions with combat, then race home at dawn. **The next milestone isn't locked: it waits on the combat-style decision.**
+- 🌙 **The long night (end of session 03, home PC):** the user let Claude work alone with its own decisions. Built on branches, nothing merged: five walk-in buildings and eight named residents (`experiment/tidy`), a dusk look test (`experiment/dusk`), a bug hunt (`experiment/bug-hunt`), a laptop speed setting (`experiment/laptop-speed`), plus code review fixes and a tidy-up. See morning report part 2.
 - 🧪 **Session 03 (home PC):** the user said the city feels too small and the paths cramped, and that a big city means "crowds and bustle". So we built the **Market Street test**; the user liked it, and it's **merged into `main`**. Then: the flag key moved to F2; sound decided (free recorded CC0); the **sound board (F4)** and **mood and lighting panel (F5)** were built; `world.gd` was **split into 9 layer files** (proved identical); and two stairs bugs were found and fixed (a shop on the north stairs, eaves over the east stairs).
 
 ### What session 02 did (short)
@@ -106,6 +115,8 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 - **Read `docs/ARCHITECTURE.md` before changing code, and follow its rules** (one job per file, layers only use what's below them, `_seed("part")` per build part, game rules separate from visuals, a test per system).
 - **After every change to `game/`, run `tools/run_tests.ps1`.** When a test fails after a change, check whether the test or the game is wrong before "fixing" either.
 - **Playtests are the main feedback loop.** The user plays and presses F2 (was F8 until session 03); Claude reads the logs, replays the session to see the flagged moments, fixes, and proves the fix with a test that reproduces the user's exact situation.
+- **When the user hands over decisions (e.g. an overnight run):** decide freely within the agreed plan, but keep it reversible: branches only, nothing merged into `main` without the user, every decision logged in DECISIONS as Claude's. Still the user's: core direction and open design questions (combat style, companions, fail state, story), paid tools or new accounts, downloads not already agreed, deleting their work, anything public. Stop when the plan is done; new ideas go to IDEAS.
+- **Refactor checks:** the world fingerprint is only repeatable with `--fixed-fps 20` (people's positions depend on frame timing otherwise).
 - **Save only the conversation to `docs/history/`** (`--chat-only`): the user wants later sessions to read between the lines, not the commands.
 
 ## Art status
@@ -148,7 +159,7 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 ## How to run things
 
 - **Play the game:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms (all the way in = first person), Z X turn. F2 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning numbers: `game/tuning.gd`.
-- **All tests (Claude, after every change):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/run_tests.ps1`. Headless, about 35 s. It runs the bot errand plus key, stairs, first-person and flower tests (`game/tests/`). Exit code 0 = all passed.
+- **All tests (Claude, after every change):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/run_tests.ps1`. Headless, about 1-2 minutes. On `main` it runs 8 groups: the bot errand, keys, stairs, first person, flowers, market, sound and mood (`game/tests/`); `experiment/tidy` adds buildings and using-edges (10), and `experiment/bug-hunt` adds a 5-minute walkabout. Exit code 0 = all passed. The list with what each test checks is at the top of the script.
 - **Hidden runs with pictures:** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot_offscreen.ps1 <project_dir> [godot args] [-- game args]`. Godot runs on a separate, never-shown Windows desktop with sound off; screenshots and FPS match a visible run. Add `--fixed-fps 60` for repeatable screenshots. It stops at once if a script fails to load.
   - Bot errand with screenshots: `... godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots` (into `game/shots/`).
 - **Playtests (recorded automatically):** every normal play session writes `game/playtests/<date_time>/`. It's git-ignored, so it stays on the machine it was played on.
