@@ -165,7 +165,7 @@ func _play_events(ev: Array) -> void:
 	_refresh()
 	var stepped := -1        # who stepped forward to attack (goes home afterwards)
 	for e in ev:
-		if not is_inside_tree():
+		if not _still_here():
 			return
 		match e["t"]:
 			"card":
@@ -236,9 +236,9 @@ func _play_events(ev: Array) -> void:
 				_end_screen(true)
 			"lose":
 				_end_screen(false)
-	if stepped >= 0:
+	if stepped >= 0 and _still_here():
 		await _go_home(stepped)
-	if not is_inside_tree():
+	if not _still_here():
 		return
 	busy = false
 	_refresh()
@@ -395,8 +395,19 @@ func _slide_back_later(b: Node3D) -> void:
 		b.set_pose(0.0, 0.15, 1.0))
 
 
+## Waits s seconds. Uses a tween that belongs to this toy (not a scene-wide timer), so if you
+## press Esc or R mid-animation and the toy is thrown away, the wait goes with it.
 func _wait(s: float) -> void:
-	await get_tree().create_timer(s).timeout
+	if not _still_here():
+		return
+	var t := create_tween()
+	t.tween_interval(s)
+	await t.finished
+
+
+## False once the toy has been closed (Esc or R) while an animation was still running.
+func _still_here() -> bool:
+	return is_instance_valid(self) and is_inside_tree()
 
 
 func _say(text: String) -> void:
@@ -411,11 +422,14 @@ func _end_screen(won: bool) -> void:
 	for n in [_energy_label, _pile_label, _end_button, _help]:
 		n.visible = false
 	if won:
-		units[R.BEETLE].die()
+		var b: Node3D = units[R.BEETLE]
+		b.visible = true          # always show it fall (it can't be beaten underground, but just in case)
+		b.position.y = 0.0
+		b.die()
 		for i in [R.YOU, R.BRAM]:
 			if rules.alive(i):
 				units[i].cheer()
-		get_tree().create_timer(0.6).timeout.connect(func() -> void: sfx.play("win"))
+		create_tween().tween_callback(sfx.play.bind("win")).set_delay(0.6)
 		_result_label.text = "THE BEETLE IS BEATEN!\nIn %d turns · You %s, Bram %s\n\nR: fight again    ·    Esc: back to the menu" % [
 				rules.turn, _left(0), _left(1)]
 	else:
@@ -690,6 +704,8 @@ func _refresh() -> void:
 			st = "DOWN"
 		elif i == R.YOU and rules.covered:
 			st = "Bram is covering you"
+		elif i == 2 and rules.burrowed:
+			st = "Underground: out of reach"
 		elif i == 2 and rules.dazzled:
 			st = "Dazzled: next attack halved"
 		elif i == 2 and rules.enraged:

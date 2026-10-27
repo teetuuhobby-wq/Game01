@@ -18,7 +18,10 @@ static func choose(rules, style: String, rng: RandomNumberGenerator) -> Dictiona
 		if rng.randf() < 0.15:
 			return {"end": true}
 		var pick: int = playable[rng.randi() % playable.size()]
-		return {"play": pick, "target": R.YOU if rng.randf() < 0.5 else R.BRAM}
+		var who: int = R.YOU if rng.randf() < 0.5 else R.BRAM
+		if not rules.alive(who):
+			who = R.BRAM if who == R.YOU else R.YOU    # the screen won't let you pick someone who is down
+		return {"play": pick, "target": who}
 	return _smart(rules, playable)
 
 
@@ -79,8 +82,7 @@ static func _smart(rules, playable: Array) -> Dictionary:
 	for id in ["sidestep", "cover", "flash", "patch"]:
 		var i := _find(rules, playable, id)
 		if i >= 0:
-			var who: int = R.YOU if rules.hp[R.YOU] * rules.max_hp[R.BRAM] < rules.hp[R.BRAM] * rules.max_hp[R.YOU] else R.BRAM
-			return {"play": i, "target": who}
+			return {"play": i, "target": rules.most_hurt()}    # (never someone who is down)
 	return {"end": true}
 
 

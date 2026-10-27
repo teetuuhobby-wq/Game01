@@ -1,6 +1,7 @@
 extends "res://turns.gd"
 ## TURN-BASED TOY TEST: the smart bot plays the real screen (with all the animations)
-## until the fight ends. Passes if the fight finishes with a win and nothing broke.
+## until the fight ends. Passes if the smart bot wins (or, with --bot random, the random bot
+## loses: that shows the losing screen) and nothing broke.
 ## Add --shots to save screenshots to shots/ (run with tools/godot_offscreen.ps1).
 ## Run:  <godot_console.exe> --headless --path prototypes/combat_toys res://tests/turns_test.tscn -- --seed 1001
 
@@ -77,7 +78,9 @@ func _save(n: String) -> void:
 
 
 func _report() -> void:
-	var ok := rules.result == "win" if style == "smart" else rules.result != ""
-	print("%s  the %s bot finishes a fight on the real screen  (%s in %d turns, %.0f s)" % [
-			"PASS" if ok else "FAIL", style, rules.result if rules.result != "" else "unfinished", rules.turn, _clock])
+	# The smart bot must win; the random one must lose (so the losing screen gets shown too)
+	var want := "win" if style == "smart" else "lose"
+	var ok := rules.result == want
+	print("%s  the %s bot %ss a fight on the real screen  (%s in %d turns, %.0f s)" % [
+			"PASS" if ok else "FAIL", style, want, rules.result if rules.result != "" else "unfinished", rules.turn, _clock])
 	get_tree().quit(0 if ok else 1)

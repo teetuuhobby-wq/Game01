@@ -52,6 +52,7 @@ var cards_played := 0      # this turn
 var acted := false         # the beetle already acted this turn
 var turn := 0
 var enraged := false
+var burrowed := false      # it's under the sand: cards can't reach it until it bursts out
 var result := ""           # "", "win" or "lose"
 var rng := RandomNumberGenerator.new()
 var _last_intent := ""
@@ -78,6 +79,8 @@ func cant_play(index: int) -> String:
 	var c: Dictionary = CARDS[hand[index]]
 	if not alive(c["who"]):
 		return "%s is down" % NAMES[c["who"]]
+	if c["aim"] == "enemy" and burrowed:
+		return "it's underground"
 	if c["cost"] > energy:
 		return "not enough energy"
 	return ""
@@ -113,7 +116,7 @@ func play(index: int, target := -1) -> Array:
 			_hurt_beetle(ev, 8, 8, who)
 		"patch":
 			if target != YOU and target != BRAM:
-				target = YOU if hp[YOU] * max_hp[BRAM] < hp[BRAM] * max_hp[YOU] else BRAM
+				target = most_hurt()
 			if alive(target):
 				var heal := mini(7, max_hp[target] - hp[target])
 				hp[target] += heal
@@ -142,6 +145,15 @@ func end_turn() -> Array:
 	if result == "":
 		_start_turn(ev)
 	return ev
+
+
+## Whichever of You and Bram is lower on health (for their size), leaving out anyone who is down.
+func most_hurt() -> int:
+	if not alive(YOU):
+		return BRAM
+	if not alive(BRAM):
+		return YOU
+	return YOU if hp[YOU] * max_hp[BRAM] < hp[BRAM] * max_hp[YOU] else BRAM
 
 
 ## How many cards until the beetle acts this turn (0 = at the end of the turn, -1 = it already did).
@@ -194,12 +206,18 @@ func _beetle_acts(ev: Array) -> void:
 			shell += add
 			ev.append({"t": "shell", "amount": add})
 		"burrow":
+			burrowed = true
 			ev.append({"t": "burrow"})
 		_:
+			burrowed = false    # (an Erupt brings it back up)
 			var d := intent_damage()
+			# "all" hits each of you who is still up, once. A hit aimed at someone who is
+			# already down (Double Snap's second bite) misses: it doesn't jump to the other one.
 			var targets: Array = [YOU, BRAM] if info["aim"] == "all" else [intent["target"]]
 			for h in info["hits"]:
 				for tg in targets:
+					if not alive(tg):
+						continue
 					_hurt_party(ev, tg, d)
 					if result != "":
 						return
@@ -211,8 +229,6 @@ func _beetle_acts(ev: Array) -> void:
 
 
 func _hurt_party(ev: Array, tg: int, d: int) -> void:
-	if not alive(tg):
-		tg = BRAM if tg == YOU else YOU
 	if tg == YOU and covered and alive(BRAM):
 		tg = BRAM
 		ev.append({"t": "covered"})
@@ -291,6 +307,8 @@ func intent_text() -> String:
 		"snap":
 			return "%s at %s: %d x2" % [info["name"], who, intent_damage()]
 		"sweep":
+			if not alive(YOU) or not alive(BRAM):
+				return "%s: %d to %s" % [info["name"], intent_damage(), NAMES[YOU if alive(YOU) else BRAM]]
 			return "%s: %d to both of you" % [info["name"], intent_damage()]
 		"harden":
 			return "%s: +%d Shell" % [info["name"], info["shell"] + (2 if enraged else 0)]
