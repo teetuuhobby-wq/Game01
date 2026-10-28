@@ -116,14 +116,14 @@ func _check_clock() -> void:
 
 func _check_light() -> void:
 	var golden: Dictionary = mood.saved if not mood.saved.is_empty() else mood.PRESETS["Golden hour"]
-	var keys := [[7.0, mood.PRESETS["Soft morning"]], [12.0, mood.PRESETS["Midday"]], [16.0, golden],
-			[18.5, mood.PRESETS["Dusk"]]]
+	var keys := [[7.0, mood.PRESETS["Dawn"]], [8.5, mood.PRESETS["Soft morning"]], [12.0, mood.PRESETS["Midday"]],
+			[16.0, golden], [18.5, mood.PRESETS["Dusk"]]]
 	var bad := []
 	for k in keys:
 		day_view.jump_to(k[0])
 		if mood.values != k[1]:
 			bad.append(k[0])
-	_add("at 7:00, 12:00, 16:00 and 18:30 the light is exactly that hour's look (golden hour = your saved look, if any)",
+	_add("at 7:00, 8:30, 12:00, 16:00 and 18:30 the light is exactly that hour's look (golden hour = your saved look, if any)",
 			bad.is_empty(), str(bad))
 	day_view.jump_to(14.0)
 	var mid: Dictionary = mood.PRESETS["Midday"]
@@ -142,9 +142,17 @@ func _check_light() -> void:
 	var day_glow: float = world.mat_glow.emission_energy_multiplier
 	day_view.jump_to(18.6)
 	var eve_glow: float = world.mat_glow.emission_energy_multiplier
-	var lamp: OmniLight3D = world._lamps[0][0]
-	_add("lanterns and lit windows glow brighter in the evening (no new lights)", eve_glow > day_glow * 2.0
-			and lamp.light_energy > world._lamps[0][1] * 1.5, "glow %.1f -> %.1f" % [day_glow, eve_glow])
+	# The lamps outside the doors turn up; the lights inside stay as they are (they reach
+	# through the walls, so turning them up would light the street too).
+	var door_lamps := 0
+	var lamps_wrong := 0
+	for l in world._lamps:
+		door_lamps += 1 if l[2] else 0
+		var want: float = l[1] * (TQ.EVENING_LAMPS if l[2] else 1.0)
+		lamps_wrong += 0 if is_equal_approx(l[0].light_energy, want) else 1
+	_add("lanterns, lit windows and door lamps glow brighter in the evening, lights inside don't (no new lights)",
+			eve_glow > day_glow * 2.0 and TQ.EVENING_LAMPS > 1.2 and door_lamps >= 4 and lamps_wrong == 0,
+			"glow %.1f -> %.1f, %d door lamps of %d, %d wrong" % [day_glow, eve_glow, door_lamps, world._lamps.size(), lamps_wrong])
 
 
 func _check_pin_and_follow() -> void:

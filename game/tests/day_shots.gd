@@ -5,7 +5,8 @@ extends "res://main.gd"
 # 18:58 (knelt), four views each: the tavern's door and the guild's door with their
 # OPEN / CLOSED plaques (first person, from across the street they share at the foot of
 # the stairs to the plaza), the market street over your shoulder, and the city from out
-# on the sand (how high it stands). The clock stays stopped at each time.
+# on the sand (how high it stands). The clock stays stopped at each time. Then the end
+# of the day: the "Day 1 done" card and Day 2's first light (day_end_card, day_end_morning).
 # Saved to shots/day_<time>_<view>.png.
 
 const HOURS := [7.12, 9.0, 12.0, 16.0, 18.33, 18.97]
@@ -29,13 +30,32 @@ func _ready() -> void:
 		var stamp := "day_%02d%02d_" % [floori(h), roundi(fposmod(h, 1.0) * 60.0)]
 		await _door_shot(stamp + "tavern", tavern)
 		await _door_shot(stamp + "guild", guild)
-		player.position = Vector3(12.0, y, 32.9)
-		camera.yaw = PI * 0.12
-		camera.snap_zoom(0.14)
+		player.position = Vector3(34.0, y, 31.0)   # market_shots.gd's shoulder spot: a clear view down the street
+		camera.yaw = PI * 0.15
+		camera.snap_zoom(0.12)
 		await _settle()
 		_save_named(stamp + "market")
 		await _city_shot(stamp + "city")
+	await _end_of_day_shots()
 	get_tree().quit()
+
+
+## The end of the day on the market street: the "Day 1 done" card, then Day 2's first light.
+func _end_of_day_shots() -> void:
+	player.position = Vector3(34.0, world.VS * 0.5, 31.0)
+	camera.yaw = PI * 0.15
+	camera.snap_zoom(0.12)
+	day_view.jump_to(18.999)
+	day_view.day.frozen = false
+	await _frames(90)    # 19:00, then most of the 1.5 s fade: the card is up
+	_save_named("day_end_card")
+	await _frames(120)   # the card's 3 s end, Day 2 begins and fades in
+	_save_named("day_end_morning")
+
+
+func _frames(n: int) -> void:
+	for i in n:
+		await get_tree().process_frame
 
 
 ## First person, from across the street, looking at a place's door and its plaque.

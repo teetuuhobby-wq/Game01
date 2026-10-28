@@ -27,8 +27,8 @@ var _cast_by_id := {}      # cast id -> their entry in _cast (cast.gd)
 var _crowd := []           # market-goers and regulars: {"d": their entry, "kind", ...}
 var _crowd_i := 0
 var _walkers_here := 0
-var _signs := {}           # place -> [Label3D, was it open]
-var _lamps := []           # [OmniLight3D, its daytime brightness]
+var _signs := {}           # place -> [OPEN/CLOSED Label3D, was it open, hours Label3D, board material]
+var _lamps := []           # [OmniLight3D, its daytime brightness, outside a door?]
 var _keep_clear := []      # spots nobody stands on: doorways, seats, boards, everyone's places
 var _evening := -1.0
 var _life_rng := RandomNumberGenerator.new()
@@ -51,7 +51,7 @@ func _build_town_life() -> void:
 	_make_open_signs()
 	for n in city.get_children():
 		if n is OmniLight3D:
-			_lamps.append([n, n.light_energy])   # the buildings' lamps (the only lights so far)
+			_lamps.append([n, n.light_energy, n.get_meta("outdoor", false)])   # the buildings' lamps (the only lights so far)
 
 
 ## The day's clock moved on. snap: everyone goes straight to where they'd be at this
@@ -67,8 +67,11 @@ func set_evening_lamps(k: float) -> void:
 	if absf(k - _evening) < 0.01:
 		return
 	_evening = k
+	# Only the lamps outside the doors: the lights inside reach through the walls onto
+	# the street (they cast no shadows), so turning them up would light the street too.
 	for l in _lamps:
-		l[0].light_energy = l[1] * (1.0 + 0.8 * k)
+		if l[2]:
+			l[0].light_energy = l[1] * lerpf(1.0, T.EVENING_LAMPS, k)
 
 
 ## Where a resident is right now (a place like "guild"), or "" while walking or away.
@@ -189,15 +192,12 @@ func _update_crowd(budget: int) -> void:
 
 # ---------------------------------------------------------------- OPEN / CLOSED plaques
 
-## A small dark board beside each place's door with OPEN or CLOSED on it (and the hours).
+## A small board beside each place's door: OPEN (green, softly lit) or CLOSED (dark), and the hours.
 func _make_open_signs() -> void:
 	var board := BoxMesh.new()
 	board.size = Vector3(0.66, 0.3, 0.05)
 	var post := BoxMesh.new()
 	post.size = Vector3(0.08, 1.4, 0.08)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = PAL[P.WOOD_DARK].darkened(0.25)
-	board.material = mat
 	for k in facilities:
 		if not DayRules.has_hours(k):
 			continue
@@ -221,22 +221,34 @@ func _make_open_signs() -> void:
 		holder.position = at
 		holder.rotation.y = atan2(out.x, out.z)
 		city.add_child(holder)
+		var mat := StandardMaterial3D.new()   # its own: open, the board turns green and glows a little
+		mat.albedo_color = PAL[P.WOOD_DARK].darkened(0.25)
+		mat.emission_enabled = true   # always on (switching it would rebuild the shader): open sets its strength
+		mat.emission = Color(0.3, 0.75, 0.4)
 		var mi := MeshInstance3D.new()
 		mi.mesh = board
+		mi.material_override = mat
 		holder.add_child(mi)
 		if on_post:
 			var pm := MeshInstance3D.new()
 			pm.mesh = post
+			pm.material_override = mat
 			pm.position = Vector3(0, -0.75, -0.05)
 			holder.add_child(pm)
-		var lb := Label3D.new()
-		lb.font_size = 28
-		lb.outline_size = 6
-		lb.pixel_size = 0.003
-		lb.outline_modulate = Color(0.08, 0.05, 0.03)
-		lb.position = Vector3(0, 0, 0.03)
-		holder.add_child(lb)
-		_signs[k] = [lb, null]
+		var word := _sign_label(46, Vector3(0, 0.045, 0.03))   # OPEN / CLOSED, big
+		var hours := _sign_label(26, Vector3(0, -0.095, 0.03))  # "8:00 - 17:00", small
+		holder.add_child(word)
+		holder.add_child(hours)
+		_signs[k] = [word, null, hours, mat]
+
+
+func _sign_label(size: int, at: Vector3) -> Label3D:
+	var lb := Label3D.new()
+	lb.font_size = size
+	lb.outline_size = 6
+	lb.pixel_size = 0.003
+	lb.position = at
+	return lb
 
 
 func _update_signs() -> void:
@@ -247,9 +259,19 @@ func _update_signs() -> void:
 			continue
 		s[1] = open
 		var o: Dictionary = TownData.OPEN_HOURS[k]
-		var lb: Label3D = s[0]
-		lb.text = "%s\n%s - %s" % ["OPEN" if open else "CLOSED", DayRules.clock_text(o["open"]), DayRules.clock_text(o["close"])]
-		lb.modulate = Color(1.0, 0.9, 0.55) if open else Color(0.9, 0.5, 0.42)
+		var word: Label3D = s[0]
+		var hours: Label3D = s[2]
+		var mat: StandardMaterial3D = s[3]
+		word.text = "OPEN" if open else "CLOSED"
+		hours.text = "%s - %s" % [DayRules.clock_text(o["open"]), DayRules.clock_text(o["close"])]
+		# Open: warm cream letters on a green board with a soft glow (stands out on the
+		# cream and white walls). Closed: dim red on dark wood.
+		var ink := Color(1.0, 0.93, 0.72) if open else Color(0.85, 0.38, 0.32)
+		for lb in [word, hours]:
+			lb.modulate = ink
+			lb.outline_modulate = Color(0.05, 0.12, 0.06) if open else Color(0.08, 0.05, 0.03)
+		mat.albedo_color = Color(0.16, 0.42, 0.24) if open else PAL[P.WOOD_DARK].darkened(0.25)
+		mat.emission_energy_multiplier = 0.25 if open else 0.0
 
 
 # ---------------------------------------------------------------- the residents' days

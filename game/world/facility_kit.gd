@@ -85,7 +85,7 @@ func _fac_doorway(side: Array, uc: int, frame: int) -> Array:
 	var c := fp(o, a, n, uc, 0, 0)
 	var nn := Vector3(n)
 	var at := Vector3(c.x, 0, c.z)
-	_fac_light(c.x + nn.x * 6, c.y + 9, c.z + nn.z * 6, Color(1.0, 0.72, 0.42), 0.35, 3.5)
+	_fac_light(c.x + nn.x * 6, c.y + 9, c.z + nn.z * 6, Color(1.0, 0.72, 0.42), 0.35, 3.5, true)
 	return [_mp(at.x + nn.x * 10, 0, at.z + nn.z * 10), _mp(at.x - nn.x * 8, 0, at.z - nn.z * 8)]
 
 
@@ -158,8 +158,10 @@ func _fac_barrel(x: int, z: int) -> void:
 					sv(x + dx, y, z + dz, P.IRON if y == 2 or y == 4 else P.WOOD)
 
 
-func _fac_light(x: float, y: float, z: float, col := Color(1.0, 0.72, 0.42), energy := 1.6, rng_m := 9.0) -> void:
-	fac_lights.append([Vector3(x, y, z) * VS, col, energy, rng_m])
+## outdoor: a lamp outside a door (town_life.gd turns these up in the evening; the
+## lights inside stay as they are).
+func _fac_light(x: float, y: float, z: float, col := Color(1.0, 0.72, 0.42), energy := 1.6, rng_m := 9.0, outdoor := false) -> void:
+	fac_lights.append([Vector3(x, y, z) * VS, col, energy, rng_m, outdoor])
 
 
 ## A lantern hanging from the ceiling on a chain, with a real light.
@@ -210,6 +212,7 @@ func _add_facility_nodes() -> void:
 		o.light_energy = l[2]
 		o.omni_range = l[3]
 		o.omni_attenuation = 1.4
+		o.set_meta("outdoor", l[4])
 		city.add_child(o)
 	for s in fac_signs:
 		var lb := Label3D.new()

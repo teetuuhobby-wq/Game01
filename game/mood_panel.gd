@@ -26,12 +26,12 @@ func _build() -> void:
 	h0.add_child(_follow_note)
 	header("Presets")
 	var names: Array = mood.PRESETS.keys()
-	var h1 := HBoxContainer.new()
-	var h2 := HBoxContainer.new()
-	_box.add_child(h1)
-	_box.add_child(h2)
+	var row: HBoxContainer
 	for i in names.size():
-		button(h1 if i < 3 else h2, names[i], _preset.bind(names[i]))
+		if i % 3 == 0:   # three to a row
+			row = HBoxContainer.new()
+			_box.add_child(row)
+		button(row, names[i], _preset.bind(names[i]))
 	header("Light")
 	for k in mood.SLIDERS:
 		var s: Array = mood.SLIDERS[k]

@@ -25,6 +25,7 @@ const SWAY := 1.0                # 0 = no swaying, 2 = twice as much
 const DAY_MINUTES := 20.0        # real minutes from 7:00 in the morning to 19:00 in the evening
 const DAY_START_HOUR := 8.0      # the time the game starts at (8.0 = 8:00, 13.5 = half past one)
 const EVENING_GLOW := 3.0        # how brightly lanterns and lit windows glow in the evening (daytime is 1.2)
+const EVENING_LAMPS := 1.5       # the buildings' door and wall lamps in the evening, times their daytime light
 const COME_AND_GO_DISTANCE := 30.0   # metres: people only arrive or leave this far from the camera, or out of its sight
 
 # --- Neighbours ---
