@@ -80,6 +80,7 @@ _Last updated: 2026-10-26 (end of session 02: street level, first person, facili
 ## Contradictions to resolve
 
 - ~~**How much fighting?**~~ **Resolved (session 02, the user's own words): expeditions into the desert should be dangerous, and combat should almost always be a given.** The town is for everyday life; the desert is where you fight. The earlier theory ("one or two huge moments") still holds for the city itself: night attacks on the city are rare, big events. Still open: *what kind* of combat (action, turn-based tactics, or party commands).
+- **"Combat almost always a given" vs. postponing combat twice** (end of session 02, and 2026-10-28 with the toys built and unplayed). Maybe combat matters as the *promise of danger* outside, not as the part they want to touch first. Test gently later: the combat toys, or a desert trip where the danger is the dark and the race home.
 - **Cozy builder look vs. epic climax.** Probably a feature: a peaceful home makes the dangerous outside and the big moment hit harder.
 
 ## Retired preferences
@@ -106,3 +107,8 @@ _Last updated: 2026-10-26 (end of session 02: street level, first person, facili
 - **People matter, not just places.** They added the characters to the plan themselves. Fits "everyday life" (#2) and "merely one resident". Confidence: medium–high.
 - **Cares about quality control.** Asked how the work would be reviewed, then suggested matching critics to each piece. Read: the "it has to look good" fear again, now as a wish for a process they can trust while away. Confidence: high.
 - **Comfortable handing over decisions** ("free to make as many decisions on your own as you want"), but only on branches. Keep everything reversible and list what was decided for them.
+
+## New signals (session 04, work laptop, 2026-10-28)
+
+- **Combat postponed a second time:** "I don't really feel like focusing on combat right now", with the two toys built and fixed but unplayed. Not a rejection (they said expeditions should be dangerous), but fighting isn't what pulls them *now*.
+- **Picked "Town life"** over "Day and night", "A home of your own" and "Desert trip, no fighting". With the market ("the city feels a lot better"), "people matter" and "places with a purpose", that's four signals pointing at the town and its people. Confidence: medium–high that **life in town is the current heart of the game** (core desire #2).

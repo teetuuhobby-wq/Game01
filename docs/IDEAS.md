@@ -31,3 +31,6 @@ Every idea goes here, used or not. Nothing gets lost.
 | 2026-10-27 | **A real workshop building** (it's still the plainest: tiny, flat red roof) and a livelier store inside | 🟢 | Small–Medium. From the critics' lowest scores. |
 | 2026-10-27 | **Real systems behind the buildings:** buying in the store, guild requests as real quests, ranks, money | 🟢 | The user's call (big decisions). Each is Medium. Today they're clever fakes (lines and boards). |
 | 2026-10-27 | **Tamsin walking round the pool** | 🟡 | Tried overnight; she got in the way, so she stays by the towels. Revisit with a proper walk path. |
+| 2026-10-28 | **Day and night in town** (Claude's option, not picked): morning bustle, golden afternoon, dusk when the city kneels, a lamp-lit night with eyes in the dark | 🟢 | Partly needed by town life anyway: routines need a clock. Night itself waits. |
+| 2026-10-28 | **A home of your own** to furnish and decorate (Claude's option, not picked) | 🟢 | Fits desire #2, "a warm place you can shape". Needs simple items and placing: Medium–Large. |
+| 2026-10-28 | **A desert trip without fighting** (Claude's option, not picked): scavenge, keep away from the eyes, race home before dawn | 🟢/🟡 | A cheap way to test the danger and the race home without choosing a combat style. |

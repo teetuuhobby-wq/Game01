@@ -1,7 +1,7 @@
 # GAME — the current game in one page
 
 **Working title:** Strider Home *(placeholder)*
-**Status:** Phase 3 done: the first playable toy (`game/`) has been playtested 3 times. The loop below was reshaped by the user in session 02. **Next milestone not locked yet:** it waits on the combat-style decision (see STATUS).
+**Status:** Phase 3 done: the first playable toy (`game/`) has been playtested 3 times. The loop below was reshaped by the user in session 02. **Next focus (2026-10-28, your pick): town life.** Combat is parked for now. The next milestone ("A day in town") is drafted in STATUS, not locked yet.
 
 ## Pitch (one sentence)
 
