@@ -6,7 +6,7 @@ _Last updated: 2026-10-28, session 04 (work laptop): a review of everything and 
 
 ## ➡️ Next session (on either machine)
 
-1. `git pull` on `main`, then `git fetch` so the experiment branches arrive too (`git switch experiment/<name>` then works).
+1. `git pull` on `main`, then `git fetch --prune`. Only two side branches are left: `experiment/combat-toys` and `experiment/city-10x`. **On the home PC (first time after 2026-10-28):** delete the local copies of the 7 deleted branches, if they're there: `git branch -D experiment/tidy experiment/dusk experiment/laptop-speed experiment/bug-hunt experiment/facilities experiment/polish-01 experiment/market-street`. Everything in them is on `main`.
 2. **Docs live on `main` only.** The copies of `docs/` on experiment branches are older (each has a ⚠️ banner saying so); when you're on a branch, read `git show main:docs/STATUS.md`. Update docs on `main`. **When merging a branch into `main`, keep `main`'s version of `docs/STATUS.md` and the other living docs** (never bring in the banner or the old text); `docs/ARCHITECTURE.md` from `tidy` is the exception: it is newer.
 3. **Ask how the day felt** (see "Session 04" below): did they play a full day, what part they liked, what bugged them. Then step 2 of "A day in town" (the guild board with 3 everyday jobs). Only `experiment/combat-toys` is still unmerged (parked).
 4. ~~**On the work laptop:** measure `experiment/laptop-speed`~~ Done 2026-10-27 (session 04), see part 2, item 5: low quality is about **2x faster** on the laptop. Still worth the user playing it there to say if low *looks* acceptable.
@@ -81,8 +81,7 @@ More in `docs/screens/2026-10-27_town_*.jpg` and `..._dusk_*.jpg`.
 - The world code is now 13 layer files, none over 600 lines. Proved to build the same world, and all tests pass.
 
 ### How to try them
-- Commit or stash any work, then `git fetch`, then for example `git switch experiment/tidy` and double-click `game/run.bat`. `git switch main` to go back.
-- **Branch family:** `tidy` (the newest town) ← `facilities` ← `polish-01` ← `main`. `dusk`, `bug-hunt` and `laptop-speed` each branch straight off `main`.
+- All of these are on `main` now (merged 2026-10-28, their branches deleted). Double-click `game/run.bat`, `run_low.bat` or `dusk.bat`.
 - **Merging:** say which ones you like and I'll merge them in order.
 
 **Questions for the user (pick one or two):** which building do you walk into first, and what part of it do you like? Blue hour, Ember or Dust? Then the combat toys are still waiting.
@@ -117,7 +116,7 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 1. **Parked (2026-10-28, the user's call): combat.** The toys stay on `experiment/combat-toys` (fixed) for later; don't push it. When it returns: **play the two toys** (built overnight, branch `experiment/combat-toys`). Then ask "what part?" of the one they liked. The user postponed this at the end of session 02. Options: (a) action, real time; (b) turn-based tactics like Chrono Ark (a game they love; it makes AI companions easy); (c) real time with pause to order the party. Ask "what part?" (the rush of reflexes, a clever plan, or the party's spectacle). *Claude's suggestion: two tiny combat toys on a branch (an afternoon each), one action and one turn-based, against the same desert creature. Let the user play both and react.*
 2. **Companions:** the user wants a party of AI companions (neighbours, guild members). *Claude's lean: the first expedition solo, then one simple companion who follows, talks, carries and warns at dawn (no fighting), and fighting companions once combat exists.* Not confirmed.
 3. **Fail state when stranded:** the user said "catch up on a vehicle, or game over and reload." *Claude suggested softer (a caravan rescues you, you lose your haul) and no vehicles in the first version (a sprint on foot after the rising city).* Not confirmed.
-4. ~~**Which facilities first**~~ A first pass of all five (guild, tavern, store, bathhouse, workshop) was built in the long night on `experiment/tidy`. **Ask:** which one the user walks into first, and what part they like. Real shops, quests and ranks are still the user's call.
+4. ~~**Which facilities first**~~ A first pass of all five (guild, tavern, store, bathhouse, workshop) was built in the long night, on `main` since 2026-10-28. **Ask:** which one the user walks into first, and what part they like. Real shops, quests and ranks are still the user's call.
 5. *(Low priority)* **Nano Banana Pro access** for concept art: the Gemini app or an API key? Only matters once we do concept art.
 
 ## Suggested next step
@@ -197,18 +196,13 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 
 | Branch | What it is | Status |
 |---|---|---|
-| `main` | The project. Always work here. | Active |
-| `experiment/tidy` | **The new town** (the long night): five walk-in buildings, eight named residents, E to talk, read, sit and look, the world code in 13 layers. Contains `facilities` and `polish-01`. | **Merged into `main`** (2026-10-28) |
-| `experiment/facilities` | The buildings and residents before the tidy-up. Superseded by `tidy`. | Kept for history |
-| `experiment/dusk` | **Dusk look test:** `game/dusk.bat`, keys 1 / 2 / 3, R replays. The city kneels, lowers a lift, lights its lamps. | **Merged into `main`** (2026-10-28); the day's evening reuses its kneel |
-| `experiment/bug-hunt` | An hour-long walkabout bot and a 1-minute version for the tests (`--minutes 60` for a full hunt). | **Merged into `main`** (2026-10-28) |
-| `experiment/laptop-speed` | **Low quality for the laptop:** `game/run_low.bat`, or F6 in the game. About 2x faster on the laptop. | **Merged into `main`** (2026-10-28) |
+| `main` | The project. Always work here. Has everything from the old `tidy`, `dusk`, `laptop-speed`, `bug-hunt`, `facilities`, `polish-01` and `market-street` branches. | Active |
 | `experiment/combat-toys` | **The two combat toys** (overnight, 2026-10-27): `prototypes/combat_toys/`. Double-click its `run.bat`, pick 1 (action) or 2 (turn-based). Review fixes applied 2026-10-27. Doesn't touch the game. | **Parked** (the user's call, 2026-10-28) |
-| `experiment/polish-01` | **Polish pass** (overnight): varied residents, softer golden hour, mouths, looser market groups. | In `main` (through `tidy`) |
-| `experiment/market-street` | The Market Street test (session 03). **Merged into `main`** after the user played it ("the city feels a lot better"). | Done, kept for history |
 | `experiment/city-10x` | **Look only, don't merge.** The terraced city at 10x its area (265 x 177 m, 4 terraces, 736 houses), built because the user asked to *see* the real scale. Code: `prototypes/look_test_10x/`. 6 FPS and a 33 s start on the laptop, 2.7 GB of memory. | Parked. The user later said even 10x may not be big enough, but what they mean is more *places with a purpose* (see TASTE). |
 
-To look at the 10x city: `git fetch`, `git switch experiment/city-10x`, double-click `prototypes/look_test_10x/run.bat`, then `git switch main`. Commit or stash any work first. The same goes for the combat toys (`experiment/combat-toys`, then `prototypes/combat_toys/run.bat`) and the polish (`experiment/polish-01`, then `game/run.bat`).
+**Only two side branches are left** (the user deleted the other 7 on 2026-10-28; everything in them was already on `main`).
+
+To look at the 10x city: `git fetch`, `git switch experiment/city-10x`, double-click `prototypes/look_test_10x/run.bat`, then `git switch main`. Commit or stash any work first. The same goes for the combat toys (`experiment/combat-toys`, then `prototypes/combat_toys/run.bat`).
 
 ## Session ritual
 
