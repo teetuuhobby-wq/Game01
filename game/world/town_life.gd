@@ -14,6 +14,7 @@ const DayRules := preload("res://day.gd")
 const TownData := preload("res://town_data.gd")
 
 const PRESENCE_CHECKS_PER_FRAME := 20  # market-goers and regulars checked each frame: should they be here?
+const SIGHT_CHECKS_PER_FRAME := 4      # at most this many "is a wall in the way?" checks each frame (they cost the most)
 const SEEN_DISTANCE: float = T.COME_AND_GO_DISTANCE
 const MAKE_WAY := 0.9                  # metres: a walking resident slows right down when you're this close in front
 
@@ -31,6 +32,7 @@ var _lamps := []           # [OmniLight3D, its daytime brightness]
 var _keep_clear := []      # spots nobody stands on: doorways, seats, boards, everyone's places
 var _evening := -1.0
 var _life_rng := RandomNumberGenerator.new()
+var _sight_left := 0       # "is a wall in the way?" checks left this frame
 
 
 func _build_town_life() -> void:
@@ -78,7 +80,8 @@ func resident_place(id: String) -> String:
 
 
 ## True if nobody would see a person at p (on the city) appear or vanish: out of the
-## camera's view, far from it, or behind a wall.
+## camera's view, far from it, or behind a wall. (Only a few wall checks a frame: when
+## they've run out, someone in view counts as seen, and waits for the next frame.)
 func unseen(p: Vector3) -> bool:
 	if camera == null:
 		return true
@@ -87,10 +90,14 @@ func unseen(p: Vector3) -> bool:
 	var cam := camera.global_position
 	if g.distance_to(cam) > SEEN_DISTANCE or not camera.is_position_in_frustum(g):
 		return true
+	if _sight_left <= 0:
+		return false
+	_sight_left -= 1
 	return first_hit(city.to_local(cam), head) < 0.97
 
 
 func _update_town_life(delta: float) -> void:
+	_sight_left = SIGHT_CHECKS_PER_FRAME
 	_update_crowd(PRESENCE_CHECKS_PER_FRAME)
 	for c in _cast:
 		_update_resident(c, delta)

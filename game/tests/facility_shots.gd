@@ -1,6 +1,7 @@
 extends "res://main.gd"
 # Screenshots of the town's buildings and people (needs a real GPU; run hidden):
-#   tools/godot_offscreen.ps1 game --fixed-fps 30 res://tests/facility_shots.tscn -- --no-record
+#   tools/godot_offscreen.ps1 game --fixed-fps 30 res://tests/facility_shots.tscn -- --no-record --hour 14 --freeze-clock
+# (14:00: everyone is at their place and every place is open.)
 # For each building: outside from across the street, the doorway in first person, the
 # room from inside (first person and from higher up). Then each resident up close,
 # and the whole cast in a line-up. Saved to shots/fac_*.png.

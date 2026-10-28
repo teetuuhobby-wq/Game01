@@ -42,10 +42,11 @@ const PRESETS := {
 	"Dusk": {"sun_height": 7.0, "sun_turn": -30.0, "sun_warmth": 0.95, "sun_brightness": 1.3,
 			"shadow_fill": 0.35, "shadow_warmth": 0.8, "sky_brightness": 0.55, "glare": 1.0, "haze": 0.002,
 			"exposure": 1.0, "colour": 1.25, "contrast": 1.15, "miniature": 0.12},
-	# Just after sunset, the end of the day: cool blue, warm windows (from the dusk test's Blue hour)
-	"Nightfall": {"sun_height": -2.0, "sun_turn": -40.0, "sun_warmth": -0.3, "sun_brightness": 0.5,
-			"shadow_fill": 0.4, "shadow_warmth": 0.0, "sky_brightness": 0.3, "glare": 0.9, "haze": 0.0018,
-			"exposure": 1.1, "colour": 1.0, "contrast": 1.05, "miniature": 0.1},
+	# The end of the day, as night falls: cool blue, warm windows (the dusk test's Blue hour,
+	# part way from its sunset to its night)
+	"Nightfall": {"sun_height": -3.0, "sun_turn": -40.0, "sun_warmth": -0.5, "sun_brightness": 0.28,
+			"shadow_fill": 0.22, "shadow_warmth": 0.0, "sky_brightness": 0.16, "glare": 1.1, "haze": 0.0022,
+			"exposure": 1.2, "colour": 0.98, "contrast": 1.05, "miniature": 0.1},
 	"Night": {"sun_height": 40.0, "sun_turn": 60.0, "sun_warmth": -0.8, "sun_brightness": 0.35,
 			"shadow_fill": 0.22, "shadow_warmth": 0.0, "sky_brightness": 0.06, "glare": 1.1, "haze": 0.0015,
 			"exposure": 1.1, "colour": 0.9, "contrast": 1.05, "miniature": 0.1},

@@ -3,6 +3,7 @@ extends "res://world/legs.gd"
 ## How a person is built from blocks, the neighbours round the plaza and along the
 ## terraces (they stop to look at you), and the market crowd: strollers keeping to
 ## the right, browsers, kids, people carrying crates, chatting groups, shopkeepers.
+## Which of the market's people are out at this time of day is up to town_life.gd ("here").
 
 
 ## A person made of blocks, facing +x. `look` changes the build (all optional):

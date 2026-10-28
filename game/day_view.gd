@@ -103,7 +103,9 @@ func _show(snap: bool) -> void:
 		world.walk_rate = move_toward(world.walk_rate, walk, WALK_EASE * dt)
 		world.kneel = move_toward(world.kneel, kneel, KNEEL_EASE * dt)
 	var evening := Day.evening_at(h)
-	world.mat_glow.emission_energy_multiplier = lerpf(_base_glow, T.EVENING_GLOW, evening)
+	var glow := lerpf(_base_glow, T.EVENING_GLOW, evening)
+	if absf(world.mat_glow.emission_energy_multiplier - glow) > 0.002:
+		world.mat_glow.emission_energy_multiplier = glow   # only when it changes: the material is shared by every lamp
 	world.set_evening_lamps(evening)
 	mood.show_hour(h, snap)
 	_clock.text = "Day %d  ·  %s" % [day.day, Day.clock_text(h)]

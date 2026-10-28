@@ -112,7 +112,7 @@ const FIRST_PERSON_NEAR_HIDE := 0.45   # metres: in first person, a resident thi
 
 var _cast_rng := RandomNumberGenerator.new()   # the cast's own, so it never reshuffles the crowd
 var cast_nodes := {}    # cast id -> Node3D (the named residents)
-var _cast := []         # [{"id", "node", "spot", "habit", "base_yaw", "k", "wait", "phase"}]
+var _cast := []         # [{"id", "node", "spot", "habit", "base_yaw", "k", "wait", "phase", "busy"}]
 var _extra_nodes := []
 var cast_away := {}     # cast id -> true while they're indoors at home or out of sight (town_life.gd)
 

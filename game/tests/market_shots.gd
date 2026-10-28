@@ -1,6 +1,7 @@
 extends "res://main.gd"
 # Market screenshots (needs a real GPU; run hidden):
-#   tools/godot_offscreen.ps1 game --fixed-fps 30 res://tests/market_shots.tscn -- --no-record
+#   tools/godot_offscreen.ps1 game --fixed-fps 30 res://tests/market_shots.tscn -- --no-record --hour 14 --freeze-clock
+# (14:00: the whole crowd is out; leave the --hour off to see the morning's thin market.)
 # Saves views of the market street to shots/: first person, over the shoulder and the diorama.
 
 func _ready() -> void:
