@@ -10,12 +10,14 @@ extends Node
 ## F3 = debug info on screen. Nothing is uploaded; playtests/ is kept out of git.
 
 const T := preload("res://tuning.gd")
+const Day := preload("res://day.gd")
 
 var world: Node3D
 var player: Node3D
 var camera: Camera3D
 var controls: Node
 var errand: Node
+var day_view: Node    # day_view.gd: the clock (its start time is saved, so a replay starts then too)
 
 var folder := ""
 var _inputs: FileAccess
@@ -57,6 +59,8 @@ func start() -> void:
 	info.store_line("Window: %s" % str(get_viewport().get_visible_rect().size))
 	info.store_line("Godot: %s" % Engine.get_version_info()["string"])
 	info.store_line("Game version (git commit): %s" % _git_commit())
+	if day_view != null:
+		info.store_line("Start time: day %d, hour %.6f" % [day_view.day.day, day_view.day.hour])
 	info.store_line("Tuning:")
 	var tuning: Script = T
 	var consts: Dictionary = tuning.get_script_constant_map()
@@ -241,5 +245,6 @@ func _update_overlay(_delta: float) -> void:
 		"You: %.1f, %.1f m   floor %d (%s)%s" % [p.x, p.z, f, level, "   STUCK?" if _stuck_noted else ""],
 		("Camera: FIRST PERSON" if camera.first_person > 0.5 else "Camera: zoom %.2f   %.1f m away   lift %.0f deg   pulled in to %d%%" % [camera.zoom, camera.distance, rad_to_deg(camera.lift), roundi(camera.pull * 100)]),
 		"Errand step %d   F2 flags %d" % [errand.step, _flags],
+		("Clock: day %d, %s (hour %.2f)   T: an hour later" % [day_view.day.day, Day.clock_text(day_view.day.hour), day_view.day.hour]) if day_view != null else "",
 		"Recording to %s" % folder.get_file(),
 	])

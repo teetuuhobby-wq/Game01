@@ -1,5 +1,5 @@
 extends "res://world/errand_sites.gd"
-## THE WORLD, layer 6 of 13: the building kit for the town's places with a purpose.
+## THE WORLD, layer 6 of 15: the building kit for the town's places with a purpose.
 ## Shared pieces the buildings in facilities.gd are made of: walls, floors and beams,
 ## open doorways, signs (name boards and hanging picture signs), windows, lanterns,
 ## barrels, seats you can sit on; and the lists the rest of the game reads:

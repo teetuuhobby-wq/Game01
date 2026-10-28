@@ -1,5 +1,5 @@
 extends "res://world/people.gd"
-## THE WORLD, layer 12 of 13: the town's named residents.
+## THE WORLD, layer 12 of 15: the town's named residents.
 ## Each one from town_data.gd, built in their spot from the buildings with the things
 ## they carry (a ledger, a mug, goggles...), their little habits, and the regulars
 ## sitting at tables or soaking in the bath. Also hides anyone right in front of the
@@ -114,6 +114,7 @@ var _cast_rng := RandomNumberGenerator.new()   # the cast's own, so it never res
 var cast_nodes := {}    # cast id -> Node3D (the named residents)
 var _cast := []         # [{"id", "node", "spot", "habit", "base_yaw", "k", "wait", "phase"}]
 var _extra_nodes := []
+var cast_away := {}     # cast id -> true while they're indoors at home or out of sight (town_life.gd)
 
 
 ## The named residents (town_data.gd), each in their spot from the buildings, plus the
@@ -133,7 +134,8 @@ func _add_cast() -> void:
 		city.add_child(node)
 		cast_nodes[id] = node
 		_cast.append({"id": id, "node": node, "spot": spot, "habit": c["habit"], "base_yaw": node.rotation.y,
-				"k": 0, "wait": _cast_rng.randf_range(0.5, 2.0), "phase": _cast_rng.randf() * TAU})
+				"k": 0, "wait": _cast_rng.randf_range(0.5, 2.0), "phase": _cast_rng.randf() * TAU,
+				"busy": false})   # busy: walking somewhere (town_life.gd moves them, not their habit)
 	for e in extras:
 		var node := Node3D.new()
 		var mi := _random_person_sitting()
@@ -142,7 +144,8 @@ func _add_cast() -> void:
 		var f: Vector3 = e["face"]
 		node.rotation.y = atan2(-f.z, f.x)
 		city.add_child(node)
-		_extra_nodes.append({"node": node, "phase": _cast_rng.randf() * TAU, "yaw": node.rotation.y})
+		_extra_nodes.append({"node": node, "phase": _cast_rng.randf() * TAU, "yaw": node.rotation.y,
+				"where": e["where"], "here": true})   # here: in at this hour (town_life.gd)
 
 
 func _make_character(c: Dictionary) -> Node3D:
@@ -176,6 +179,8 @@ func _update_cast(delta: float) -> void:
 	for c in _cast:
 		var node: Node3D = c["node"]
 		c["phase"] += delta
+		if c["busy"] or cast_away.has(c["id"]):
+			continue   # on their way somewhere, or at home (town_life.gd)
 		var ph: float = c["phase"]
 		var to_you: Vector3 = you - node.position
 		to_you.y = 0.0
@@ -230,7 +235,7 @@ func _hide_close_residents() -> void:
 	for pw in promenaders:
 		pw["node"].visible = _mk_clear_of_camera(pw["node"].position, cam)
 	for e in _extra_nodes:
-		e["node"].visible = _mk_clear_of_camera(e["node"].position, cam)
+		e["node"].visible = e["here"] and _mk_clear_of_camera(e["node"].position, cam)
 	# The named residents and Mira too, or walking into the barkeep fills the screen.
 	# Through your own eyes (first person) you talk to them face to face, about a metre
 	# away, so then only someone you're standing right inside of is hidden.
@@ -238,7 +243,9 @@ func _hide_close_residents() -> void:
 	var eyes: bool = fp != null and fp > 0.5
 	for id in cast_nodes:
 		var n: Node3D = cast_nodes[id]
-		if eyes:
+		if cast_away.has(id):
+			n.visible = false   # at home, indoors
+		elif eyes:
 			n.visible = Vector2(n.position.x - cam.x, n.position.z - cam.z).length() > FIRST_PERSON_NEAR_HIDE
 		else:
 			n.visible = _mk_clear_of_camera(n.position, cam)

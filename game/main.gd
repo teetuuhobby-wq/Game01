@@ -5,7 +5,8 @@ extends Node3D
 ## moment, F3 shows debug info.
 ## Test options (after "--"): --autoplay lets a bot play the errand and quits when
 ## it's done; --shots saves screenshots to shots/ along the way;
-## --replay <playtests/folder> plays a recorded session back (see replay.gd).
+## --replay <playtests/folder> plays a recorded session back (see replay.gd);
+## --hour 14.5 starts at that time of day, --freeze-clock stops the clock (day_view.gd).
 
 var controls: Node
 var world: Node3D
@@ -14,6 +15,7 @@ var camera: Camera3D
 var sfx: Node
 var errand: Node
 var recorder: Node
+var day_view: Node    # the time of day (day_view.gd; the clock itself is day.gd)
 var _shots := false
 var _shot_n := 0
 
@@ -62,6 +64,9 @@ func _ready() -> void:
 	board.controls = controls
 	add_child(board)
 	world.stomped.connect(_on_stomp)
+	day_view = preload("res://day_view.gd").new()
+	add_child(day_view)
+	day_view.setup(world, mood, sfx, controls)
 
 	errand = preload("res://errand.gd").new()
 	add_child(errand)
@@ -79,6 +84,7 @@ func _ready() -> void:
 		rp.player = player
 		rp.folder = args[replay_at + 1] if args[replay_at + 1].begins_with("res://") else "res://" + args[replay_at + 1]
 		rp.shots = _shots
+		rp.day_view = day_view
 		rp.finished.connect(func() -> void: get_tree().quit())   # before add_child: it may finish straight away
 		add_child(rp)
 		return
@@ -89,6 +95,7 @@ func _ready() -> void:
 		recorder.camera = camera
 		recorder.controls = controls
 		recorder.errand = errand
+		recorder.day_view = day_view
 		add_child(recorder)
 		recorder.start()
 	var bot: Node = null
@@ -133,6 +140,7 @@ func _setup_input() -> void:
 		"zoom_in": [KEY_EQUAL, KEY_KP_ADD, KEY_PAGEUP], "zoom_out": [KEY_MINUS, KEY_KP_SUBTRACT, KEY_PAGEDOWN],
 		"quit": [KEY_ESCAPE], "flag": [KEY_F2], "debug": [KEY_F3],
 		"sound_board": [KEY_F4], "mood": [KEY_F5], "quality": [KEY_F6],
+		"skip_hour": [KEY_T],
 	}
 	for action in keys:
 		if not InputMap.has_action(action):

@@ -1,7 +1,9 @@
 extends "res://main.gd"
 # Mood test (headless): F5 opens the mood panel with a slider per setting, presets
-# change the light, a slider change reaches the world, and the default look is golden hour.
-# Run all tests with tools/run_tests.ps1, or one: <godot_console.exe> --headless --path game res://tests/mood_test.tscn -- --no-record
+# change the light, a slider change reaches the world, and at 16:00 the look is golden hour.
+# (The light follows the time of day now, and 16:00 is the day's golden hour, so this
+# starts at 16:00 with the clock stopped. The day's other looks are checked in day_test.gd.)
+# Run all tests with tools/run_tests.ps1, or one: <godot_console.exe> --headless --path game res://tests/mood_test.tscn -- --no-record --hour 16 --freeze-clock
 
 func _ready() -> void:
 	super()
@@ -22,9 +24,9 @@ func _ready() -> void:
 	# its values, so this shows the mood really was put on the world at start-up.
 	var want_colour: Color = mood._sun_colour(mood.values["sun_warmth"])
 	var applied: bool = world.sun.light_color.is_equal_approx(want_colour) and is_equal_approx(world.sun.light_energy, mood.values["sun_brightness"])
-	var golden: bool = FileAccess.file_exists(mood.SAVED) or mood.values == mood.PRESETS["Golden hour"]
-	results.append(["the game starts golden hour (unless a saved look exists), put on by the mood",
-			applied and golden, "sun %.2f, colour %s" % [world.sun.light_energy, world.sun.light_color]])
+	var golden: bool = mood.values == (mood.saved if not mood.saved.is_empty() else mood.PRESETS["Golden hour"])
+	results.append(["at 16:00 the light is golden hour (or your saved look, if one exists), put on by the mood",
+			applied and golden and day_view.day.hour == 16.0, "hour %.2f, sun %.2f, colour %s" % [day_view.day.hour, world.sun.light_energy, world.sun.light_color]])
 	var ev := InputEventAction.new()
 	ev.action = "mood"
 	ev.pressed = true

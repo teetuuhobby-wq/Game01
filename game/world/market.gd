@@ -1,5 +1,5 @@
 extends "res://world/facilities.gd"
-## THE WORLD, layer 9 of 13: the market street (north half of the outer ring).
+## THE WORLD, layer 9 of 15: the market street (north half of the outer ring).
 ## A U-shaped shopping street: up the east side, along the north, down the west side,
 ## from stairs to stairs. Shops on both sides with open fronts, awnings, hanging signs
 ## and goods outside; lanterns, bunting and washing strung across; stalls on little

@@ -1,5 +1,5 @@
 extends "res://world/legs.gd"
-## THE WORLD, layer 11 of 13: the city's people.
+## THE WORLD, layer 11 of 15: the city's people.
 ## How a person is built from blocks, the neighbours round the plaza and along the
 ## terraces (they stop to look at you), and the market crowd: strollers keeping to
 ## the right, browsers, kids, people carrying crates, chatting groups, shopkeepers.
@@ -339,7 +339,7 @@ func _add_market_crowd() -> void:
 		node.position = _mk_point(s, lane)
 		market_people.append({"node": node, "s": s, "dir": dir, "lane": lane, "goal": lane,
 				"speed": rng.randf_range(2.0, 2.8) if kid else rng.randf_range(0.8, 1.35),
-				"state": Mk.WALK, "timer": 0.0, "kid": kid})
+				"state": Mk.WALK, "timer": 0.0, "kid": kid, "here": true})
 	for g in T.MARKET_GROUPS:
 		var side := 1.0 if rng.randf() < 0.5 else -1.0
 		var c := _mk_point(rng.randf_range(6.0, _mk_len - 6.0), side * 2.6)
@@ -352,13 +352,17 @@ func _add_market_crowd() -> void:
 			node.position = c + Vector3(cos(a), 0.0, sin(a)) * rng.randf_range(0.5, 0.95)
 			var to_c := c - node.position
 			node.rotation.y = atan2(-to_c.z, to_c.x) + rng.randf_range(-0.5, 0.5)
-			market_idlers.append({"node": node, "yaw": node.rotation.y, "phase": rng.randf() * TAU})
-	for sk in shopkeepers + shoppers:
+			market_idlers.append({"node": node, "yaw": node.rotation.y, "phase": rng.randf() * TAU,
+					"kind": "group", "group": g, "here": true})
+	var standing: Array = shopkeepers + shoppers
+	for si in standing.size():
+		var sk: Array = standing[si]
 		var node := _mk_person(looks, false)
 		node.position = sk[0]
 		var f: Vector3 = sk[1]
 		node.rotation.y = atan2(-f.z, f.x)
-		market_idlers.append({"node": node, "yaw": node.rotation.y, "phase": rng.randf() * TAU})
+		market_idlers.append({"node": node, "yaw": node.rotation.y, "phase": rng.randf() * TAU,
+				"kind": "keeper" if si < shopkeepers.size() else "shopper", "here": true})
 	print("market crowd: %d walking, %d standing" % [market_people.size(), market_idlers.size()])
 
 
@@ -479,10 +483,10 @@ func _update_market(delta: float) -> void:
 		var moving: bool = pp["state"] == Mk.WALK or pp["state"] == Mk.BROWSE_IN
 		var bob := absf(sin(life_t * (13.0 if kid else 9.0) + s * 3.0)) * 0.05 if moving else 0.0
 		node.position = Vector3(p.x, VS * 0.5 + bob, p.z)
-		node.visible = _mk_clear_of_camera(node.position, cam)
+		node.visible = pp["here"] and _mk_clear_of_camera(node.position, cam)   # here: see town_life.gd
 		if face.length_squared() > 0.0001:
 			node.rotation.y = lerp_angle(node.rotation.y, atan2(-face.z, face.x), minf(1.0, 8.0 * delta))
 	for idl in market_idlers:
 		var node: Node3D = idl["node"]
-		node.visible = _mk_clear_of_camera(node.position, cam)
+		node.visible = idl["here"] and _mk_clear_of_camera(node.position, cam)
 		node.rotation.y = float(idl["yaw"]) + sin(life_t * 0.6 + float(idl["phase"])) * 0.35

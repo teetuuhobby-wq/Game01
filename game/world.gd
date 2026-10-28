@@ -1,9 +1,10 @@
-extends "res://world/walk_map.gd"
+extends "res://world/town_life.gd"
 ## THE WORLD: the desert, the walking city on its legs, and its people.
 ## Built from code at start-up. This file only puts it together (in this order) and
 ## moves it each frame; each part lives in its own file in world/, each one building
 ## on the one before (blocks -> sky_and_ground -> buildings -> city -> errand_sites ->
-## facility_kit -> outer_places -> facilities -> market -> legs -> people -> cast -> walk_map -> here). See docs/ARCHITECTURE.md.
+## facility_kit -> outer_places -> facilities -> market -> legs -> people -> cast -> walk_map ->
+## routes -> town_life -> here). See docs/ARCHITECTURE.md.
 
 
 func _ready() -> void:
@@ -23,6 +24,7 @@ func _ready() -> void:
 	_seed("cast")
 	_add_cast()
 	_build_walk_map()
+	_build_town_life()
 
 
 func _build_city() -> void:
@@ -69,6 +71,7 @@ func _process(delta: float) -> void:
 		_update_promenaders(delta)
 		_update_market(delta)
 		_update_cast(delta)
+		_update_town_life(delta)
 		_hide_close_residents()
 	var period := 2.0 * STEP_LENGTH / CITY_SPEED
 	var body_x := CITY_SPEED * t

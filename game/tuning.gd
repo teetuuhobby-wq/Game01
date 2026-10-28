@@ -21,6 +21,12 @@ const STOMP_SHAKE := 0.06        # how much the camera shakes when a giant foot 
 const CITY_SPEED := 4.0          # metres per second
 const SWAY := 1.0                # 0 = no swaying, 2 = twice as much
 
+# --- The day (who goes where when, and the opening hours, are in town_data.gd) ---
+const DAY_MINUTES := 20.0        # real minutes from 7:00 in the morning to 19:00 in the evening
+const DAY_START_HOUR := 8.0      # the time the game starts at (8.0 = 8:00, 13.5 = half past one)
+const EVENING_GLOW := 3.0        # how brightly lanterns and lit windows glow in the evening (daytime is 1.2)
+const COME_AND_GO_DISTANCE := 30.0   # metres: people only arrive or leave this far from the camera, or out of its sight
+
 # --- Neighbours ---
 const NOTICE_DISTANCE := 2.5     # neighbours stop and look at you when you're this close (metres)
 

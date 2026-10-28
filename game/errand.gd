@@ -178,7 +178,7 @@ func _make_hud() -> void:
 	keys.anchor_top = 1.0
 	keys.anchor_bottom = 1.0
 	keys.offset_top = -34
-	keys.text = "Click, then mouse: look    WASD / arrows: walk    Shift: run    E: use    Wheel or + -: zoom (all the way in = your eyes)    Z X: turn    F2: something felt off    F3: info    F4: sounds    F5: mood    F6: quality    Esc: free mouse / quit"
+	keys.text = "Click, then mouse: look    WASD / arrows: walk    Shift: run    E: use    Wheel or + -: zoom (all the way in = your eyes)    Z X: turn    T: an hour later    F2: something felt off    F3: info    F4: sounds    F5: mood    F6: quality    Esc: free mouse / quit"
 	_bar = ProgressBar.new()
 	_bar.max_value = 1.0
 	_bar.show_percentage = false

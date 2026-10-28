@@ -60,6 +60,7 @@ func _ready() -> void:
 		variant = args[vi + 1]
 	shots = args.has("--shots")
 	super()
+	day_view.stand_aside()   # this scene drives the light and the city itself, not the clock
 	for c in get_children():
 		if c.get_script() == preload("res://mood.gd"):
 			_mood = c

@@ -2,7 +2,9 @@ extends "res://main.gd"
 # Market test (headless): the market street is open to walk along its whole length,
 # end to end, it's busy (enough shops and people), and its people don't jump when the
 # city's walk loops round.
-# Run all tests with tools/run_tests.ps1, or one: <godot_console.exe> --headless --fixed-fps 20 --path game res://tests/market_test.tscn -- --no-record
+# The crowd follows the time of day now (thin in the morning, gone at night: day_test.gd
+# checks that), so this starts at 14:00, when the whole crowd is out, with the clock stopped.
+# Run all tests with tools/run_tests.ps1, or one: <godot_console.exe> --headless --fixed-fps 20 --path game res://tests/market_test.tscn -- --no-record --hour 14 --freeze-clock
 
 func _ready() -> void:
 	super()
@@ -19,8 +21,11 @@ func _ready() -> void:
 	results.append(["the market street is walkable everywhere people walk (3 lanes, every metre)", blocked == 0, "%d blocked spots on %.0f m" % [blocked, len_m]])
 	var route: PackedVector3Array = world.find_path(path[0], path[path.size() - 1])
 	results.append(["a route runs from one end of the street to the other", route.size() > 0, "%.0f m" % (route.size() * 0.2)])
-	var people: int = world.market_people.size() + world.market_idlers.size()
-	results.append(["it's busy: at least 150 people in the market", people >= 150, "%d people" % people])
+	var people := 0
+	for pp in world.market_people + world.market_idlers:
+		if pp["here"]:
+			people += 1   # out at this time of day (all of them at 14:00)
+	results.append(["it's busy at 14:00: at least 150 people out in the market", people >= 150, "%d people" % people])
 	var covered := 0
 	var unwalkable := 0
 	for c in world.stair_top:

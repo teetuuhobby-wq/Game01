@@ -1,5 +1,5 @@
 extends "res://world/facility_kit.gd"
-## THE WORLD, layer 7 of 13: the places a little further out.
+## THE WORLD, layer 7 of 15: the places a little further out.
 ## The domed bathhouse (a pool you wade into and sit in), the inside of Bram's workshop,
 ## Old Wendel's lookout by the outer wall, and the street Pip runs along. The guild hall,
 ## the tavern and the store are in facilities.gd, which also builds all of them in order.

@@ -10,11 +10,13 @@ extends Node
 signal finished
 
 const FPS := 60.0   # must match --fixed-fps
+const Day := preload("res://day.gd")
 
 var controls: Node
 var player: Node3D
 var folder := ""
 var shots := false
+var day_view: Node    # day_view.gd: the replay starts at the time the recording did
 
 var _rows: Array[PackedStringArray] = []
 var _k := 0
@@ -39,6 +41,7 @@ func _ready() -> void:
 		var line := f.get_line()
 		if line != "":
 			_rows.append(line.split(","))
+	_start_time()
 	var lg := FileAccess.open(folder.path_join("log.csv"), FileAccess.READ)
 	if lg:
 		lg.get_line()
@@ -80,6 +83,21 @@ func _process(_delta: float) -> void:
 	if _shots_at.has(_k):
 		_take(_shots_at[_k])
 	_k += 1
+
+
+## Starts the clock where the recording started (session.txt says, from "Start time: day
+## 1, hour 8.000000"). Recordings from before the day had no clock: they start at the usual time.
+func _start_time() -> void:
+	var info := FileAccess.open(folder.path_join("session.txt"), FileAccess.READ)
+	if info == null or day_view == null:
+		return
+	while not info.eof_reached():
+		var line := info.get_line()
+		if line.begins_with("Start time: day "):
+			var parts := line.substr(16).split(", hour ")
+			if parts.size() == 2:
+				day_view.jump_to(parts[1].to_float(), parts[0].to_int())
+				print("REPLAY: starts on day %d at %s" % [parts[0].to_int(), Day.clock_text(parts[1].to_float())])
 
 
 func _add_shot(frame: int, name: String) -> void:

@@ -7,7 +7,8 @@ extends "res://main.gd"
 #   - sitting lowers your first-person eyes, and the valve you carry stays in your hand
 #   - a named resident (Dorran) right in front of the camera is hidden, like everyone else,
 #     but not in first person when you're just talking to him across the bar
-# Run: <godot_console.exe> --headless --path game res://tests/use_edge_test.tscn -- --no-record
+# (Starts at 14:00 with the clock stopped, so Dorran is behind his bar: he's home in the morning.)
+# Run: <godot_console.exe> --headless --path game res://tests/use_edge_test.tscn -- --no-record --hour 14 --freeze-clock
 
 const T := preload("res://tuning.gd")
 

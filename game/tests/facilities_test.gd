@@ -10,7 +10,9 @@ extends "res://main.gd"
 #   - a bot walks into each building and uses everything there with E (even while
 #     Mira's errand is on, so nothing sits inside the valve's reach), then sits
 #     down and gets up again, without getting stuck
-# Run: <godot_console.exe> --headless --fixed-fps 20 --path game res://tests/facilities_test.tscn -- --no-record
+# Everyone keeps a daily routine now (home in the morning and evening), so this starts at
+# 14:00, when everyone is at their place, with the clock stopped (day_test.gd checks the routines).
+# Run: <godot_console.exe> --headless --fixed-fps 20 --path game res://tests/facilities_test.tscn -- --no-record --hour 14 --freeze-clock
 
 const Town := preload("res://town_data.gd")
 const Dialogue := preload("res://dialogue.gd")

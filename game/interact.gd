@@ -4,9 +4,11 @@ extends Node
 ## boards, seats and so on in world.interact_spots), shows "E: ..." and does it.
 ## Mira's errand comes first: when its valve or rain-catcher is in reach, E is the errand's.
 ## What people say lives in town_data.gd; which line comes next, in dialogue.gd.
+## At a place that's closed (day.gd), its people and its boards just say when it opens.
 
 const Town := preload("res://town_data.gd")
 const Dialogue := preload("res://dialogue.gd")
+const Day := preload("res://day.gd")
 const T := preload("res://tuning.gd")
 const TALK_REACH: float = T.TALK_REACH     # metres from a person you can talk to them
 const THING_REACH: float = T.THING_REACH   # metres from a board, seat or the like
@@ -81,6 +83,8 @@ func find_target() -> Dictionary:
 	var face: Vector3 = player.facing
 	var inside: String = world.facility_at(here)
 	for id in world.cast_nodes:
+		if world.cast_away.has(id):
+			continue   # at home, indoors
 		var node: Node3D = world.cast_nodes[id]
 		var c: Dictionary = Town.CAST[id]
 		var s := _score(here, face, node.position, TALK_REACH, 3.0, id) - 0.5   # people first: you came to the bar to talk
@@ -129,6 +133,11 @@ func use(t: Dictionary) -> void:
 	match t["kind"]:
 		"talk":
 			var c: Dictionary = Town.CAST[t["id"]]
+			var shut := _closed_line(world.resident_place(t["id"]), c["where"])
+			if shut != "":
+				_show(t["id"], "%s, %s" % [c["name"], c["role"]], shut, t["pos"])
+				sfx.play("tick", -6.0)
+				return
 			var done: bool = errand.step == errand.Step.DONE
 			var line := talk.next_line(t["id"], done)
 			var n: int = talk.lines_for(t["id"], done).size()
@@ -140,7 +149,11 @@ func use(t: Dictionary) -> void:
 				_close()
 				return
 			var b: Dictionary = Town.PLACES[t["id"]]
-			_show(t["id"], b["title"], "\n".join(b["lines"]), t["pos"], 60.0)
+			var shut := _closed_line(t["where"], t["where"])
+			if shut != "":
+				_show(t["id"], b["title"], shut, t["pos"])
+			else:
+				_show(t["id"], b["title"], "\n".join(b["lines"]), t["pos"], 60.0)
 			sfx.play("crate", -14.0)
 		"look":
 			if showing == t["id"]:
@@ -155,6 +168,14 @@ func use(t: Dictionary) -> void:
 			player.sit(seat, t["face"], stand, -0.36 if t.get("soak", false) else 0.0)
 			_wait_release = controls.move != Vector2.ZERO or player.bot_input != Vector2.ZERO
 			sfx.play("crate", -12.0)
+
+
+## When someone is at their own place (or you read a board there) and it's closed:
+## the line saying when it opens. Otherwise "".
+func _closed_line(here: String, own: String) -> String:
+	if here == "" or here != own or not Day.has_hours(here) or Day.is_open(here, world.town_hour):
+		return ""
+	return Day.closed_line(here, world.town_hour)
 
 
 func _show(id: String, who: String, text: String, at: Vector3, seconds := -1.0) -> void:

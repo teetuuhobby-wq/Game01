@@ -15,6 +15,7 @@ var look := Vector2.ZERO      # mouse movement this frame, in pixels
 var zoom_steps := 0.0         # mouse wheel and + / - (positive = zoom out)
 var turn := 0.0               # Z / X keys, -1 to 1
 var flag_pressed := false     # F2 pressed this frame
+var skip_hour := false        # T pressed this frame: the clock jumps an hour ahead
 
 var typing := false           # the F2 note box is open: game keys are ignored
 var menu_open := false        # a panel (sound board, mood) is open: clicks and the wheel are for it
@@ -60,6 +61,7 @@ func _process(delta: float) -> void:
 	zoom_steps = _wheel + (Input.get_action_strength("zoom_out") - Input.get_action_strength("zoom_in")) * delta * 8.6
 	turn = Input.get_action_strength("turn_right") - Input.get_action_strength("turn_left")
 	flag_pressed = Input.is_action_just_pressed("flag")
+	skip_hour = Input.is_action_just_pressed("skip_hour")
 	_mouse = Vector2.ZERO
 	_wheel = 0.0
 
@@ -73,16 +75,18 @@ func clear() -> void:
 	zoom_steps = 0.0
 	turn = 0.0
 	flag_pressed = false
+	skip_hour = false
 
 
 # ---------- Recording and replaying (one line of inputs.csv per frame) ----------
 
-const HEADER := "frame,delta,move_x,move_y,run,use_held,use_pressed,look_x,look_y,zoom,turn,flag"
+## (skip_hour came later: recordings made before it have no such column, and replay without it.)
+const HEADER := "frame,delta,move_x,move_y,run,use_held,use_pressed,look_x,look_y,zoom,turn,flag,skip_hour"
 
 
 func to_row(frame: int, delta: float) -> String:
-	return "%d,%.10f,%.4f,%.4f,%d,%d,%d,%.3f,%.3f,%.5f,%.4f,%d" % [frame, delta, move.x, move.y,
-			int(run), int(use_held), int(use_pressed), look.x, look.y, zoom_steps, turn, int(flag_pressed)]
+	return "%d,%.10f,%.4f,%.4f,%d,%d,%d,%.3f,%.3f,%.5f,%.4f,%d,%d" % [frame, delta, move.x, move.y,
+			int(run), int(use_held), int(use_pressed), look.x, look.y, zoom_steps, turn, int(flag_pressed), int(skip_hour)]
 
 
 ## Sets the snapshot from a recorded line. Returns that frame's delta.
@@ -95,4 +99,5 @@ func from_row(cols: PackedStringArray) -> float:
 	zoom_steps = cols[9].to_float()
 	turn = cols[10].to_float()
 	flag_pressed = false   # a replay never opens the note box
+	skip_hour = cols.size() > 12 and cols[12] == "1"
 	return cols[1].to_float()

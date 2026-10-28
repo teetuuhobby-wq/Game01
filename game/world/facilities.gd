@@ -1,5 +1,5 @@
 extends "res://world/outer_places.gd"
-## THE WORLD, layer 8 of 13: the town's places with a purpose, the ones you can walk into.
+## THE WORLD, layer 8 of 15: the town's places with a purpose, the ones you can walk into.
 ## The adventurers' guild, the tavern, the general store and the bathhouse (outer ring,
 ## round the foot of the stairs on the homes side), plus the inside of Bram's workshop.
 ## Each has a sign, an open doorway, a furnished, lamplit inside and things to use.

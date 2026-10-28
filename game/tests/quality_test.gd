@@ -4,7 +4,9 @@ extends "res://main.gd"
 # with the mood panel (F5). In low, the haze never drops below low's floor (even when
 # you turn it down with F5), and people of every kind far from the camera are hidden
 # (never you).
-# Run: <godot_console.exe> --headless --path game res://tests/quality_test.tscn -- --no-record
+# (Starts at 14:00 with the clock stopped: the whole market crowd is out then, so "everyone
+# far away shows again" in high means everyone. At other hours some are home.)
+# Run: <godot_console.exe> --headless --path game res://tests/quality_test.tscn -- --no-record --hour 14 --freeze-clock
 
 const TQ := preload("res://tuning.gd")
 

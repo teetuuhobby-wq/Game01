@@ -1,7 +1,9 @@
 extends "res://world/sky_and_ground.gd"
-## THE WORLD, layer 3 of 13: things built on the deck, as templates.
+## THE WORLD, layer 3 of 15: things built on the deck, as templates.
 ## Paving and stone patterns, houses (walls, windows, shutters, doors, balconies,
 ## ivy, three kinds of roof, chimneys), lamps, parasols and trees.
+
+var house_doors := []   # every house's front door: [where to stand (metres, on the city), outward direction]
 
 
 func _stone(x: int, y: int, z: int) -> int:
@@ -100,6 +102,8 @@ func _add_house(x0: int, z0: int, w: int, d: int, floors: int, door_side := -1) 
 				_window(o, a, n, sx, f * 15 + 5, shutter, f > 0 and rng.randf() < 0.4)
 		if door_at >= 0:
 			_door(o, a, n, door_at)
+			# Where someone stands to go in (metres, on the city), and the way out of the door
+			house_doors.append([_m(fp(o, a, n, door_at, 0, 4) + origin), Vector3(n)])
 			if floors >= 2 and rng.randf() < 0.6:
 				_balcony(o, a, n, door_at, 15)
 		if rng.randf() < 0.15:

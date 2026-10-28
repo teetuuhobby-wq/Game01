@@ -7,6 +7,7 @@ extends Node
 ## sound's volume and variety; your choices are saved in audio/sound_settings.json.
 
 const Tuning := preload("res://tuning.gd")
+const DayRules := preload("res://day.gd")
 const RATE := 22050
 const SETTINGS := "res://audio/sound_settings.json"
 
@@ -309,9 +310,16 @@ func market_level() -> float:
 
 ## The crowd follows you, and now and then a coin drops or a crate is set down.
 ## Town life is the other way round: it fades down as the market's noise takes over.
+## Both follow how busy the town is at this time of day (world/town_life.gd): quiet
+## in the early morning and the evening, the tavern only full while it's open.
 func _process(delta: float) -> void:
 	_creak_wait -= delta
-	var k := market_level()
+	var busy := 1.0
+	var tavern_open := true
+	if world != null and world.get("market_share") != null:
+		busy = world.market_share
+		tavern_open = DayRules.is_open("tavern", world.town_hour)
+	var k := market_level() * busy
 	var crowd: AudioStreamPlayer = _loops["crowd"]
 	crowd.volume_db = float(settings["crowd"]["db"]) + linear_to_db(maxf(k * k, 0.0001))
 	# Indoors the wind and the town go quiet; the tavern has its own crowd
@@ -320,10 +328,10 @@ func _process(delta: float) -> void:
 		inside = world.facility_at(player.position)
 	_indoor = lerpf(_indoor, 1.0 if inside != "" and inside != "workshop" else 0.0, minf(1.0, 3.0 * delta))
 	if inside == "tavern":
-		k = maxf(k, 0.55)
+		k = maxf(k, 0.55 if tavern_open else 0.08)
 		crowd.volume_db = float(settings["crowd"]["db"]) + TAVERN_CROWD + linear_to_db(maxf(k * k, 0.0001))
 	var town: AudioStreamPlayer = _loops["town"]
-	town.volume_db = float(settings["town"]["db"]) + linear_to_db(maxf(1.0 - 0.85 * k, 0.0001)) + INDOOR_TOWN_CUT * _indoor
+	town.volume_db = float(settings["town"]["db"]) + linear_to_db(maxf((1.0 - 0.85 * k) * lerpf(0.35, 1.0, busy), 0.0001)) + INDOOR_TOWN_CUT * _indoor
 	var wind: AudioStreamPlayer = _loops["wind"]
 	wind.volume_db = float(settings["wind"]["db"]) + INDOOR_WIND_CUT * _indoor
 	if k > 0.6:

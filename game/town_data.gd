@@ -165,3 +165,61 @@ const PLACES := {
 	"store_shelves": {"text": "Rope in coils, lamp oil in tins, dried figs, spare boot laces, buckets, a whole shelf of lanterns, and one dented old lantern with a little sign: NOT FOR SALE."},
 	"bath_steam": {"text": "Warm steam rolls off the water. The noise of the street fades away behind you."},
 }
+
+
+# ---------------------------------------------------------------- the town's day
+# Times are on a 24-hour clock, in hours: 8.0 = 8:00, 17.5 = half past five,
+# 10.25 = quarter past ten. A day runs from 7:00 to 19:00 (how long that takes in
+# real minutes is DAY_MINUTES in tuning.gd).
+
+## Each place's opening hours. busy: its busiest hours, when all its regulars come in
+## (the rest of the open hours only about half of them do). Doors are never locked:
+## when a place is closed you can still walk in, but nobody sits at its tables, and
+## the people working there tell you when it opens.
+const OPEN_HOURS := {
+	"store": {"open": 8.0, "close": 17.0},
+	"guild": {"open": 8.0, "close": 17.0},
+	"tavern": {"open": 11.0, "close": 19.0, "busy": [17.0, 19.0]},
+	"bath": {"open": 9.0, "close": 19.0, "busy": [16.0, 19.0]},
+	"workshop": {"open": 7.0, "close": 18.0},
+}
+
+## What people say (and boards show) at a place that's closed. {open} becomes the
+## opening time, like "8:00". "before": it opens later today; "after": closed for the day.
+const CLOSED_LINES := {
+	"default": {"before": "We open at {open}. Come back then!", "after": "We're closed for the day. We open at {open} tomorrow."},
+	"guild": {"before": "The guild opens at {open}. The requests will keep till then.", "after": "The guild is closed for the day. We open at {open} tomorrow."},
+	"tavern": {"before": "Not open yet! Doors open at {open}. Come back thirsty.", "after": "Closed for the night. We open at {open} tomorrow."},
+	"workshop": {"before": "Shop opens at {open}.", "after": "Shop's shut for the day. Back at {open} tomorrow."},
+}
+
+## Each resident's day: [time, where they head]. Places: "home" (their front door,
+## then they go inside), "guild", "tavern", "store", "bath", "workshop", "lookout",
+## "plaza", "south_street" (the street between the guild and the tavern). Their own
+## place (their "where" above) means their usual spot; any other, a spot inside it.
+## Leave a little before opening time: walking takes a while.
+## Mira stays in the plaza all day (her errand needs her there).
+const ROUTINES := {
+	"sabeth": [[7.0, "home"], [7.5, "guild"], [17.0, "home"]],
+	"pell": [[7.0, "home"], [7.4, "store"], [17.0, "tavern"]],
+	"dorran": [[7.0, "home"], [10.4, "tavern"]],
+	"tamsin": [[7.0, "home"], [8.3, "bath"]],
+	"bram": [[7.0, "workshop"]],
+	"wendel": [[7.0, "lookout"]],
+	"pip": [[7.0, "home"], [7.6, "south_street"], [18.0, "home"]],
+	"mira": [[7.0, "plaza"]],
+}
+
+## How fast each resident walks between places (metres per second).
+const WALK_PACE := {"default": 1.25, "pip": 2.3, "wendel": 0.8, "sabeth": 1.1}
+
+## How full the market street is over the day: [time, share of the crowd] (0 = empty,
+## 1 = everyone in MARKET_WALKERS in tuning.gd). In between it changes gradually.
+const MARKET_CROWD := [[7.0, 0.0], [8.0, 0.15], [9.0, 0.45], [10.5, 0.85], [11.5, 1.0],
+		[16.0, 1.0], [17.5, 0.6], [18.25, 0.25], [18.75, 0.05], [19.0, 0.0]]
+
+## The market's standing people (shopkeepers, shoppers at the stalls, chatting groups):
+## [earliest, latest] time they arrive in the morning and leave in the evening, each at
+## their own time in between. Shopkeepers come first and go last.
+const MARKET_KEEPERS := {"arrive": [7.0, 8.0], "leave": [18.25, 18.75]}
+const MARKET_STANDERS := {"arrive": [7.5, 8.5], "leave": [18.0, 18.5]}

@@ -2,6 +2,8 @@ extends Node
 ## MOOD: the light and colour of the world in a few plain values (sun height, warmth,
 ## glare, haze...). The mood panel (F5, mood_panel.gd) changes them live; "Save as
 ## default" writes mood.json, which the game loads at start. Presets are below.
+## The light follows the time of day (DAY_LOOKS below, blended by day_view.gd) until
+## you touch the mood panel; its "Follow the day" button hands the light back to the clock.
 
 const SAVED := "res://mood.json"
 
@@ -40,27 +42,85 @@ const PRESETS := {
 	"Dusk": {"sun_height": 7.0, "sun_turn": -30.0, "sun_warmth": 0.95, "sun_brightness": 1.3,
 			"shadow_fill": 0.35, "shadow_warmth": 0.8, "sky_brightness": 0.55, "glare": 1.0, "haze": 0.002,
 			"exposure": 1.0, "colour": 1.25, "contrast": 1.15, "miniature": 0.12},
+	# Just after sunset, the end of the day: cool blue, warm windows (from the dusk test's Blue hour)
+	"Nightfall": {"sun_height": -2.0, "sun_turn": -40.0, "sun_warmth": -0.3, "sun_brightness": 0.5,
+			"shadow_fill": 0.4, "shadow_warmth": 0.0, "sky_brightness": 0.3, "glare": 0.9, "haze": 0.0018,
+			"exposure": 1.1, "colour": 1.0, "contrast": 1.05, "miniature": 0.1},
 	"Night": {"sun_height": 40.0, "sun_turn": 60.0, "sun_warmth": -0.8, "sun_brightness": 0.35,
 			"shadow_fill": 0.22, "shadow_warmth": 0.0, "sky_brightness": 0.06, "glare": 1.1, "haze": 0.0015,
 			"exposure": 1.1, "colour": 0.9, "contrast": 1.05, "miniature": 0.1},
 }
 
+## The light over the day: [hour, preset]. In between, the light changes gradually
+## from one to the next. If you saved your own look (F5, "Save as default"), it takes
+## the place of Golden hour.
+const DAY_LOOKS := [[7.0, "Soft morning"], [12.0, "Midday"], [16.0, "Golden hour"], [18.5, "Dusk"], [19.0, "Nightfall"]]
+
 var world: Node3D      # world.gd: its env, sun and sky_mat get changed
 var camera: Camera3D   # for the miniature blur
 var values := {}
+var saved := {}        # your saved look (mood.json), or empty
+var follow_day := true # the light follows the clock; false once you change it in the mood panel
+var day_hour := -1.0   # the hour the light was last set for (day_view.gd)
 var least_haze := 0.0  # low quality (quality.gd) needs at least this much haze
 var _blur: CameraAttributesPractical   # the camera's blur settings, kept even while low quality takes them off it
 
 
 func _ready() -> void:
 	values = PRESETS["Golden hour"].duplicate()
+	saved = {}
 	if FileAccess.file_exists(SAVED):
 		var parsed = JSON.parse_string(FileAccess.get_file_as_string(SAVED))
 		if parsed is Dictionary:
 			for k in parsed:
 				if values.has(k):
 					values[k] = float(parsed[k])
+			saved = values.duplicate()
 	apply()
+
+
+## The look for an hour of the day: the two DAY_LOOKS either side of it, blended.
+func day_look(h: float) -> Dictionary:
+	var keys := DAY_LOOKS
+	if h <= keys[0][0]:
+		return _look(keys[0][1]).duplicate()
+	for i in range(1, keys.size()):
+		if h < keys[i][0]:
+			var f := smoothstep(keys[i - 1][0], keys[i][0], h)
+			var a := _look(keys[i - 1][1])
+			if f <= 0.0:
+				return a.duplicate()
+			var b := _look(keys[i][1])
+			var out := {}
+			for k in a:
+				out[k] = lerpf(a[k], b[k], f)
+			return out
+	return _look(keys[keys.size() - 1][1]).duplicate()
+
+
+func _look(name: String) -> Dictionary:
+	if name == "Golden hour" and not saved.is_empty():
+		return saved
+	return PRESETS[name]
+
+
+## The clock moved on (day_view.gd): while the light follows the day, it changes with it.
+func show_hour(h: float, force := false) -> void:
+	if not follow_day:
+		day_hour = h   # remembered, so "Follow the day" picks up the right hour
+		return
+	if not force and absf(h - day_hour) < 0.0004:
+		return
+	day_hour = h
+	values = day_look(h)
+	apply()
+
+
+## "Follow the day" (mood panel): the light goes back to the clock's.
+func follow() -> void:
+	follow_day = true
+	if day_hour >= 0.0:
+		show_hour(day_hour, true)
 
 
 func use_preset(name: String) -> void:
