@@ -8,21 +8,22 @@
 
 | Node | File | Job |
 |---|---|---|
-| Controls | `controls.gd` | Reads keys and mouse once per frame into a snapshot. **All player input goes through here**, which is what makes recording and replay possible. |
+| Controls | `controls.gd` | Reads keys and mouse once per frame into a snapshot (T, the hour jump, too). **All player input goes through here**, which is what makes recording and replay possible. |
 | World | `world.gd` + `world/*.gd` | The desert, the walking city, its people, and where you can stand (see below). |
 | You | `player.gd` | Walking, stairs, bumping into things (using the world's walk map). |
 | Camera | `camera_rig.gd` | Follow camera, first person, the diorama view. |
-| Mood | `mood.gd` | The light and colour in plain values; presets; `mood.json`. |
+| Mood | `mood.gd` | The light and colour in plain values; presets; `mood.json`; the day's looks by the hour (`DAY_LOOKS`), which it follows until you touch the mood panel. |
+| The day | `day.gd` (rules), `day_view.gd` (on screen) | `day.gd`: the clock (day and hour, 7:00-19:00, T, the end of the day) and the town's timetable as plain rules: opening hours, the market's crowd by the hour, where each resident heads when (read from `town_data.gd`). `day_view.gd` runs the clock and shows it: the light, lamps, bells, the city slowing and kneeling, the "Day 1 done" card, the clock in the corner. |
 | Sound | `sfx.gd` | Every sound by name; recordings in `audio/<name>/`; `audio/sound_settings.json`. |
 | Panels | `panel_base.gd`, `sound_board.gd` (F4), `mood_panel.gd` (F5) | Tools for the user to direct the game with sliders. |
-| Using things | `interact.gd`, `dialogue.gd`, `town_data.gd` | E to talk, read, sit and look; which line each resident says next; the cast and their lines as plain data. |
+| Using things | `interact.gd`, `dialogue.gd`, `town_data.gd` | E to talk, read, sit and look; which line each resident says next; the cast and their lines, the opening hours, routines and the market's day as plain data. |
 | Errand | `errand.gd` | Mira's job, the goal text, the marker and the speech. |
-| Playtest tools | `recorder.gd`, `replay.gd`, `bot.gd` | Recording every session, replaying it exactly, and the test bot. |
+| Playtest tools | `recorder.gd`, `replay.gd`, `bot.gd` | Recording every session (with its start time), replaying it exactly (from that time), and the test bot. |
 | Tuning | `tuning.gd` | Numbers the user can safely change. |
 
 ## The world, in layers
 
-`world.gd` only assembles the world (in a fixed order) and moves it each frame. Everything else is a chain of files in `world/`, **each extending the one before**:
+`world.gd` only assembles the world (in a fixed order) and moves it each frame. Everything else is a chain of files in `world/`, **each extending the one before** (15 layers):
 
 | # | File | Job |
 |---|---|---|
@@ -39,6 +40,8 @@
 | 11 | `people.gd` | Building people, neighbours, the market crowd |
 | 12 | `cast.gd` | The named residents (from `town_data.gd`), their props and habits, the regulars |
 | 13 | `walk_map.gd` | Where people can stand, line-of-sight checks, route finding |
+| 14 | `routes.gd` | Routes for the residents: a search that does a little each frame (no stutter), for people slimmer than you |
+| 15 | `town_life.gd` | The town following the day: residents walk their routines, the market and the regulars come and go, OPEN / CLOSED plaques, brighter lamps at dusk; nobody appears or vanishes where the camera can see |
 
 ## Rules
 
