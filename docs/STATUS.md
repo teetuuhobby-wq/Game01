@@ -1,21 +1,29 @@
 # STATUS: start here
 
-**New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 03 is the latest, and includes the overnight run and the long night).
+**New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 04 is the latest: `session-04-review-and-a-day-in-town.md`).
 
-_Last updated: 2026-10-28, session 04 (work laptop): a review of everything and its fixes; the user parked combat and chose town life; `tidy`, `laptop-speed`, `bug-hunt` and `dusk` merged into `main`; **"A day in town" step 1 built** (see "Session 04" below). Before that, 2026-10-27, the long night at the end of session 03 (home PC): five walk-in buildings and eight named residents, a dusk look test, a bug hunt, a laptop speed setting and a tidy-up, all on branches (part 2 below). Before that, overnight: new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
+_Last updated: 2026-10-28, session 04 (work laptop): a review of everything and its fixes; the user parked combat and chose town life; `tidy`, `laptop-speed`, `bug-hunt` and `dusk` merged into `main`; **"A day in town" step 1 built** (see "Session 04" below); 7 old side branches deleted; **everything pushed to GitHub** (main, `combat-toys`, `city-10x`). Before that, 2026-10-27, the long night at the end of session 03 (home PC): five walk-in buildings and eight named residents, a dusk look test, a bug hunt, a laptop speed setting and a tidy-up, all on branches (part 2 below). Before that, overnight: new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
 
 ## ➡️ Next session (on either machine)
 
 1. `git pull` on `main`, then `git fetch --prune`. Only two side branches are left: `experiment/combat-toys` and `experiment/city-10x`. **On the home PC (first time after 2026-10-28):** delete the local copies of the 7 deleted branches, if they're there: `git branch -D experiment/tidy experiment/dusk experiment/laptop-speed experiment/bug-hunt experiment/facilities experiment/polish-01 experiment/market-street`. Everything in them is on `main`.
-2. **Docs live on `main` only.** The copies of `docs/` on experiment branches are older (each has a ⚠️ banner saying so); when you're on a branch, read `git show main:docs/STATUS.md`. Update docs on `main`. **When merging a branch into `main`, keep `main`'s version of `docs/STATUS.md` and the other living docs** (never bring in the banner or the old text); `docs/ARCHITECTURE.md` from `tidy` is the exception: it is newer.
+2. **Docs live on `main` only.** The copies of `docs/` on the two side branches are older (each has a ⚠️ banner saying so); when you're on a branch, read `git show main:docs/STATUS.md`. **If `combat-toys` is ever merged, keep `main`'s living docs** (never bring in the banner or the old text).
 3. **Ask how the day felt** (see "Session 04" below): did they play a full day, what part they liked, what bugged them. Then step 2 of "A day in town" (the guild board with 3 everyday jobs). Only `experiment/combat-toys` is still unmerged (parked).
-4. ~~**On the work laptop:** measure `experiment/laptop-speed`~~ Done 2026-10-27 (session 04), see part 2, item 5: low quality is about **2x faster** on the laptop. Still worth the user playing it there to say if low *looks* acceptable.
-5. **Review of everything (2026-10-27, work laptop): `docs/REVIEW-2026-10-27.md`.** **The fixes are done** (same day): every player-visible bug and broken test, on its own branch, all suites green. Still open: the cleanups, M6 and S1/S2. **Ask the user to check by hand:** closing F4/F5 gives mouse-look back (can't be tested hidden); the market crowd loop for a click; sitting in first person and with the valve looks right.
-6. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
+4. **Review of everything (2026-10-27, work laptop): `docs/REVIEW-2026-10-27.md`.** **The fixes are done** (same day) and are all on `main` now, except the combat toy fixes, which are on `experiment/combat-toys`. Still open: the cleanups, M6 and S1/S2. **Ask the user to check by hand:** closing F4/F5 gives mouse-look back (can't be tested hidden); the market crowd loop for a click; sitting in first person and with the valve looks right.
+5. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
 
 ## Session 04 (work laptop, 2026-10-27/28): "A day in town", step 1
 
-**The user's choices:** combat parked; focus on town life; "A day in town" built with all of Claude's defaults (see GAME.md and DECISIONS).
+**What happened, in order:**
+1. **2026-10-27:** pulled session 03's work; measured low quality on the laptop (about 2x faster, numbers in part 2, item 5 below).
+2. The user asked for **a review of everything**: `docs/REVIEW-2026-10-27.md`. About 20 bugs the tests missed.
+3. The user: **"fix all the player-visible bugs and the broken tests, on each branch; leave the cleanups for later."** Done, each fix with a test.
+4. **2026-10-28:** the user came back after a break. They **didn't feel like combat** and wanted another focus; from Claude's 4 options they picked **town life**. Combat is parked (second time; see TASTE).
+5. The user said **"Yes, build it"** to Claude's draft milestone **"A day in town"** with all defaults. Claude merged `tidy`, `laptop-speed`, `bug-hunt` and `dusk` into `main`, then built step 1 (below), checked by two critic rounds.
+6. The user asked to **push** main and then the side branches, then to **delete the 7 side branches** that `main` already covered. Only `combat-toys` and `city-10x` remain.
+7. The conversation is saved in `docs/history/session-04-review-and-a-day-in-town.md`.
+
+**The user hasn't played the day yet.** That's the first thing to ask about next session.
 
 **What's on `main` now:** the new town and residents (`tidy`), F6 low quality (`laptop-speed`), the walkabout bot (`bug-hunt`), the dusk scene (`dusk`), and the day:
 - **The clock:** 7:00 → 19:00 in 20 real minutes, starting at 8:00. "Day 1 · 8:30" in the top right (and in F3). **T** jumps an hour. Tuning: `DAY_MINUTES`, `DAY_START_HOUR`, `EVENING_GLOW`, `EVENING_LAMPS` in `game/tuning.gd`.
@@ -35,7 +43,7 @@ _Last updated: 2026-10-28, session 04 (work laptop): a review of everything and 
 
 ## 🌅 Morning report, part 2 (the long night, 2026-10-27)
 
-After the first report, the user asked Claude to keep going all night, decide things on its own, and review everything with matched critics. **Everything is on branches; nothing new is on `main` except docs.**
+After the first report, the user asked Claude to keep going all night, decide things on its own, and review everything with matched critics. **Everything is on branches; nothing new is on `main` except docs.** *(History: all of it was merged into `main` on 2026-10-28, except the combat toys, and the branches were deleted.)*
 
 ### Look first
 
