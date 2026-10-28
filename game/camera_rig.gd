@@ -118,7 +118,7 @@ func _process(delta: float) -> void:
 	else:
 		# Glide between over-the-shoulder and your eyes, looking where the mouse points
 		var fp := smoothstep(0.0, 1.0, first_person)
-		var eye: Vector3 = target.global_position + Vector3(0, T.EYE_HEIGHT + target.body.position.y, 0) + wobble * 0.5
+		var eye: Vector3 = target.global_position + Vector3(0, target.eye_height(), 0) + wobble * 0.5
 		var cp := clampf(view_pitch, deg_to_rad(-60.0), deg_to_rad(70.0))
 		var look_dir := -Vector3(cos(cp) * cos(yaw), sin(cp), cos(cp) * sin(yaw))
 		global_position = behind.lerp(eye, fp)

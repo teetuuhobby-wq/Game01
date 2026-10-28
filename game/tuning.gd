@@ -14,6 +14,7 @@ const MOUSE_SENSITIVITY := 0.0035   # how far the camera turns per bit of mouse 
 const MOUSE_INVERT_Y := false    # true = push the mouse up to look down
 const FIRST_PERSON_FOV := 75.0   # how wide you see through your own eyes (degrees)
 const EYE_HEIGHT := 1.55         # metres; you're 1.8 m tall
+const SEATED_EYE_DROP := 0.35    # metres your eyes go down when you sit (first person)
 const STOMP_SHAKE := 0.06        # how much the camera shakes when a giant foot lands
 
 # --- The walking city ---
@@ -32,6 +33,12 @@ const MARKET_CARRY := 0.2        # share of walkers carrying a crate or basket
 # --- The errand ---
 const USE_DISTANCE := 1.8        # how close you need to be to use something (metres)
 const FIX_TIME := 1.5            # seconds to hold E to fit the valve
+
+# --- Using things (E) ---
+const TALK_REACH := 2.4          # metres from a person you can talk to them
+const THING_REACH := 1.7         # metres from a board, seat or the like
+const TEXT_SECONDS := 4.0        # how long a line stays up...
+const TEXT_SECONDS_PER_LETTER := 0.05   # ...plus this much per letter
 
 # --- Sound ---
 # Volumes, variety and which recording to use are set in the game with the sound board

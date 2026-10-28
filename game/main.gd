@@ -63,6 +63,9 @@ func _ready() -> void:
 	errand = preload("res://errand.gd").new()
 	add_child(errand)
 	errand.setup(world, player, sfx, camera, controls)
+	var interact := preload("res://interact.gd").new()
+	add_child(interact)
+	interact.setup(world, player, controls, errand, sfx)
 
 	var args := OS.get_cmdline_user_args()
 	_shots = "--shots" in args

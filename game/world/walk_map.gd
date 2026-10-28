@@ -1,5 +1,5 @@
-extends "res://world/people.gd"
-## THE WORLD, layer 9 of 9: where people can stand.
+extends "res://world/cast.gd"
+## THE WORLD, layer 13 of 13: where people can stand.
 ## The walk map (floor height and head room for every deck column), standing checks,
 ## the camera's line-of-sight test, and route finding for the test bot.
 
