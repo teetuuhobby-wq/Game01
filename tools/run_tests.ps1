@@ -19,6 +19,9 @@ Tests (in game/tests/ unless noted):
                   stand you straight back up; sitting lowers your eyes and keeps the
                   valve in hand; residents near the camera are hidden
   quality         low quality (F6, run_low.bat) turns costly effects off; high restores them
+  walkabout       a bot walks between random spots all over the city for 1 minute of game
+                  time: no stuck spots, height glitches or stranded spots (about 30 s; for
+                  the full bug hunt run it on its own with --minutes 60, see soak_test.gd)
 Exit code 0 = everything passed. Set GODOT to use a different Godot console .exe.
 #>
 # "Continue": Windows PowerShell treats anything Godot prints to stderr (even harmless
@@ -41,14 +44,16 @@ $runs = @(
 	@{ Name = "panels"; Args = @("--headless", "--path", $game, "res://tests/panel_test.tscn", "--", "--no-record") },
 	@{ Name = "buildings"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/facilities_test.tscn", "--", "--no-record") },
 	@{ Name = "using edges"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/use_edge_test.tscn", "--", "--no-record") },
-	@{ Name = "quality"; Args = @("--headless", "--path", $game, "res://tests/quality_test.tscn", "--", "--no-record") }
+	@{ Name = "quality"; Args = @("--headless", "--path", $game, "res://tests/quality_test.tscn", "--", "--no-record") },
+	@{ Name = "walkabout"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/soak_test.tscn", "--", "--no-record", "--minutes", "1") }
 )
 $failed = 0
 foreach ($r in $runs) {
 	Write-Output "=== $($r.Name)"
 	$out = & $godot @($r.Args) 2>&1 | ForEach-Object { "$_" }
 	$code = $LASTEXITCODE
-	$out | Where-Object { $_ -match "^(PASS|FAIL)|BOT: (errand|stuck|no|still)|SCRIPT ERROR|Parse Error" } | ForEach-Object { Write-Output "  $_" }
+	# PROBLEM lines are the walkabout's problem spots, so a failure says where
+	$out | Where-Object { $_ -match "^(PASS|FAIL|PROBLEM)|BOT: (errand|stuck|no|still)|SOAK: stranded|SCRIPT ERROR|Parse Error" } | ForEach-Object { Write-Output "  $_" }
 	$ok = ($code -eq 0) -and -not ($out -match "SCRIPT ERROR|Parse Error")
 	if ($r.Pass) { $ok = $ok -and ($out -match [regex]::Escape($r.Pass)) }
 	if (-not $ok) { $failed += 1; Write-Output "  -> FAILED (exit code $code)" }
