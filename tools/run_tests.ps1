@@ -22,6 +22,8 @@ Tests (in game/tests/ unless noted):
   walkabout       a bot walks between random spots all over the city for 1 minute of game
                   time: no stuck spots, height glitches or stranded spots (about 30 s; for
                   the full bug hunt run it on its own with --minutes 60, see soak_test.gd)
+  dusk            the dusk scene plays to the end, and replays (--loop and R) start the city
+                  exactly where the first run did (about a minute)
 Exit code 0 = everything passed. Set GODOT to use a different Godot console .exe.
 #>
 # "Continue": Windows PowerShell treats anything Godot prints to stderr (even harmless
@@ -45,7 +47,8 @@ $runs = @(
 	@{ Name = "buildings"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/facilities_test.tscn", "--", "--no-record") },
 	@{ Name = "using edges"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/use_edge_test.tscn", "--", "--no-record") },
 	@{ Name = "quality"; Args = @("--headless", "--path", $game, "res://tests/quality_test.tscn", "--", "--no-record") },
-	@{ Name = "walkabout"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/soak_test.tscn", "--", "--no-record", "--minutes", "1") }
+	@{ Name = "walkabout"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/soak_test.tscn", "--", "--no-record", "--minutes", "1") },
+	@{ Name = "dusk"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/dusk_test.tscn", "--", "--no-record", "--loop") }
 )
 $failed = 0
 foreach ($r in $runs) {

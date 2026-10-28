@@ -234,6 +234,15 @@ var paused := false
 var people_view := INF   # metres: people further from the camera are hidden (quality.gd sets it on low)
 
 
+var walk_rate := 1.0   # how fast the city walks (1 = normal, 0 = stopped); dusk eases it down
+
+
+var kneel := 0.0       # 0 = standing tall, 1 = knelt down for the night
+
+
+const KNEEL_DROP := 0.5   # how much lower the deck sits when fully knelt (share of its height)
+
+
 ## Starts the shared random numbers afresh for one part of the build (houses, market,
 ## people...), so changing one part never reshuffles another.
 func _seed(part: String) -> void:

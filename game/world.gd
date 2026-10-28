@@ -63,7 +63,7 @@ func _build_city() -> void:
 
 func _process(delta: float) -> void:
 	if not paused:
-		t += delta
+		t += delta * walk_rate
 		life_t += delta
 		_update_walkers(delta)
 		_update_promenaders(delta)
@@ -77,7 +77,8 @@ func _process(delta: float) -> void:
 		# so the jump can't be seen and the walk never ends.
 		t -= LOOP / CITY_SPEED
 		body_x = CITY_SPEED * t
-	var bob := -0.6 * T.SWAY * absf(sin(TAU * t / period))
-	city.position = Vector3(body_x, CITY_HEIGHT + bob, 0)
-	city.rotation.x = 0.012 * T.SWAY * sin(TAU * t / period)
+	var still := maxf(kneel, 1.0 - walk_rate)   # sway fades as the city stops and kneels
+	var bob := -0.6 * T.SWAY * absf(sin(TAU * t / period)) * (1.0 - still)
+	city.position = Vector3(body_x, CITY_HEIGHT * (1.0 - KNEEL_DROP * kneel) + bob, 0)
+	city.rotation.x = 0.012 * T.SWAY * sin(TAU * t / period) * (1.0 - still)
 	_update_legs(period)

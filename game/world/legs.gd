@@ -150,7 +150,7 @@ func _update_legs(period: float) -> void:
 			var from_x := CITY_SPEED * (t - (p - 0.5) * period) + hip_l.x - STEP_LENGTH * 0.5
 			var to_x := CITY_SPEED * (t + (1.0 - p) * period) + hip_l.x + STEP_LENGTH * 0.5
 			fx = lerpf(from_x, to_x, smoothstep(0.0, 1.0, s))
-			lift = sin(PI * s) * STEP_LIFT
+			lift = sin(PI * s) * STEP_LIFT * (1.0 - maxf(kneel, 1.0 - walk_rate))   # feet settle as it stops
 		var foot := Vector3(fx, ground_at(fx, fz) + lift, fz)
 		var ankle := foot + Vector3(0, 2, 0)
 		var hip := city.to_global(hip_l)
