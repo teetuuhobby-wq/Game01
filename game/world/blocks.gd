@@ -584,16 +584,6 @@ func _map_levels() -> void:
 			lvl[(z - GZ0) * NX + (x - GX0)] = l
 
 
-func _sphere(cx: int, cy: int, cz: int, r: float, p_main: int, p_band: int) -> void:
-	var ri := int(ceil(r))
-	for dx in range(-ri, ri + 1):
-		for dy in range(-ri, ri + 1):
-			for dz in range(-ri, ri + 1):
-				var d := sqrt(float(dx * dx + dy * dy + dz * dz))
-				if d <= r and d > r - 2.0:
-					sv(cx + dx, cy + dy, cz + dz, p_band if absi(dy) <= 1 else p_main)
-
-
 func _hip_positions() -> Array:
 	# Just outside the deck's edge, so a leg swinging up to its knee never passes
 	# through the streets (playtest 2: "the city legs clip through the walls")

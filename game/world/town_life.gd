@@ -17,6 +17,7 @@ const PRESENCE_CHECKS_PER_FRAME := 20  # market-goers and regulars checked each 
 const SIGHT_CHECKS_PER_FRAME := 4      # at most this many "is a wall in the way?" checks each frame (they cost the most)
 const SEEN_DISTANCE: float = T.COME_AND_GO_DISTANCE
 const MAKE_WAY := 0.9                  # metres: a walking resident slows right down when you're this close in front
+const MAKE_WAY_SECONDS := 3.0          # ...for this long at most, then they squeeze past
 
 var town_hour := 8.0       # the time the town is living at (day_view.gd sets it)
 var market_share := 1.0    # how full the market street is right now (0..1): its sound follows it
@@ -312,7 +313,7 @@ func _good_stand(p: Vector3) -> bool:
 	if i < 0 or not _roomy(i) or stair_top.has(Vector2i(roundi(p.x / VS), roundi(p.z / VS))):
 		return false
 	for q: Vector3 in _keep_clear:
-		if absf(q.x - p.x) < 1.1 and absf(q.z - p.z) < 1.1 and absf(q.y - p.y) < 2.0 				and Vector2(q.x - p.x, q.z - p.z).length() < 1.1:
+		if absf(q.y - p.y) < 2.0 and Vector2(q.x - p.x, q.z - p.z).length() < 1.1:
 			return false
 	return true
 
@@ -509,15 +510,19 @@ func _walk(c: Dictionary, L: Dictionary, delta: float) -> void:
 	var k: int = L["k"]
 	var at: Vector3 = L["at"]
 	var speed: float = L["pace"]
-	# Make way: slow right down when you're just in front of them (for a few seconds at most)
+	# Make way: slow right down when you're just in front of them (for a few seconds at
+	# most, then they squeeze past; the count starts again once you've stepped aside)
 	if player != null and k < path.size():
 		var to_you: Vector3 = player.position - at
 		to_you.y = 0.0
 		var ahead: Vector3 = path[k] - at
 		ahead.y = 0.0
-		if to_you.length() < MAKE_WAY and to_you.dot(ahead) > 0.0 and L["wait"] < 3.0:
+		if to_you.length() < MAKE_WAY and to_you.dot(ahead) > 0.0:
 			L["wait"] += delta
-			speed *= 0.15
+			if L["wait"] < MAKE_WAY_SECONDS:
+				speed *= 0.15
+		else:
+			L["wait"] = 0.0
 	var step := speed * delta
 	while step > 0.0 and k < path.size():
 		var to: Vector3 = path[k] - at

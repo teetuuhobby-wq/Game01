@@ -51,10 +51,15 @@ func route_step(budget: int) -> int:
 		budget -= 1
 		var x := i % NX
 		var z := i / NX
-		_route_try(i, i + 1, x < gx)
-		_route_try(i, i - 1, x > gx)
-		_route_try(i, i + NX, z < gz)
-		_route_try(i, i - NX, z > gz)
+		# (Never off the map's edge: the column "past" the last one is the next row's first)
+		if x < NX - 1:
+			_route_try(i, i + 1, x < gx)
+		if x > 0:
+			_route_try(i, i - 1, x > gx)
+		if z < NZ - 1:
+			_route_try(i, i + NX, z < gz)
+		if z > 0:
+			_route_try(i, i - NX, z > gz)
 	return 0
 
 
@@ -78,8 +83,12 @@ func _route_try(i: int, j: int, closer: bool) -> void:
 
 
 ## True if a slim person (a resident) fits here: every column right round it is
-## standable, with no big step.
+## standable, with no big step. (Never on the map's edge row or column.)
 func _snug(i: int) -> bool:
+	var x := i % NX
+	var z := i / NX
+	if x == 0 or x == NX - 1 or z == 0 or z == NZ - 1:
+		return false
 	var f := walk_floor[i]
 	for dz in range(-1, 2):
 		var row := i + dz * NX

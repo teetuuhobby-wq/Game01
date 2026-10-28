@@ -4,6 +4,17 @@ extends "res://world/market.gd"
 ## or swinging, and the knee bends to fit (a two-bone reach).
 
 
+## A hollow ball of blocks r blocks across (a leg's hip joint), with a band round its middle.
+func _sphere(cx: int, cy: int, cz: int, r: float, p_main: int, p_band: int) -> void:
+	var ri := int(ceil(r))
+	for dx in range(-ri, ri + 1):
+		for dy in range(-ri, ri + 1):
+			for dz in range(-ri, ri + 1):
+				var d := sqrt(float(dx * dx + dy * dy + dz * dz))
+				if d <= r and d > r - 2.0:
+					sv(cx + dx, cy + dy, cz + dz, p_band if absi(dy) <= 1 else p_main)
+
+
 ## A hollow square leg segment built along local -Y, with brass bands and rivets.
 func _segment_mesh(length_m: float, thick: int, base: Color, piston: bool) -> ArrayMesh:
 	var pts := PackedVector3Array()
