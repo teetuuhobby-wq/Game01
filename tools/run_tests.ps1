@@ -18,6 +18,7 @@ Tests (in game/tests/ unless noted):
   using edges     one press of E does one thing; sitting down while walking doesn't
                   stand you straight back up; sitting lowers your eyes and keeps the
                   valve in hand; residents near the camera are hidden
+  quality         low quality (F6, run_low.bat) turns costly effects off; high restores them
 Exit code 0 = everything passed. Set GODOT to use a different Godot console .exe.
 #>
 # "Continue": Windows PowerShell treats anything Godot prints to stderr (even harmless
@@ -39,7 +40,8 @@ $runs = @(
 	@{ Name = "mood"; Args = @("--headless", "--path", $game, "res://tests/mood_test.tscn", "--", "--no-record") },
 	@{ Name = "panels"; Args = @("--headless", "--path", $game, "res://tests/panel_test.tscn", "--", "--no-record") },
 	@{ Name = "buildings"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/facilities_test.tscn", "--", "--no-record") },
-	@{ Name = "using edges"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/use_edge_test.tscn", "--", "--no-record") }
+	@{ Name = "using edges"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/use_edge_test.tscn", "--", "--no-record") },
+	@{ Name = "quality"; Args = @("--headless", "--path", $game, "res://tests/quality_test.tscn", "--", "--no-record") }
 )
 $failed = 0
 foreach ($r in $runs) {

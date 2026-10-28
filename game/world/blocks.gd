@@ -231,6 +231,9 @@ var life_t := 0.0   # the people's own clock, for their bobbing and fidgeting: u
 var paused := false
 
 
+var people_view := INF   # metres: people further from the camera are hidden (quality.gd sets it on low)
+
+
 ## Starts the shared random numbers afresh for one part of the build (houses, market,
 ## people...), so changing one part never reshuffles another.
 func _seed(part: String) -> void:

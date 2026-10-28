@@ -40,6 +40,15 @@ const THING_REACH := 1.7         # metres from a board, seat or the like
 const TEXT_SECONDS := 4.0        # how long a line stays up...
 const TEXT_SECONDS_PER_LETTER := 0.05   # ...plus this much per letter
 
+# --- Graphics ---
+const QUALITY := "high"          # "high" for the home PC, "low" for a weaker laptop (F6 switches in the game)
+# Low quality only:
+const LOW_RENDER_SCALE := 0.7    # share of the screen's resolution the 3D is drawn at
+const LOW_VIEW_DISTANCE := 450.0 # metres the camera can see (high: 1000)
+const LOW_HAZE := 0.004          # the least haze, so the shorter view doesn't end in a visible edge
+const LOW_SHADOW_DISTANCE := 80.0   # metres around you that get sun shadows
+const LOW_PEOPLE_VIEW := 45.0    # metres: people further from the camera are hidden
+
 # --- Sound ---
 # Volumes, variety and which recording to use are set in the game with the sound board
 # (press F4), and saved in audio/sound_settings.json. The built-in values are in sfx.gd.

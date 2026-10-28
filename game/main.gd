@@ -44,6 +44,9 @@ func _ready() -> void:
 	mood.world = world
 	mood.camera = camera
 	add_child(mood)
+	var quality := preload("res://quality.gd").new()
+	add_child(quality)
+	quality.setup(world, camera, mood)
 	var mood_panel := preload("res://mood_panel.gd").new()
 	mood_panel.mood = mood
 	mood_panel.controls = controls
@@ -129,7 +132,7 @@ func _setup_input() -> void:
 		"turn_left": [KEY_Z], "turn_right": [KEY_X],
 		"zoom_in": [KEY_EQUAL, KEY_KP_ADD, KEY_PAGEUP], "zoom_out": [KEY_MINUS, KEY_KP_SUBTRACT, KEY_PAGEDOWN],
 		"quit": [KEY_ESCAPE], "flag": [KEY_F2], "debug": [KEY_F3],
-		"sound_board": [KEY_F4], "mood": [KEY_F5],
+		"sound_board": [KEY_F4], "mood": [KEY_F5], "quality": [KEY_F6],
 	}
 	for action in keys:
 		if not InputMap.has_action(action):
