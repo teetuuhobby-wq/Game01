@@ -6,7 +6,8 @@ extends Node3D
 ## Test options (after "--"): --autoplay lets a bot play the errand and quits when
 ## it's done; --shots saves screenshots to shots/ along the way;
 ## --replay <playtests/folder> plays a recorded session back (see replay.gd);
-## --hour 14.5 starts at that time of day, --freeze-clock stops the clock (day_view.gd).
+## --hour 14.5 starts at that time of day, --freeze-clock stops the clock (day_view.gd);
+## --no-round skips the morning round (welcome.gd) and starts with Mira's errand.
 
 var controls: Node
 var world: Node3D
@@ -14,6 +15,9 @@ var player: Node3D
 var camera: Camera3D
 var sfx: Node
 var errand: Node
+var welcome: Node     # the morning round (welcome.gd), null when it's off
+var hud: Node         # the guide on screen (quest_hud.gd): goal line, speech, gold marker
+var interact: Node    # E: talk, read, sit, look (interact.gd)
 var recorder: Node
 var day_view: Node    # the time of day (day_view.gd; the clock itself is day.gd)
 var _shots := false
@@ -68,14 +72,23 @@ func _ready() -> void:
 	add_child(day_view)
 	day_view.setup(world, mood, sfx, controls)
 
+	var args := OS.get_cmdline_user_args()
+	hud = preload("res://quest_hud.gd").new()
+	add_child(hud)
+	hud.setup(world, camera)
+	# The morning round comes first in normal play (and its replays); the tests, the
+	# test bot (--autoplay) and --no-round start straight with Mira's errand.
+	var round_on: bool = preload("res://tuning.gd").WELCOME_ROUND and scene_file_path == "res://main.tscn" \
+			and not "--autoplay" in args and not "--no-round" in args
 	errand = preload("res://errand.gd").new()
 	add_child(errand)
-	errand.setup(world, player, sfx, camera, controls)
-	var interact := preload("res://interact.gd").new()
+	errand.setup(world, player, sfx, camera, controls, hud, not round_on)
+	interact = preload("res://interact.gd").new()
 	add_child(interact)
 	interact.setup(world, player, controls, errand, sfx)
+	if round_on:
+		start_round()
 
-	var args := OS.get_cmdline_user_args()
 	_shots = "--shots" in args
 	var replay_at := args.find("--replay")
 	if replay_at >= 0 and replay_at + 1 < args.size():
@@ -95,6 +108,7 @@ func _ready() -> void:
 		recorder.camera = camera
 		recorder.controls = controls
 		recorder.errand = errand
+		recorder.welcome = welcome
 		recorder.day_view = day_view
 		add_child(recorder)
 		recorder.start()
@@ -114,6 +128,15 @@ func _ready() -> void:
 		await _start_shots()
 		if bot:
 			bot.set_process(true)
+
+
+## The morning round (welcome.gd): Mira's errand waits until its last stop. (The round
+## test calls this too, since tests start without the round.)
+func start_round() -> void:
+	welcome = preload("res://welcome.gd").new()
+	add_child(welcome)
+	welcome.setup(world, player, hud, errand, day_view)
+	interact.welcome = welcome
 
 
 ## Esc frees the mouse; Esc again (with the mouse free) quits.

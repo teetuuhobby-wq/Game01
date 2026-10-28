@@ -17,7 +17,9 @@
 | Sound | `sfx.gd` | Every sound by name; recordings in `audio/<name>/`; `audio/sound_settings.json`. |
 | Panels | `panel_base.gd`, `sound_board.gd` (F4), `mood_panel.gd` (F5) | Tools for the user to direct the game with sliders. |
 | Using things | `interact.gd`, `dialogue.gd`, `town_data.gd` | E to talk, read, sit and look; which line each resident says next; the cast and their lines, the opening hours, routines and the market's day as plain data. |
-| Errand | `errand.gd` | Mira's job, the goal text, the marker and the speech. |
+| Errand | `errand.gd` | Mira's job: the valve and the rain-catcher. Waits (`active` false) while the morning round runs, until `begin()`. |
+| The morning round | `welcome.gd` | The first walk round the town (Pip's deliveries), stop by stop from `ROUND` in `town_data.gd`; hands over to the errand at Bram's, then the evening. Hears what you use from `interact.gd`. On only in normal play (`main.tscn`, `WELCOME_ROUND` in `tuning.gd`); tests call `start_round()` themselves. |
+| The guide on screen | `quest_hud.gd` | The goal line, what someone said, the prompt, the progress bar, the key hints and the gold marker with its edge arrow. Shared by the round and the errand; whoever is guiding sets it. |
 | Playtest tools | `recorder.gd`, `replay.gd`, `bot.gd` | Recording every session (with its start time), replaying it exactly (from that time), and the test bot. |
 | Tuning | `tuning.gd` | Numbers the user can safely change. |
 

@@ -223,3 +223,46 @@ const MARKET_CROWD := [[7.0, 0.0], [8.0, 0.15], [9.0, 0.45], [10.5, 0.85], [11.5
 ## their own time in between. Shopkeepers come first and go last.
 const MARKET_KEEPERS := {"arrive": [7.0, 8.0], "leave": [18.25, 18.75]}
 const MARKET_STANDERS := {"arrive": [7.5, 8.5], "leave": [18.0, 18.5]}
+
+
+## THE MORNING ROUND (welcome.gd): a first walk round the town before Mira's errand.
+## Mira asks you to help Pip with his deliveries; you take them round, trying one thing
+## at each place, and the last stop (Bram's) hands over to Mira's errand.
+## Each stop: do = "talk" (to the resident id), "read" / "look" (the spot id, see
+## PLACES), or "sit" (any seat in the place "where"; soak: only in the bath's water).
+## goal: the line at the top of the screen. line: what the resident says at this stop
+## instead of their usual lines. say: what you think to yourself when it's done.
+## carry: something in your hand from this stop on ("" = nothing).
+const ROUND_START := {"who": "Mira", "bubble": "Could you help\nPip this morning?",
+		"text": "Morning, neighbour! Pip's run off his feet with deliveries today. Could you give him a hand? He's at the foot of the stairs, between the guild and the tavern."}
+const ROUND := [
+	{"do": "talk", "id": "pip", "goal": "Find Pip at the foot of the stairs",
+		"line": "You're helping? Brilliant! Ink for Sabeth at the guild, lamp wicks for Pell, a note for Dorran and soap for Tamsin. Guild's right here. Go go go!"},
+	{"do": "talk", "id": "sabeth", "goal": "Take the ink to Sabeth in the Adventurers' Guild",
+		"line": "Ink. Proper ink, not the watery kind. Pip delivered something to the right person; I'll make a note of it. While you're here, the request board is just there. Read it. Don't pin anything."},
+	{"do": "read", "id": "guild_board", "goal": "Read the guild's request board",
+		"say": "Lots of odd jobs. Pell's Provisions is next, west along the street."},
+	{"do": "talk", "id": "pell", "goal": "Take the lamp wicks to Pell at Pell's Provisions",
+		"line": "Wicks! You're a lifesaver, I was down to my last three. Have a look at the shelves while you're here. Everything's for sale except the dented lantern."},
+	{"do": "look", "id": "store_shelves", "goal": "Have a look at Pell's shelves",
+		"say": "Next, Pip's note for Dorran at the Kneeling Strider, back east past the guild."},
+	{"do": "talk", "id": "dorran", "goal": "Take Pip's note to Dorran at the Kneeling Strider",
+		"line": "A note from Pip? \"Out of cactus cider, send more.\" ...That's my own note from yesterday. Never mind! Do me a favour: take this tea up to Old Wendel on the lookout. Warm your hands by the fire first.",
+		"carry": "tea"},
+	{"do": "look", "id": "tavern_hearth", "goal": "Warm your hands at the tavern's fire",
+		"say": "Soap for Tamsin at the bathhouse, then the tea for Wendel."},
+	{"do": "talk", "id": "tamsin", "goal": "Take the soap to Tamsin at the Bathhouse",
+		"line": "Soap. Thank you. Now sit in the water a moment before you go on. Your shoulders are up by your ears."},
+	{"do": "sit", "where": "bath", "soak": true, "goal": "Sit in the warm water for a moment",
+		"say": "Lovely. Now the tea, before it goes cold: Old Wendel's lookout is out past the bathhouse."},
+	{"do": "talk", "id": "wendel", "goal": "Take the tea to Old Wendel on the lookout",
+		"line": "Tea? It isn't dusk. ...Hm. Thank you. Bram's been banging about in his workshop all morning. Mira's valve, I'd wager. Up the stairs, middle terrace, east side.",
+		"carry": ""},
+	{"do": "talk", "id": "bram", "goal": "Look in on Bram at his workshop",
+		"line": "Delivering, are you? Then deliver this: Mira's spare valve, there on the bench. Take it to the rain-catcher before she comes down here herself."},
+]
+## When the rain-catcher works again: the clock jumps to evening (EVENING_HOUR) so you
+## see the bell, the lamps and the city kneeling; when Day 2 begins, the round is over.
+const ROUND_EVENING := {"hour": 17.75, "goal": "Evening already! Find a good spot and watch the city stop and kneel for the night",
+		"say": "Where did the day go? The evening bell rings at six."}
+const ROUND_OVER := "That was the round! Keep exploring as long as you like: talk to everyone, and press F2 for anything that feels off (or great)."

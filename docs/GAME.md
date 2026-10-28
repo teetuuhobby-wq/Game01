@@ -39,6 +39,7 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
     - The town's buildings (guild, tavern, store, bathhouse, workshop) and eight named residents, now on `main`.
     - Residents walk to work and home on their own routines (see `CHARACTERS.md`). Places open and close, with OPEN/CLOSED plaques. The market fills up through the morning and empties in the evening.
     - Evening: lamps brighten and the bell rings at 18:00. The city slows, stops and kneels. At 19:00 "Day 1 done", then Day 2's morning bell, and the city stands up and walks on.
+  - **Added (2026-10-28, your request): "The morning round",** a first walk round the town that showcases it for a playtest. Mira asks you to help Pip with his deliveries: ink for Sabeth (then read the guild's board), wicks for Pell (look at her shelves), a note for Dorran (warm up at the hearth; he hands you tea for Old Wendel), soap for Tamsin (sit in the bath), the tea up to Wendel, then Bram's, where Mira's errand takes over. The clock stands still at 11:30 until the valve is on, then jumps to evening: the bell, the lamps, the city kneels, Day 2. About 10 minutes.
   - **Step 2 (after you play step 1):** a guild board with 3 everyday jobs, like Mira's errand.
 - **Out:** combat, expeditions, money and real buying, saving, homes of your own, night-time play.
 

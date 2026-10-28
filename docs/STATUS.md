@@ -12,6 +12,15 @@ _Last updated: 2026-10-28, home PC after session 04: pulled the laptop's work, r
 4. **Review of everything (2026-10-27, work laptop): `docs/REVIEW-2026-10-27.md`.** **The fixes are done** (same day) and are all on `main` now, except the combat toy fixes, which are on `experiment/combat-toys`. Still open: the cleanups, M6 and S1/S2. **Ask the user to check by hand:** closing F4/F5 gives mouse-look back (can't be tested hidden); the market crowd loop for a click; sitting in first person and with the valve looks right.
 5. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
 
+## Home PC, 2026-10-28 (after session 04): "The morning round"
+
+The user came back after a while and asked for a short tutorial/quest that shows off the town and residents, to playtest and review everything at once. Built: **the morning round** (`welcome.gd`; stops and lines in `ROUND`, `town_data.gd`). It starts the normal game (`run.bat`): Mira asks you to help Pip with his deliveries round the guild, store, tavern, bathhouse and lookout, trying one thing at each (read, look, warm up, sit in the bath; you carry Dorran's tea to Wendel), then Bram's hands over to Mira's valve errand. The clock stands still at 11:30 until the valve is on, then jumps to 17:45: bell, lamps, kneel, "Day 1 done", Day 2. About 10 minutes. `WELCOME_ROUND = false` in `tuning.gd` turns it off.
+
+- **The user reviews it with F2 flags** (their pick). Each stop is logged in `events.csv` ("round" rows), so flags can be matched to stops.
+- **Tests:** a new "morning round" group (17 now): a bot walks the whole round (about 6 minutes of walking), every stop works, every line shows, the tea is carried, the evening ends in Day 2. Screenshots: `docs/screens/2026-10-28_round_*.jpg`.
+- **Also:** the guide on screen (goal, speech, marker, arrow) is now `quest_hud.gd`, shared by the round and the errand.
+- **Ask after the playtest:** which stop was best, which was dull, and whether the round is too long or too short. Then step 2 (the guild board's jobs).
+
 ## Session 04 (work laptop, 2026-10-27/28): "A day in town", step 1
 
 **What happened, in order:**
@@ -187,7 +196,7 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 ## How to run things
 
 - **Play the game:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms (all the way in = first person), Z X turn. F2 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning numbers: `game/tuning.gd`.
-- **All tests (Claude, after every change):** `& .\tools\run_tests.ps1` from PowerShell. Headless, 16 groups, about 10 minutes on the laptop (the walkabout and the day take longest). Exit code 0 = all passed. The list with what each test checks is at the top of the script.
+- **All tests (Claude, after every change):** `& .\tools\run_tests.ps1` from PowerShell. Headless, 17 groups, about 12 minutes on the laptop (the walkabout and the day take longest). Exit code 0 = all passed. The list with what each test checks is at the top of the script.
 - **Hidden runs with pictures:** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot_offscreen.ps1 <project_dir> [godot args] [-- game args]`. Godot runs on a separate, never-shown Windows desktop with sound off; screenshots and FPS match a visible run. Add `--fixed-fps 60` for repeatable screenshots. It stops at once if a script fails to load.
   - Bot errand with screenshots: `... godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots` (into `game/shots/`).
 - **Playtests (recorded automatically):** every normal play session writes `game/playtests/<date_time>/`. It's git-ignored, so it stays on the machine it was played on.

@@ -32,6 +32,8 @@ The day runs 7:00 to 19:00. Times are when they set off; they leave a little ear
 
 At a closed place, the people who work there tell you when it opens ("The guild opens at 8:00…"). You can't talk to anyone who's at home.
 
+**The morning round:** at their stop in the round (`ROUND` in `game/town_data.gd`), Pip, Sabeth, Pell, Dorran, Tamsin, Old Wendel and Bram each say one line of their own instead of their usual ones.
+
 ## Sample lines (one each)
 
 - **Sabeth:** "New members start at the bottom of the ledger. Everyone starts at the bottom of the ledger."

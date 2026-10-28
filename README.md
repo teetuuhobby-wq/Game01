@@ -10,11 +10,11 @@ A hobby game for me and my friends, made with Claude Code in **Godot 4.7**.
 
 ## Status
 
-The **first playable toy** is done: walk the terraced city in first person while it walks, with neighbours and one errand. Next: dangerous night expeditions (the combat style is still to be decided). Details: **[docs/STATUS.md](docs/STATUS.md)**.
+You live on a walking city: walk it in first person, visit the guild, tavern, store, bathhouse and workshop, talk to eight named residents, and live through a day from dawn until the city kneels for the night. Current milestone: **"A day in town"** (combat is parked for now). Details: **[docs/STATUS.md](docs/STATUS.md)**.
 
 ## Run it
 
-- **The first playable toy:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, and the mouse wheel zooms (all the way in = first person). F2 flags something that felt off, F3 shows debug info, F4 opens the sound board, F5 the mood and lighting panel (on the `experiment/laptop-speed` branch, F6 switches to low quality), and Esc frees the mouse (press it again to quit). Every play session is recorded to `game/playtests/` for Claude to study.
+- **The game:** double-click `game/run.bat`. It starts with **the morning round**: Mira asks you to help Pip with his deliveries, a guided walk round the town and its people (about 10 minutes; `WELCOME_ROUND` in `game/tuning.gd` turns it off). Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, and the mouse wheel zooms (all the way in = first person). F2 flags something that felt off, F3 shows debug info, F4 opens the sound board, F5 the mood and lighting panel, F6 switches to low quality (for the laptop; `run_low.bat` starts in it), T jumps an hour ahead, and Esc frees the mouse (press it again to quit). Every play session is recorded to `game/playtests/` for Claude to study.
 - **Look test:** install [Godot 4.7.2](https://godotengine.org) (`winget install GodotEngine.GodotEngine`), then double-click `prototypes/look_test_hd/run.bat` (older coarse version: `prototypes/look_test/`).
   Keys: `1`–`6` camera, `Space` pause, `Esc` quit.
 

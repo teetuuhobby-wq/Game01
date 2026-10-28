@@ -17,6 +17,7 @@ var player: Node3D
 var camera: Camera3D
 var controls: Node
 var errand: Node
+var welcome: Node = null   # the morning round (welcome.gd): its stops go in events.csv too
 var day_view: Node    # day_view.gd: the clock (its start time is saved, so a replay starts then too)
 
 var folder := ""
@@ -68,6 +69,8 @@ func start() -> void:
 		info.store_line("  %s = %s" % [c, str(consts[c])])
 	info.close()
 	errand.step_changed.connect(func(what: String) -> void: _event("errand", what))
+	if welcome != null:
+		welcome.step_changed.connect(func(what: String) -> void: _event("round", what))
 	_last_pos = player.position
 	_make_ui()
 	_event("start", "session started")

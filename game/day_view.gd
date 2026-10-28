@@ -33,6 +33,7 @@ var _fade: ColorRect
 var _card: Label
 var _card_sub: Label
 var _base_glow := 1.2  # how brightly the lamps glow by day (from the world's glow material)
+var _veil := 0.0       # an extra fade to dark (fade_to), on top of the end of the day's
 
 
 func setup(w: Node3D, m: Node, s: Node, c: Node) -> void:
@@ -59,6 +60,21 @@ func setup(w: Node3D, m: Node, s: Node, c: Node) -> void:
 func jump_to(h: float, d := -1, snap := true) -> void:
 	day.set_time(h, d)
 	_show(snap)
+
+
+## Fades to dark, jumps the clock to an hour (everyone where they'd be then, nobody
+## seen moving), and fades back in. run: the clock runs from there (else it stays as it was).
+func fade_to(h: float, run := true) -> void:
+	var tw := create_tween()
+	tw.tween_property(self, "_veil", 1.0, Day.FADE_SECONDS)
+	tw.tween_callback(_jump_behind_veil.bind(h, run))
+	tw.tween_property(self, "_veil", 0.0, Day.FADE_SECONDS)
+
+
+func _jump_behind_veil(h: float, run: bool) -> void:
+	jump_to(h)
+	if run:
+		day.frozen = false
 
 
 ## The dusk look test drives the light and the city itself.
@@ -109,7 +125,7 @@ func _show(snap: bool) -> void:
 	world.set_evening_lamps(evening)
 	mood.show_hour(h, snap)
 	_clock.text = "Day %d  ·  %s" % [day.day, Day.clock_text(h)]
-	var dark := day.darkness()
+	var dark := maxf(day.darkness(), _veil)
 	_fade.visible = dark > 0.0
 	_fade.color.a = dark
 	_card.visible = day.phase == Day.Phase.CARD or (day.phase == Day.Phase.FADE_OUT and dark > 0.6)

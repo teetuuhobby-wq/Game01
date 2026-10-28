@@ -28,6 +28,10 @@ const EVENING_GLOW := 3.0        # how brightly lanterns and lit windows glow in
 const EVENING_LAMPS := 1.5       # the buildings' door and wall lamps in the evening, times their daytime light
 const COME_AND_GO_DISTANCE := 30.0   # metres: people only arrive or leave this far from the camera, or out of its sight
 
+# --- The morning round (welcome.gd; its stops and lines are ROUND in town_data.gd) ---
+const WELCOME_ROUND := true      # false: the game starts straight with Mira's errand, at DAY_START_HOUR
+const ROUND_HOUR := 11.5         # the clock stands still at this time during the round (11.5 = 11:30, everything open)
+
 # --- Neighbours ---
 const NOTICE_DISTANCE := 2.5     # neighbours stop and look at you when you're this close (metres)
 

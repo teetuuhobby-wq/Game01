@@ -30,6 +30,9 @@ Tests (in game/tests/ unless noted):
                   the deck, and nobody popping in or out in view (about a minute)
   make way        a walking resident slows when you step in front, squeezes past after
                   3 s, and slows again the next time you're in the way
+  morning round   a bot walks the whole morning round (welcome.gd) and uses every stop,
+                  each resident says their round line, the tea is carried, Bram's hands
+                  over to Mira's errand, then the evening, "Day 1 done" and Day 2
 Tests that need everyone at their place (the market's full crowd, the residents at
 work) start at 14:00 with the clock stopped (-- --hour 14 --freeze-clock); the
 mood test starts at 16:00, when the day's light is golden hour.
@@ -59,7 +62,8 @@ $runs = @(
 	@{ Name = "walkabout"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/soak_test.tscn", "--", "--no-record", "--minutes", "1") },
 	@{ Name = "dusk"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/dusk_test.tscn", "--", "--no-record", "--loop") },
 	@{ Name = "day"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/day_test.tscn", "--", "--no-record") },
-	@{ Name = "make way"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/make_way_test.tscn", "--", "--no-record", "--hour", "14", "--freeze-clock") }
+	@{ Name = "make way"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/make_way_test.tscn", "--", "--no-record", "--hour", "14", "--freeze-clock") },
+	@{ Name = "morning round"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/round_test.tscn", "--", "--no-record") }
 )
 $failed = 0
 foreach ($r in $runs) {

@@ -3,6 +3,7 @@ extends Node
 ## Finds the nearest thing in reach (the named residents in world.cast_nodes, and the
 ## boards, seats and so on in world.interact_spots), shows "E: ..." and does it.
 ## Mira's errand comes first: when its valve or rain-catcher is in reach, E is the errand's.
+## The morning round (welcome.gd) hears everything you use, to know when a stop is done.
 ## What people say lives in town_data.gd; which line comes next, in dialogue.gd.
 ## At a place that's closed (day.gd), its people and its boards just say when it opens.
 
@@ -19,6 +20,7 @@ var player: Node3D      # player.gd
 var controls: Node      # controls.gd
 var errand: Node        # errand.gd
 var sfx: Node           # sfx.gd
+var welcome: Node = null   # welcome.gd, the morning round (null when it's off): it hears what you use
 var talk := Dialogue.new()
 var target := {}        # what E would use right now ({} = nothing in reach)
 var showing := ""       # id of what the panel shows ("" = closed)
@@ -129,10 +131,22 @@ func _score(here: Vector3, face: Vector3, at: Vector3, reach: float, max_dy: flo
 
 
 ## Does it: says a line, opens a board, sits you down, or describes something.
+## The morning round hears about it afterwards (and may give a resident a line of its own).
 func use(t: Dictionary) -> void:
+	_do(t)
+	if welcome != null:
+		welcome.used(t)
+
+
+func _do(t: Dictionary) -> void:
 	match t["kind"]:
 		"talk":
 			var c: Dictionary = Town.CAST[t["id"]]
+			var round_line: String = welcome.talk_line(t["id"]) if welcome != null else ""
+			if round_line != "":
+				_show(t["id"], "%s, %s" % [c["name"], c["role"]], round_line, t["pos"])
+				sfx.play("tick", -6.0)
+				return
 			var shut := _closed_line(world.resident_place(t["id"]), c["where"])
 			if shut != "":
 				_show(t["id"], "%s, %s" % [c["name"], c["role"]], shut, t["pos"])
