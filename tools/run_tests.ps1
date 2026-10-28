@@ -24,6 +24,13 @@ Tests (in game/tests/ unless noted):
                   the full bug hunt run it on its own with --minutes 60, see soak_test.gd)
   dusk            the dusk scene plays to the end, and replays (--loop and R) start the city
                   exactly where the first run did (about a minute)
+  day             the day clock and T, the light over the day and the mood panel's pin, the
+                  places' hours, the market by the hour, every resident's routine walked,
+                  the end of the day (stop, kneel, "Day 1 done", morning) with you safe on
+                  the deck, and nobody popping in or out in view (about a minute)
+Tests that need everyone at their place (the market's full crowd, the residents at
+work) start at 14:00 with the clock stopped (-- --hour 14 --freeze-clock); the
+mood test starts at 16:00, when the day's light is golden hour.
 Exit code 0 = everything passed. Set GODOT to use a different Godot console .exe.
 #>
 # "Continue": Windows PowerShell treats anything Godot prints to stderr (even harmless
@@ -40,15 +47,16 @@ $runs = @(
 	@{ Name = "stairs"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/stair_test.tscn", "--", "--no-record") },
 	@{ Name = "first person"; Args = @("--headless", "--fixed-fps", "30", "--path", $game, "res://tests/first_person_test.tscn", "--", "--no-record") },
 	@{ Name = "flowers"; Args = @("--headless", "--fixed-fps", "30", "--path", $game, "res://tests/flower_test.tscn", "--", "--no-record") },
-	@{ Name = "market"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/market_test.tscn", "--", "--no-record") },
+	@{ Name = "market"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/market_test.tscn", "--", "--no-record", "--hour", "14", "--freeze-clock") },
 	@{ Name = "sound"; Args = @("--headless", "--path", $game, "res://tests/sound_test.tscn", "--", "--no-record") },
-	@{ Name = "mood"; Args = @("--headless", "--path", $game, "res://tests/mood_test.tscn", "--", "--no-record") },
+	@{ Name = "mood"; Args = @("--headless", "--path", $game, "res://tests/mood_test.tscn", "--", "--no-record", "--hour", "16", "--freeze-clock") },
 	@{ Name = "panels"; Args = @("--headless", "--path", $game, "res://tests/panel_test.tscn", "--", "--no-record") },
-	@{ Name = "buildings"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/facilities_test.tscn", "--", "--no-record") },
-	@{ Name = "using edges"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/use_edge_test.tscn", "--", "--no-record") },
-	@{ Name = "quality"; Args = @("--headless", "--path", $game, "res://tests/quality_test.tscn", "--", "--no-record") },
+	@{ Name = "buildings"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/facilities_test.tscn", "--", "--no-record", "--hour", "14", "--freeze-clock") },
+	@{ Name = "using edges"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/use_edge_test.tscn", "--", "--no-record", "--hour", "14", "--freeze-clock") },
+	@{ Name = "quality"; Args = @("--headless", "--path", $game, "res://tests/quality_test.tscn", "--", "--no-record", "--hour", "14", "--freeze-clock") },
 	@{ Name = "walkabout"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/soak_test.tscn", "--", "--no-record", "--minutes", "1") },
-	@{ Name = "dusk"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/dusk_test.tscn", "--", "--no-record", "--loop") }
+	@{ Name = "dusk"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/dusk_test.tscn", "--", "--no-record", "--loop") },
+	@{ Name = "day"; Args = @("--headless", "--fixed-fps", "20", "--path", $game, "res://tests/day_test.tscn", "--", "--no-record") }
 )
 $failed = 0
 foreach ($r in $runs) {
