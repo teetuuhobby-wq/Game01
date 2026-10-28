@@ -2,16 +2,36 @@
 
 **New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 03 is the latest, and includes the overnight run and the long night).
 
-_Last updated: 2026-10-27, the long night at the end of session 03 (home PC): five walk-in buildings and eight named residents, a dusk look test, a bug hunt, a laptop speed setting and a tidy-up, all on branches (part 2 below). Before that, overnight: new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
+_Last updated: 2026-10-28, session 04 (work laptop): a review of everything and its fixes; the user parked combat and chose town life; `tidy`, `laptop-speed`, `bug-hunt` and `dusk` merged into `main`; **"A day in town" step 1 built** (see "Session 04" below). Before that, 2026-10-27, the long night at the end of session 03 (home PC): five walk-in buildings and eight named residents, a dusk look test, a bug hunt, a laptop speed setting and a tidy-up, all on branches (part 2 below). Before that, overnight: new recorded sounds, two combat toys, a polish pass. Session 03 before that: home PC check, the market street (merged), the sound board (F4), the mood panel (F5), and the world code split into layers (see `docs/ARCHITECTURE.md`)._
 
 ## ➡️ Next session (on either machine)
 
 1. `git pull` on `main`, then `git fetch` so the experiment branches arrive too (`git switch experiment/<name>` then works).
 2. **Docs live on `main` only.** The copies of `docs/` on experiment branches are older (each has a ⚠️ banner saying so); when you're on a branch, read `git show main:docs/STATUS.md`. Update docs on `main`. **When merging a branch into `main`, keep `main`'s version of `docs/STATUS.md` and the other living docs** (never bring in the banner or the old text); `docs/ARCHITECTURE.md` from `tidy` is the exception: it is newer.
-3. Give the user the recap from the morning report (part 2 below), and ask what they played and what to merge.
+3. **Ask how the day felt** (see "Session 04" below): did they play a full day, what part they liked, what bugged them. Then step 2 of "A day in town" (the guild board with 3 everyday jobs). Only `experiment/combat-toys` is still unmerged (parked).
 4. ~~**On the work laptop:** measure `experiment/laptop-speed`~~ Done 2026-10-27 (session 04), see part 2, item 5: low quality is about **2x faster** on the laptop. Still worth the user playing it there to say if low *looks* acceptable.
 5. **Review of everything (2026-10-27, work laptop): `docs/REVIEW-2026-10-27.md`.** **The fixes are done** (same day): every player-visible bug and broken test, on its own branch, all suites green. Still open: the cleanups, M6 and S1/S2. **Ask the user to check by hand:** closing F4/F5 gives mouse-look back (can't be tested hidden); the market crowd loop for a click; sitting in first person and with the valve looks right.
 6. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
+
+## Session 04 (work laptop, 2026-10-27/28): "A day in town", step 1
+
+**The user's choices:** combat parked; focus on town life; "A day in town" built with all of Claude's defaults (see GAME.md and DECISIONS).
+
+**What's on `main` now:** the new town and residents (`tidy`), F6 low quality (`laptop-speed`), the walkabout bot (`bug-hunt`), the dusk scene (`dusk`), and the day:
+- **The clock:** 7:00 → 19:00 in 20 real minutes, starting at 8:00. "Day 1 · 8:30" in the top right (and in F3). **T** jumps an hour. Tuning: `DAY_MINUTES`, `DAY_START_HOUR`, `EVENING_GLOW`, `EVENING_LAMPS` in `game/tuning.gd`.
+- **The light follows the clock:** Dawn (7:00) → Soft morning (8:30) → Midday (12:00) → Golden hour, or your saved F5 look (16:00) → Dusk (18:30) → Nightfall (19:00). Touching F5 pins the look; "Follow the day" gives it back.
+- **The town's timetable** (`game/town_data.gd`): `OPEN_HOURS` (store and guild 8-17, tavern 11-19, bathhouse 9-19, workshop 7-18), `CLOSED_LINES`, `ROUTINES` (who goes where when, see `CHARACTERS.md`), and `MARKET_CROWD` (empty at 7:00, full 11:30-16:00, empty by 19:00). OPEN/CLOSED plaques by each door. Doors never lock.
+- **Evening:** lamps brighten from about 17:30; bell at 18:00; the market empties; the city slows to a stop by 18:45 and kneels by 19:00. Then a fade, "Day 1 done", Day 2 at 7:00 with a morning bell; the city stands by 7:15 and walks by 7:30.
+- **Tests:** a new "day" group (15 groups now, about 10 minutes on the laptop). Tests that need the whole town at work start at 14:00 with the clock stopped (`-- --hour 14 --freeze-clock`).
+- **Screenshots:** `game/tests/day_shots.tscn` (hidden: `tools/godot_offscreen.ps1 game --fixed-fps 30 res://tests/day_shots.tscn '--' --no-record`). Keepers: `docs/screens/2026-10-28_day_*.jpg` (7:07 city, noon market, 16:00 city, 18:58 market, city and tavern, the end card).
+- **Critic (separate agent), two rounds:** fixed: morning looked like noon (new Dawn look), the plaques were easy to miss (OPEN is now green), the market screenshot was blocked. The city and market read clearly from 7:00 to 19:00. **Still weak:** standing at a shop door, nightfall looks much like dawn, because the indoor lights shine through walls onto the doorstep (a real fix needs shadows on those lights: too slow for the laptop).
+
+**For the user to check by hand (Claude can't):**
+- Both bells (18:00 and the morning) are audible, and the market crowd fades in the evening.
+- Play a whole day: `game/run_low.bat` on the laptop, T to hurry. Talk to Sabeth at about 7:40 (before the guild opens); watch Pell walk to the tavern at 17:00.
+- From the review: closing F4/F5 gives mouse-look back; the crowd loop for a click; sitting in first person.
+
+**Known and parked:** Mira's speech bubble can be seen from far away (huge from the desert; only matters once we go down there); the top-left quest text can sit over building signs in first person; the miniature blur makes a soft blob at the far end of the market street; thin bright slivers between blocks on the dark sand at nightfall.
 
 ## 🌅 Morning report, part 2 (the long night, 2026-10-27)
 
@@ -102,7 +122,7 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 
 ## Suggested next step
 
-**Focus (2026-10-28, the user's pick): town life.** Combat is parked. Claude's draft milestone, **"A day in town"** (waiting for the user's yes on the defaults): merge the new town (`experiment/tidy`) plus `dusk`, `laptop-speed` and `bug-hunt`; a day clock from morning to dusk, with the light following it; residents with simple routines (the store opens in the morning, the tavern fills up in the evening); shops that open and close; a guild board with a few everyday jobs like Mira's errand. Out: combat, expeditions, money and real buying, saving, homes, night. The older draft, "One night out", waits until combat comes back.
+**Focus (2026-10-28, the user's pick): town life.** Combat is parked. **Milestone "A day in town" is locked** (the user said "Yes, build it" to all defaults). Step 1 (the merges, the clock, light, routines, hours, evening) is built: **the user plays it first.** Step 2: a guild board with 3 everyday jobs like Mira's errand (no money). Out: combat, expeditions, money and real buying, saving, homes, night. The older draft, "One night out", waits until combat comes back.
 
 ## Important rules learned (don't break these)
 
@@ -160,7 +180,7 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 ## How to run things
 
 - **Play the game:** double-click `game/run.bat`. Click in the window, then the mouse looks around. WASD or arrows walk, Shift runs, E uses, the mouse wheel or + - zooms (all the way in = first person), Z X turn. F2 = "that felt off", F3 = debug info. Esc frees the mouse; Esc again quits. Tuning numbers: `game/tuning.gd`.
-- **All tests (Claude, after every change):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/run_tests.ps1`. Headless, about 1-2 minutes. On `main` it runs 8 groups: the bot errand, keys, stairs, first person, flowers, market, sound and mood (`game/tests/`); `experiment/tidy` adds buildings and using-edges (10), and `experiment/bug-hunt` adds a 5-minute walkabout. Exit code 0 = all passed. The list with what each test checks is at the top of the script.
+- **All tests (Claude, after every change):** `& .\tools\run_tests.ps1` from PowerShell. Headless, 15 groups, about 10 minutes on the laptop (the walkabout and the day take longest). Exit code 0 = all passed. The list with what each test checks is at the top of the script.
 - **Hidden runs with pictures:** `powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot_offscreen.ps1 <project_dir> [godot args] [-- game args]`. Godot runs on a separate, never-shown Windows desktop with sound off; screenshots and FPS match a visible run. Add `--fixed-fps 60` for repeatable screenshots. It stops at once if a script fails to load.
   - Bot errand with screenshots: `... godot_offscreen.ps1 game --fixed-fps 30 -- --autoplay --shots` (into `game/shots/`).
 - **Playtests (recorded automatically):** every normal play session writes `game/playtests/<date_time>/`. It's git-ignored, so it stays on the machine it was played on.
@@ -178,13 +198,13 @@ Code review and fixes; tests run hidden (`tools/godot_offscreen.ps1`); a 2.5x fa
 | Branch | What it is | Status |
 |---|---|---|
 | `main` | The project. Always work here. | Active |
-| `experiment/tidy` | **The newest town** (the long night): five walk-in buildings, eight named residents, E to talk, read, sit and look, code review fixes, the world code in 13 layers. Contains `facilities` and `polish-01`. All 10 test groups pass. | Waiting for the user to play; merge into `main` if liked |
+| `experiment/tidy` | **The new town** (the long night): five walk-in buildings, eight named residents, E to talk, read, sit and look, the world code in 13 layers. Contains `facilities` and `polish-01`. | **Merged into `main`** (2026-10-28) |
 | `experiment/facilities` | The buildings and residents before the tidy-up. Superseded by `tidy`. | Kept for history |
-| `experiment/dusk` | **Dusk look test:** `game/dusk.bat`, keys 1 / 2 / 3, R replays. The city kneels, lowers a lift, lights its lamps. | Waiting for the user's pick |
-| `experiment/bug-hunt` | An hour-long walkabout bot (nothing found) and a 1-minute version for the tests. Its alarms were rebuilt after the review (the old ones could never fire). | Merge any time |
-| `experiment/laptop-speed` | **Low quality for the laptop:** `game/run_low.bat`, or F6 in the game. Measured on the laptop: about 2x faster (13-20 → 22-39 FPS). | Merge if the user is happy with how low looks |
-| `experiment/combat-toys` | **The two combat toys** (overnight, 2026-10-27): `prototypes/combat_toys/`. Double-click its `run.bat`, pick 1 (action) or 2 (turn-based). Tests: `prototypes/combat_toys/run_tests.ps1`. Tuning: `prototypes/combat_toys/tuning.gd`. Doesn't touch the game. | Waiting for the user to play both |
-| `experiment/polish-01` | **Polish pass** (overnight): varied residents and a softer default golden hour, then a mouth on faces and looser market groups. Before/after: `docs/screens/2026-10-27_polish_*.jpg`. Already inside `tidy`. | If the user likes it: merge into `main` (or merge `tidy`) |
+| `experiment/dusk` | **Dusk look test:** `game/dusk.bat`, keys 1 / 2 / 3, R replays. The city kneels, lowers a lift, lights its lamps. | **Merged into `main`** (2026-10-28); the day's evening reuses its kneel |
+| `experiment/bug-hunt` | An hour-long walkabout bot and a 1-minute version for the tests (`--minutes 60` for a full hunt). | **Merged into `main`** (2026-10-28) |
+| `experiment/laptop-speed` | **Low quality for the laptop:** `game/run_low.bat`, or F6 in the game. About 2x faster on the laptop. | **Merged into `main`** (2026-10-28) |
+| `experiment/combat-toys` | **The two combat toys** (overnight, 2026-10-27): `prototypes/combat_toys/`. Double-click its `run.bat`, pick 1 (action) or 2 (turn-based). Review fixes applied 2026-10-27. Doesn't touch the game. | **Parked** (the user's call, 2026-10-28) |
+| `experiment/polish-01` | **Polish pass** (overnight): varied residents, softer golden hour, mouths, looser market groups. | In `main` (through `tidy`) |
 | `experiment/market-street` | The Market Street test (session 03). **Merged into `main`** after the user played it ("the city feels a lot better"). | Done, kept for history |
 | `experiment/city-10x` | **Look only, don't merge.** The terraced city at 10x its area (265 x 177 m, 4 terraces, 736 houses), built because the user asked to *see* the real scale. Code: `prototypes/look_test_10x/`. 6 FPS and a 33 s start on the laptop, 2.7 GB of memory. | Parked. The user later said even 10x may not be big enough, but what they mean is more *places with a purpose* (see TASTE). |
 

@@ -1,7 +1,7 @@
 # GAME — the current game in one page
 
 **Working title:** Strider Home *(placeholder)*
-**Status:** Phase 3 done: the first playable toy (`game/`) has been playtested 3 times. The loop below was reshaped by the user in session 02. **Next focus (2026-10-28, your pick): town life.** Combat is parked for now. The next milestone ("A day in town") is drafted in STATUS, not locked yet.
+**Status:** Phase 3 done: the first playable toy (`game/`) has been playtested 3 times. The loop below was reshaped by the user in session 02. **Focus (2026-10-28, your pick): town life.** Combat is parked for now. **Current milestone: "A day in town"** (below); step 1 is built and waiting for you to play.
 
 ## Pitch (one sentence)
 
@@ -30,7 +30,19 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
 
 **Godot 4.7** (already installed). It's strong at 3D voxel looks, runs great on your PC, and I can launch it and take screenshots myself. Friends get a zipped Windows build. A web build is possible later but limited.
 
-## Last milestone: Phase 3, first toy: "Walk your town while it walks" (done, playtested 3 times)
+## Current milestone: "A day in town" (locked 2026-10-28)
+
+- **In:**
+  - **Step 1 (built, waiting for you to play):**
+    - A day from 7:00 to 19:00 in 20 real minutes, starting at 8:00. The clock is in the top corner, and T jumps an hour.
+    - The light follows the day: cool dawn, soft morning, midday, golden hour, dusk, nightfall. F5 can pin a look; "Follow the day" gives it back to the clock.
+    - The town's buildings (guild, tavern, store, bathhouse, workshop) and eight named residents, now on `main`.
+    - Residents walk to work and home on their own routines (see `CHARACTERS.md`). Places open and close, with OPEN/CLOSED plaques. The market fills up through the morning and empties in the evening.
+    - Evening: lamps brighten and the bell rings at 18:00. The city slows, stops and kneels. At 19:00 "Day 1 done", then Day 2's morning bell, and the city stands up and walks on.
+  - **Step 2 (after you play step 1):** a guild board with 3 everyday jobs, like Mira's errand.
+- **Out:** combat, expeditions, money and real buying, saving, homes of your own, night-time play.
+
+## Earlier milestone: Phase 3, first toy: "Walk your town while it walks" (done, playtested 3 times)
 
 - **In:**
   - You, walking the terraced city's streets and stairs (WASD, Shift to run). You can't pass through houses or walls, or off the edge.
@@ -43,5 +55,5 @@ You're one ordinary resident of a small walking city crossing a dangerous wastel
   - `game/tuning.gd` for speeds, sway and camera.
   - **Added in session 03:** the bigger city with the market street and crowd; the sound board (F4); the mood and lighting panel (F5).
   - **Added overnight (2026-10-27):** recorded wind, town life, bell, and the city creaking as it steps. Two combat toys wait on a branch (`experiment/combat-toys`) to settle the combat style.
-  - **Waiting on branches (the long night, 2026-10-27):** five walk-in buildings (guild, tavern, store, bathhouse, workshop) and eight named residents you can talk to with E (`experiment/tidy`, see `docs/CHARACTERS.md`); a dusk look test (`experiment/dusk`); a laptop speed setting (`experiment/laptop-speed`). Not merged until the user plays them.
+  - **From the long night (2026-10-27), merged 2026-10-28:** five walk-in buildings (guild, tavern, store, bathhouse, workshop) and eight named residents you can talk to with E (see `docs/CHARACTERS.md`); a dusk look test (`game/dusk.bat`); a laptop speed setting (F6, `game/run_low.bat`).
 - **Out (still to come):** night and expeditions, combat, companions, real shops and guild quests (the buildings are clever fakes), building, inventory, real dialogue, saving, a bigger city, and the art polish list.

@@ -2,7 +2,7 @@
 
 *Everyday people only: jobs, habits, opinions about the town. No secrets, backstories or story hooks (a blind "spoiler guard" critic checked every line). They're residents, not companions: who joins your party is still your call.*
 
-**Where they live in the code:** looks and lines in `game/town_data.gd` (edit freely), where they stand in `game/world/facilities.gd` and `outer_places.gd`, their props and habits in `game/world/cast.gd` (branch `experiment/facilities`, tidied on `experiment/tidy`).
+**Where they live in the code:** looks and lines in `game/town_data.gd` (edit freely), where they stand in `game/world/facilities.gd` and `outer_places.gd`, their props and habits in `game/world/cast.gd`, their walks through the day in `game/world/town_life.gd` (all on `main` since 2026-10-28).
 
 **How talking works:** press **E** near someone. Each press gives the next line, round and round. Some have lines only *before* Mira's errand is done; once it's done, everyone first says their "after" line (news travels), then their usual ones.
 
@@ -16,6 +16,21 @@
 | 6 | **Mira**, your neighbour | The plaza (gives you the errand) | Rose shirt, green headscarf, a bright green watering can | Practical, upbeat, keeps half the neighbourhood's plants alive | — |
 | 7 | **Old Wendel**, lookout | On a timber lookout by the outer wall, past the bathhouse | Short, long brown coat, wide hat, white beard, brass spyglass at his eye | Weathered, few words, notices everything, likes the desert more than people (mostly) | Scans the horizon |
 | 8 | **Pip**, errand runner (a kid) | Running between the guild and the tavern | Lime shirt, red cap, ginger hair, an orange satchel | Fast, curious, knows every shortcut and every rumour (most of them wrong) | Runs errands, stops when you're near |
+
+## Their day (since 2026-10-28, "A day in town")
+
+The day runs 7:00 to 19:00. Times are when they set off; they leave a little early so they arrive on time, then wait at their place. Change any of it in `ROUTINES` in `game/town_data.gd`.
+
+| Who | Their day |
+|---|---|
+| Sabeth | Home → the guild at 7:30 (opens 8:00) → home at 17:00 |
+| Pell | Home → her store at 7:24 (opens 8:00) → **the tavern at 17:00**, for a drink after work |
+| Dorran | Home → the tavern at 10:24 (opens 11:00), until the day ends |
+| Tamsin | Home → the bathhouse at 8:18 (opens 9:00) |
+| Pip | Home → running the south street from 7:36 → home at 18:00 |
+| Bram, Old Wendel, Mira | At their spot all day (Mira's errand needs her in the plaza). After 18:00 Bram says the shop's shut. |
+
+At a closed place, the people who work there tell you when it opens ("The guild opens at 8:00…"). You can't talk to anyone who's at home.
 
 ## Sample lines (one each)
 
