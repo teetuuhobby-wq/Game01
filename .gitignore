@@ -25,3 +25,6 @@ playtests/
 
 # Full-size original sound downloads (see tools/prepare_sounds.py, which makes the game copies)
 audio_originals/
+
+# Builds to share (tools/export_build.ps1)
+builds/

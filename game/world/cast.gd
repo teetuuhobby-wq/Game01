@@ -166,7 +166,9 @@ func _random_person_sitting() -> MeshInstance3D:
 	var look: Dictionary = mi.get_meta("look", {})
 	look["sitting"] = true
 	look["legs"] = 3
-	return _make_person(mi.get_meta("shirt"), mi.get_meta("bottom"), mi.get_meta("hair"), mi.get_meta("skin"), look)
+	var sitting := _make_person(mi.get_meta("shirt"), mi.get_meta("bottom"), mi.get_meta("hair"), mi.get_meta("skin"), look)
+	mi.free()   # the standing one only lent its looks (left lying about, it crashed shared builds on quitting)
+	return sitting
 
 
 ## Little habits: the clerk writes, the barkeep polishes and glances round, Bram hammers,

@@ -11,6 +11,7 @@ Usage (from the repo root):
 Examples:
   ... tools/godot_offscreen.ps1 prototypes/look_test_hd -- --shots
   ... tools/godot_offscreen.ps1 prototypes/look_test_hd --quit-after 600 --print-fps
+  ... tools/godot_offscreen.ps1 "builds/Strider Home/Strider Home.exe" --quit-after 600   (an exported game, as it is)
 The game's output is printed when it exits, and the exit code is Godot's (124 = timed out).
 For logic-only checks that need no pictures, plain `--headless` is faster.
 Set the GODOT environment variable to use a different Godot .exe.
@@ -32,6 +33,12 @@ if (-not $exe) {
 }
 if (-not (Test-Path $exe)) { throw "Godot not found at $exe (set the GODOT environment variable to its .exe)" }
 $projectPath = (Resolve-Path $Project).Path.TrimEnd('\')
+# An exported game (a .exe instead of a project folder) runs as it is: it carries its own files
+$pathArgs = @("--path", $projectPath)
+if ($projectPath -like "*.exe") {
+	$exe = $projectPath
+	$pathArgs = @()
+}
 
 Add-Type @"
 using System;
@@ -85,7 +92,7 @@ public static class HiddenDesktop {
 $desktopName = "GodotTest_$PID"
 $log = [System.IO.Path]::GetTempFileName()
 # Quote each argument for the Windows command line.
-$cmd = (@($exe, "--audio-driver", "Dummy", "--log-file", $log, "--path", $projectPath) + $GodotArgs |
+$cmd = (@($exe, "--audio-driver", "Dummy", "--log-file", $log) + $pathArgs + $GodotArgs |
 	ForEach-Object { if ("$_" -match '[\s"]' -or "$_" -eq "") { '"' + ("$_" -replace '"', '\"') + '"' } else { "$_" } }) -join " "
 
 $desk = [HiddenDesktop]::Create($desktopName)
@@ -120,4 +127,6 @@ try {
 if (Test-Path $log) { Get-Content $log; Remove-Item $log -ErrorAction SilentlyContinue }
 if ($scriptBroken) { Write-Output "godot_offscreen: a script failed to load, stopped Godot"; exit 1 }
 if ($timedOut) { Write-Output "godot_offscreen: timed out after $TimeoutSec s, stopped it"; exit 124 }
+# A crash's code (like 0xC0000005) is too big for PowerShell's exit: report it and exit 1
+if ($code -gt [int]::MaxValue) { Write-Output ("godot_offscreen: Godot crashed (code 0x{0:X8})" -f [uint32]$code); exit 1 }
 exit [int]$code

@@ -306,7 +306,9 @@ func _add_market_crowd() -> void:
 	_mk_len = (market_path.size() - 1) * 0.5
 	var looks := []
 	for i in 32:
-		looks.append(_random_person().mesh)
+		var p := _random_person()
+		looks.append(p.mesh)
+		p.free()   # only its mesh is shared (left lying about, it crashed shared builds on quitting)
 	var crates := []
 	for c in [P.WOOD, P.RED, P.AWN1, P.LEAF]:
 		var m := BoxMesh.new()

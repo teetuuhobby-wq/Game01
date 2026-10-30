@@ -101,7 +101,11 @@ func _ready() -> void:
 		rp.finished.connect(func() -> void: get_tree().quit())   # before add_child: it may finish straight away
 		add_child(rp)
 		return
-	if not "--autoplay" in args and not "--no-record" in args:   # tests pass --no-record
+	# A shared build (exported, for friends) doesn't record: it starts with a tip about F6 instead
+	var shared := OS.has_feature("template")
+	if shared:
+		hud.tip("Running slowly? Press F6 for low quality.", 25.0)
+	if not "--autoplay" in args and not "--no-record" in args and not shared:   # tests pass --no-record
 		recorder = preload("res://recorder.gd").new()
 		recorder.world = world
 		recorder.player = player
@@ -122,7 +126,7 @@ func _ready() -> void:
 		add_child(bot)
 		bot.finished.connect(_on_bot_finished)
 	if _shots:
-		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://shots"))
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(shot_dir()))
 		if bot:
 			bot.set_process(false)   # stand still for the opening shots
 		await _start_shots()
@@ -199,7 +203,7 @@ func _settle() -> void:
 func _save_shot(label: String) -> void:
 	_shot_n += 1
 	var img := get_viewport().get_texture().get_image()
-	img.save_png("res://shots/%02d_%s.png" % [_shot_n, label])
+	img.save_png(shot_dir().path_join("%02d_%s.png" % [_shot_n, label]))
 	print("shot: ", label)
 
 
@@ -210,3 +214,9 @@ func _on_bot_finished(code: int) -> void:
 			await _settle()
 			_save_shot("done_zoom%d" % int(z * 10))
 	get_tree().quit(code)
+
+
+## Where --shots saves pictures: shots/ in the project, or the player's own folder in a
+## shared build (it can't write next to its own files).
+func shot_dir() -> String:
+	return "user://shots" if OS.has_feature("template") else "res://shots"

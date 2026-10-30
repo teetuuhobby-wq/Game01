@@ -17,6 +17,8 @@ var _marker: MeshInstance3D
 var _arrow: Polygon2D       # points to the goal when the marker is off-screen
 var _target: Variant = null # where the marker floats (a point on the city), or null
 var _t := 0.0
+var _tip: Label             # a small hint under the clock, for a while (tip())
+var _tip_time := 0.0
 
 
 func setup(w: Node3D, cam: Camera3D) -> void:
@@ -38,6 +40,12 @@ func prompt(text: String) -> void:
 func speak(who: String, text: String, seconds: float) -> void:
 	_say.text = "%s:  \"%s\"" % [who, text]
 	_say_time = seconds
+
+
+## A small hint in the top corner, under the clock, for a few seconds.
+func tip(text: String, seconds: float) -> void:
+	_tip.text = text
+	_tip_time = seconds
 
 
 func bar(shown: bool, value: float) -> void:
@@ -70,6 +78,8 @@ func _process(delta: float) -> void:
 	_t += delta
 	_say_time -= delta
 	_say.visible = _say_time > 0.0
+	_tip_time -= delta
+	_tip.visible = _tip_time > 0.0
 	_update_marker()
 
 
@@ -93,6 +103,16 @@ func _make_ui() -> void:
 	keys.anchor_bottom = 1.0
 	keys.offset_top = -34
 	keys.text = "Click, then mouse: look    WASD / arrows: walk    Shift: run    E: use    Wheel or + -: zoom (all the way in = your eyes)    Z X: turn    T: an hour later    F2: something felt off    F3: info    F4: sounds    F5: mood    F6: quality    Esc: free mouse / quit"
+	if OS.has_feature("template"):
+		keys.text = keys.text.replace("    F2: something felt off    F3: info", "")   # a shared build doesn't record playtests
+	_tip = _label(layer, Vector2(0, 0), 18)
+	_tip.anchor_left = 1.0
+	_tip.anchor_right = 1.0
+	_tip.offset_left = -520
+	_tip.offset_right = -20
+	_tip.offset_top = 44
+	_tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_tip.visible = false
 	_bar = ProgressBar.new()
 	_bar.max_value = 1.0
 	_bar.show_percentage = false

@@ -75,8 +75,9 @@ var _blur: CameraAttributesPractical   # the camera's blur settings, kept even w
 func _ready() -> void:
 	values = PRESETS["Golden hour"].duplicate()
 	saved = {}
-	if FileAccess.file_exists(SAVED):
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(SAVED))
+	var from := save_spot() if FileAccess.file_exists(save_spot()) else SAVED   # a shared build's own save first
+	if FileAccess.file_exists(from):
+		var parsed = JSON.parse_string(FileAccess.get_file_as_string(from))
 		if parsed is Dictionary:
 			for k in parsed:
 				if values.has(k):
@@ -135,8 +136,15 @@ func use_preset(name: String) -> void:
 
 
 func save() -> void:
-	var f := FileAccess.open(SAVED, FileAccess.WRITE)
+	var f := FileAccess.open(save_spot(), FileAccess.WRITE)
 	f.store_string(JSON.stringify(values, "\t", true))
+
+
+## Where "Save as default" writes: next to the game's files while we work on it (so it
+## goes in git), or the player's own folder (user://) in a shared build, which can't
+## change its own files.
+func save_spot() -> String:
+	return "user://" + SAVED.get_file() if OS.has_feature("template") else SAVED
 
 
 ## The sun's colour: white at 0, golden toward +1, moonlight blue toward -1.

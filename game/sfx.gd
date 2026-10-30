@@ -64,6 +64,12 @@ func _ready() -> void:
 		"bell": [_wav(_make_bell())],
 	}
 	rescan()
+	var found := 0
+	for n in SOUNDS:
+		found += _files[n].size()
+		for s in _sets[n]:
+			found += _sets[n][s].size()
+	print("sound: %d recordings found" % found)   # a shared build must find them too (tools/export_build.ps1)
 	_load_settings()
 	for n in SOUNDS:
 		if SOUNDS[n][2] == "loop":
@@ -116,8 +122,9 @@ func choices(n: String) -> Array:
 
 func _load_settings() -> void:
 	var saved := {}
-	if FileAccess.file_exists(SETTINGS):
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(SETTINGS))
+	var from := _saved_file()
+	if FileAccess.file_exists(from):
+		var parsed = JSON.parse_string(FileAccess.get_file_as_string(from))
 		if parsed is Dictionary:
 			saved = parsed
 	for n in SOUNDS:
@@ -145,9 +152,22 @@ func _load_settings() -> void:
 
 
 func save_settings() -> void:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://audio"))
-	var f := FileAccess.open(SETTINGS, FileAccess.WRITE)
+	var path := save_spot()
+	if path == SETTINGS:
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://audio"))
+	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify(settings, "\t", true))
+
+
+## Where Save writes: next to the game's files while we work on it (so it goes in git),
+## or the player's own folder (user://) in a shared build, which can't change its own files.
+func save_spot() -> String:
+	return "user://" + SETTINGS.get_file() if OS.has_feature("template") else SETTINGS
+
+
+## The saved settings to load: a shared build's own save first, else the ones it came with.
+func _saved_file() -> String:
+	return save_spot() if FileAccess.file_exists(save_spot()) else SETTINGS
 
 
 ## Back to the built-in volume and variety (keeps the chosen recording).
