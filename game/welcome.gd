@@ -6,7 +6,8 @@ extends Node
 ## the clock jumps to evening: the bell, the lamps, the city stopping and kneeling.
 ## When Day 2 begins, the round is over.
 ## The stops and every line are data: ROUND in town_data.gd. The clock stands still at
-## ROUND_HOUR (tuning.gd) until the evening, so everyone is at work. Turn the round off
+## ROUND_HOUR (tuning.gd) until the evening, so everyone is at work (T waits too), and
+## nobody talks about Mira's valve until Bram hands it over. Turn the round off
 ## with WELCOME_ROUND in tuning.gd.
 
 signal step_changed(what: String)   ## each stop done, "errand", "evening", "over" (for the recorder and tests)
@@ -38,6 +39,7 @@ func setup(w: Node3D, p: Node3D, h: Node, e: Node, d: Node) -> void:
 	errand.active = false   # Mira's errand waits until Bram's
 	day_view.jump_to(T.ROUND_HOUR)
 	day_view.day.frozen = true
+	day_view.hold_t = true   # T would close the places and send everyone home mid-round
 	errand.step_changed.connect(_on_errand)
 	day_view.happened.connect(_on_day)
 	var s: Dictionary = Town.ROUND_START
@@ -76,13 +78,20 @@ func target() -> Vector3:
 	return player.position
 
 
-## What a resident says when you talk to them at their stop ("" = their usual lines).
-## interact.gd asks before every talk.
+## What a resident says when you talk to them at their stop, or Mira's reminder while
+## the round is on ("" = their usual lines). interact.gd asks before every talk.
 func talk_line(id: String) -> String:
 	if phase != Phase.ROUND:
 		return ""
 	var s: Dictionary = Town.ROUND[stop]
-	return s["line"] if s["do"] == "talk" and s["id"] == id else ""
+	if s["do"] == "talk" and s["id"] == id:
+		return s["line"]
+	return Town.ROUND_START["mira_line"] if id == "mira" else ""
+
+
+## True until Bram's stop hands over to Mira's errand: nobody talks about the valve yet.
+func before_errand() -> bool:
+	return phase == Phase.ROUND
 
 
 ## Something was used with E (interact.gd tells us): if it's this stop, on to the next.
@@ -127,12 +136,15 @@ func _on_errand(what: String) -> void:
 ## The clock jumps to evening behind a fade, then runs: bell, lamps, the city kneels.
 func _evening() -> void:
 	phase = Phase.EVENING
+	day_view.hold_t = false
 	day_view.fade_to(float(Town.ROUND_EVENING["hour"]), true)
 	hud.speak("You", Town.ROUND_EVENING["say"], 10.0)
 	step_changed.emit("evening")
 
 
 func _on_day(what: String) -> void:
+	if what == "skip_held":
+		hud.speak("You", Town.ROUND_START["hold_t"], 5.0)
 	if what == "awake" and phase == Phase.EVENING:
 		phase = Phase.OVER
 		hud.goal(Town.ROUND_OVER)

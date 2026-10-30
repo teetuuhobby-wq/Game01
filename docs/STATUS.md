@@ -8,7 +8,7 @@ _Last updated: 2026-10-28, home PC after session 04: pulled the laptop's work, r
 
 1. `git pull` on `main`, then `git fetch --prune`. Only two side branches are left: `experiment/combat-toys` and `experiment/city-10x`. **On the home PC (first time after 2026-10-28):** delete the local copies of the 7 deleted branches, if they're there: `git branch -D experiment/tidy experiment/dusk experiment/laptop-speed experiment/bug-hunt experiment/facilities experiment/polish-01 experiment/market-street`. Everything in them is on `main`.
 2. **Docs live on `main` only.** The copies of `docs/` on the two side branches are older (each has a ⚠️ banner saying so); when you're on a branch, read `git show main:docs/STATUS.md`. **If `combat-toys` is ever merged, keep `main`'s living docs** (never bring in the banner or the old text).
-3. **Ask how the day felt** (see "Session 04" below): did they play a full day, what part they liked, what bugged them. Then step 2 of "A day in town" (the guild board with 3 everyday jobs). Only `experiment/combat-toys` is still unmerged (parked).
+3. **Ask how the morning round went** (see "Home PC, 2026-10-28" below; it starts the game, `run.bat`): read the playtest's `events.csv` (F2 flags and the "round" rows say which stop they were at), then ask which stop was best, which was dull, and whether it's too long. Also how the day felt (the evening and the kneel end the round). Then step 2 of "A day in town" (the guild board with 3 everyday jobs). Only `experiment/combat-toys` is still unmerged (parked).
 4. **Review of everything (2026-10-27, work laptop): `docs/REVIEW-2026-10-27.md`.** **The fixes are done** (same day) and are all on `main` now, except the combat toy fixes, which are on `experiment/combat-toys`. Still open: the cleanups, M6 and S1/S2. **Ask the user to check by hand:** closing F4/F5 gives mouse-look back (can't be tested hidden); the market crowd loop for a click; sitting in first person and with the valve looks right.
 5. Claude's private memory notes stay on the machine they were written on; the rules that matter are in "Important rules learned" below.
 
@@ -20,6 +20,7 @@ The user came back after a while and asked for a short tutorial/quest that shows
 - **Tests:** a new "morning round" group (17 now): a bot walks the whole round (about 6 minutes of walking), every stop works, every line shows, the tea is carried, the evening ends in Day 2. Screenshots: `docs/screens/2026-10-28_round_*.jpg`.
 - **Also:** the guide on screen (goal, speech, marker, arrow) is now `quest_hud.gd`, shared by the round and the errand.
 - **Ask after the playtest:** which stop was best, which was dull, and whether the round is too long or too short. Then step 2 (the guild board's jobs).
+- **Re-review (2026-10-29, home PC):** all 17 test groups pass. Fixed in the round: residents no longer talk about Mira's valve before Bram hands it over (Mira reminds you of the round instead), and T waits during the round (it closed the places and sent everyone home mid-round; now it says the clock can wait). Still open: shared builds can't find the recorded sounds or save F4/F5 settings (S1/S2 in the review; fix before sending friends a build), and the review's small cleanups.
 
 ## Session 04 (work laptop, 2026-10-27/28): "A day in town", step 1
 

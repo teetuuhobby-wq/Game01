@@ -10,7 +10,7 @@ extends Node
 ## The dusk look test (dusk.tscn) drives the light and the city itself, so there this
 ## stands aside (stand_aside()).
 
-signal happened(what: String)   ## each of the clock's moments (see day.gd advance), for tests
+signal happened(what: String)   ## each of the clock's moments (see day.gd advance), and "skip_held" (T while hold_t)
 
 const Day := preload("res://day.gd")
 const T := preload("res://tuning.gd")
@@ -34,6 +34,7 @@ var _card: Label
 var _card_sub: Label
 var _base_glow := 1.2  # how brightly the lamps glow by day (from the world's glow material)
 var _veil := 0.0       # an extra fade to dark (fade_to), on top of the end of the day's
+var hold_t := false    # T does nothing (the morning round keeps the clock still); it says "skip_held" instead
 
 
 func setup(w: Node3D, m: Node, s: Node, c: Node) -> void:
@@ -88,7 +89,10 @@ func _process(delta: float) -> void:
 		return
 	var events := []
 	if controls.skip_hour:
-		events.append_array(day.skip_hour())
+		if hold_t:
+			events.append("skip_held")
+		else:
+			events.append_array(day.skip_hour())
 	events.append_array(day.advance(delta))
 	var snap := false
 	for e in events:

@@ -234,7 +234,9 @@ const MARKET_STANDERS := {"arrive": [7.5, 8.5], "leave": [18.0, 18.5]}
 ## instead of their usual lines. say: what you think to yourself when it's done.
 ## carry: something in your hand from this stop on ("" = nothing).
 const ROUND_START := {"who": "Mira", "bubble": "Could you help\nPip this morning?",
-		"text": "Morning, neighbour! Pip's run off his feet with deliveries today. Could you give him a hand? He's at the foot of the stairs, between the guild and the tavern."}
+		"text": "Morning, neighbour! Pip's run off his feet with deliveries today. Could you give him a hand? He's at the foot of the stairs, between the guild and the tavern.",
+		"mira_line": "Pip's deliveries first! Just follow the round, you'll meet half the town.",
+		"hold_t": "No rush today: the clock can wait until Pip's deliveries are done."}
 const ROUND := [
 	{"do": "talk", "id": "pip", "goal": "Find Pip at the foot of the stairs",
 		"line": "You're helping? Brilliant! Ink for Sabeth at the guild, lamp wicks for Pell, a note for Dorran and soap for Tamsin. Guild's right here. Go go go!"},

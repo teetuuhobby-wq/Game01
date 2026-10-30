@@ -153,8 +153,9 @@ func _do(t: Dictionary) -> void:
 				sfx.play("tick", -6.0)
 				return
 			var done: bool = errand.step == errand.Step.DONE
-			var line := talk.next_line(t["id"], done)
-			var n: int = talk.lines_for(t["id"], done).size()
+			var on: bool = welcome == null or not welcome.before_errand()   # no valve talk before the errand starts
+			var line := talk.next_line(t["id"], done, on)
+			var n: int = talk.lines_for(t["id"], done, on).size()
 			var k: int = talk.said_count(t["id"], n)
 			_show(t["id"], "%s, %s   (%d/%d)" % [c["name"], c["role"], k, n], line, t["pos"])
 			sfx.play("tick", -6.0)

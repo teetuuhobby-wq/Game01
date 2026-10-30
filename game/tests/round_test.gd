@@ -40,6 +40,26 @@ func _ready() -> void:
 	results.append(["it starts with Mira asking, the clock still at %s and Mira's errand waiting" % preload("res://day.gd").clock_text(T.ROUND_HOUR),
 			absf(day_view.day.hour - T.ROUND_HOUR) < 0.001 and day_view.day.frozen and not errand.active
 			and hud._say.text.begins_with(Town.ROUND_START["who"]), "%.2f, errand active %s" % [day_view.day.hour, errand.active]])
+	# T waits during the round (it would close the places and send everyone home), and says so
+	controls.skip_hour = true
+	day_view._process(0.0)
+	controls.skip_hour = false
+	results.append(["T does nothing during the round, and says why", absf(day_view.day.hour - T.ROUND_HOUR) < 0.001
+			and Town.ROUND_START["hold_t"] in hud._say.text, "%.2f" % day_view.day.hour])
+	# Nobody talks about the valve before Bram hands it over
+	var bram_before: Array = Town.CAST["bram"].get("before", [])
+	var said := []
+	for i in 6:
+		interact.use({"kind": "talk", "id": "bram", "pos": world.cast_nodes["bram"].position})
+		said.append(interact.last_text)
+	interact.use({"kind": "talk", "id": "mira", "pos": world.cast_nodes["mira"].position})
+	var mira_said: String = interact.last_text
+	var valve_talk := false
+	for line in said:
+		valve_talk = valve_talk or line in bram_before
+	results.append(["before Bram's stop nobody talks about the valve; Mira reminds you of the round",
+			not valve_talk and mira_said == Town.ROUND_START["mira_line"], "Mira: '%s'" % mira_said])
+	interact._close()
 
 
 ## A standable spot within reach of `at`, in the same room, that a route from you gets to.
@@ -105,9 +125,15 @@ func _process(delta: float) -> void:
 		return
 	if welcome.phase == W.Phase.ROUND and absf(day_view.day.hour - T.ROUND_HOUR) > 0.001:
 		_clock_still = false
-	if _shots and _t > 1.5 and _t - delta <= 1.5:
-		camera.snap_zoom(0.15)
-		_save_shot("round_start")
+	if _shots:
+		# Through your own eyes (how the user plays), looking where the bot walks or faces
+		camera.snap_zoom(camera.FP_ZOOM)
+		var f: Vector3 = player.facing
+		if player.bot_input != Vector2.ZERO:
+			f = Vector3(player.bot_input.x, 0, player.bot_input.y)
+		camera.yaw = lerp_angle(camera.yaw, atan2(-f.z, -f.x), minf(1.0, 6.0 * delta))
+		if _t > 1.5 and _t - delta <= 1.5:
+			_save_shot("round_start")
 	match _stage:
 		"start":
 			if welcome.phase != W.Phase.ROUND:
@@ -144,6 +170,8 @@ func _process(delta: float) -> void:
 				return
 			_tries = 0
 			controls.use_pressed = true
+			if _shots:
+				camera.yaw = atan2(-player.facing.z, -player.facing.x)   # look at them
 			_stage = "check"
 			_wait = 0.15
 		"check":

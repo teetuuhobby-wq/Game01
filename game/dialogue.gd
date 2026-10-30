@@ -10,11 +10,13 @@ var _said := {}       # cast id -> how many lines they've said
 var _knew_done := {}  # cast id -> true once they've started on their "after" lines
 
 
-## The lines a resident has right now.
-func lines_for(id: String, errand_done: bool) -> Array:
+## The lines a resident has right now. errand_on false: Mira's errand hasn't started
+## yet (the morning round comes first), so nobody talks about the valve.
+func lines_for(id: String, errand_done: bool, errand_on := true) -> Array:
 	var c: Dictionary = Town.CAST[id]
 	var out: Array = []
-	out.append_array(c.get("after" if errand_done else "before", []))
+	if errand_done or errand_on:
+		out.append_array(c.get("after" if errand_done else "before", []))
 	out.append_array(c["lines"])
 	return out
 
@@ -25,11 +27,11 @@ func said_count(id: String, n: int) -> int:
 
 
 ## The next thing a resident says (and counts it).
-func next_line(id: String, errand_done: bool) -> String:
+func next_line(id: String, errand_done: bool, errand_on := true) -> String:
 	if errand_done and not _knew_done.get(id, false):
 		_knew_done[id] = true
 		_said[id] = 0
-	var lines := lines_for(id, errand_done)
+	var lines := lines_for(id, errand_done, errand_on)
 	var n: int = _said.get(id, 0)
 	_said[id] = n + 1
 	return lines[n % lines.size()]
