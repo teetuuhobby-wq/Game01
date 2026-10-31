@@ -126,3 +126,7 @@ _Last updated: 2026-10-26 (end of session 02: street level, first person, facili
 - **Character detail is now the "it has to look good" worry:** faces up close, blocky bodies, plain clothes. They play 84% in first person and talk to people face to face, so the people are what they look at most. Confidence: high (direct, and fits the original fear).
 - **Finding their way matters:** compass directions don't work in first person; they want to *see* where to go and *spot* who they're looking for. Read: they want to wander the town by sight, not by reading. Confidence: medium-high.
 - **Natural behaviour over gamey behaviour:** people stopping to stare, and conversations that never end, broke the feeling of a real town. Fits "the world feels alive, you're merely one resident". Confidence: medium.
+
+## New signals (character look test, 2026-10-31)
+
+- **"None of the characters look that nice to me"** after five rounds (10 cm, cute big heads, smaller heads, 5 cm, painted faces). Liked C's cute style best but found its head too big. Read: the "it has to look good" requirement now applies to people, and code-built voxel faces aren't reaching the bar however fine the blocks. They may need to see a target look first (concept art) to say what "nice" is. Confidence: high (direct and repeated).
