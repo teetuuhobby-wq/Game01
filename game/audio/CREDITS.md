@@ -24,4 +24,4 @@ All of these are **CC0** (public domain: free to use, no credit required). They'
 
 The three crowd files are Freesound's public **preview MP3s** (about 128 kbps), not the full-quality originals, which need a Freesound account to download. Downloaded 2026-10-26.
 
-The wind, town, bell and creak files were downloaded by the user in full quality (2026-10-27), kept in `audio_originals/` (not in git), and turned into the game's copies by `tools/prepare_sounds.py`: the wind and town are the calmest 60 s of each recording, with the end blended into the start so the loop has no seam, at 32 kHz; the one-off sounds have the silence at the start cut. To change how they're cut, edit that script and run it again.
+The wind, town, bell and creak files were downloaded by the user in full quality (2026-10-27), kept in `originals/audio/` (not in git), and turned into the game's copies by `tools/prepare_sounds.py`: the wind and town are the calmest 60 s of each recording, with the end blended into the start so the loop has no seam, at 32 kHz; the one-off sounds have the silence at the start cut. To change how they're cut, edit that script and run it again.

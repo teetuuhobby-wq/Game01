@@ -3,11 +3,11 @@
 Purpose: the user picks the body proportions for Strider Home's residents by looking
 (after the code-built voxel people didn't look nice; see docs/STATUS.md, 2026-10-31).
 The style target is the user's own character sheet from another project
-(`Character_Reference/NPC_1/`, local only): clean anime cel shading, bold outlines.
+(`originals/characters/npc_1_other_project/`, local only): clean anime cel shading, bold outlines.
 The winner becomes a full turnaround sheet, which is the reference for building the 3D model.
 
 How to use: paste one prompt into Nano Banana Pro (Gemini), save the image into
-`Character_Reference/strider/` (e.g. `tamsin_proportions.jpg`), and tell Claude.
+`originals/characters/strider/` (e.g. `tamsin_proportions.jpg`), and tell Claude.
 If the three versions don't match each other, run it again or use the "one at a time"
 prompts at the bottom.
 
