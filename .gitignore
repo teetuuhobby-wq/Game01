@@ -23,8 +23,10 @@ shots/
 # Playtest recordings (big, and only useful on the machine they were made on)
 playtests/
 
-# Full-size original sound downloads (see tools/prepare_sounds.py, which makes the game copies)
-audio_originals/
+# Big files from outside, exactly as they came (see README, "Folders"): sound downloads,
+# asset packs, the user's reference images. The game uses small copies made from them.
+originals/
 
 # Builds to share (tools/export_build.ps1)
 builds/
+

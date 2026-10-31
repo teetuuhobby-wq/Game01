@@ -1,6 +1,6 @@
 """Makes the game's copies of downloaded sounds (Freesound originals) so they're small and loop cleanly.
 
-The full-size downloads live in audio_originals/ (git-ignored, keep them on your PC).
+The full-size downloads live in originals/audio/ (git-ignored, keep them on your PC).
 This script writes the game's versions into game/audio/<sound>/ :
   - loops (wind, town): the calmest 60 s stretch, the end blended into the start so the
     repeat can't be heard, at 32 kHz 16-bit (about a third of the size)
@@ -16,7 +16,7 @@ import wave
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "audio_originals")
+SRC = os.path.join(ROOT, "originals", "audio")
 DST = os.path.join(ROOT, "game", "audio")
 
 # (original file, game file, kind)
