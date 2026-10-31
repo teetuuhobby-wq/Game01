@@ -1,9 +1,12 @@
 extends "res://world/legs.gd"
 ## THE WORLD, layer 11 of 15: the city's people.
 ## How a person is built from blocks, the neighbours round the plaza and along the
-## terraces (they stop to look at you), and the market crowd: strollers keeping to
+## terraces (they glance at you, and wait if you're in their way), and the market crowd: strollers keeping to
 ## the right, browsers, kids, people carrying crates, chatting groups, shopkeepers.
 ## Which of the market's people are out at this time of day is up to town_life.gd ("here").
+
+
+const IN_YOUR_WAY := 1.0   # metres: a walking neighbour waits for you when you're this close, right in front
 
 
 ## A person made of blocks, facing +x. `look` changes the build (all optional):
@@ -243,16 +246,24 @@ func _update_walkers(delta: float) -> void:
 			node.rotation.y = atan2(-move.z, move.x)
 
 
-## Neighbours stop for a moment and turn to look at you when you walk past.
+## Neighbours don't stop to stare (playtest 4): someone standing about glances at you as
+## you pass, and someone walking keeps going, only pausing if you're right in their way.
+## True while they're held up by you.
 func _notice(w: Dictionary, node: Node3D) -> bool:
 	if player == null:
 		return false
 	var d: Vector3 = player.position - node.position
-	if d.x * d.x + d.z * d.z > NOTICE * NOTICE:
+	d.y = 0.0
+	if d.length_squared() > NOTICE * NOTICE:
 		return false
-	w["wait"] = maxf(w["wait"], 0.8)
-	node.rotation.y = lerp_angle(node.rotation.y, atan2(-d.z, d.x), 0.2)
-	return true
+	if w["wait"] > 0.0:
+		node.rotation.y = lerp_angle(node.rotation.y, atan2(-d.z, d.x), 0.2)   # standing anyway: a glance
+		return false
+	var ahead := Vector3(cos(node.rotation.y), 0.0, -sin(node.rotation.y))   # the way they face (the mesh faces +x)
+	if d.length() < IN_YOUR_WAY and ahead.dot(d.normalized()) > 0.5:
+		w["wait"] = maxf(w["wait"], 0.4)   # you're in their path: they wait for you, facing ahead
+		return true
+	return false
 
 
 ## A point on a promenade (just inside a terrace's edge), with a little walking bob.

@@ -37,6 +37,7 @@ var _t := 0.0
 var _wait_release := false    # just sat down holding a walk key: don't stand until it's let go
 var _show_time := 0.0
 var _show_at := Vector3.ZERO
+var _talk_end := false        # the panel shows someone's last line: the next E closes it
 
 
 func setup(w: Node3D, p: Node3D, c: Node, e: Node, s: Node) -> void:
@@ -69,7 +70,8 @@ func _process(delta: float) -> void:
 	_prompt.text = ("E: " + target["label"]) if not target.is_empty() and not _panel.visible else ""
 	if _panel.visible:
 		var same: bool = target.get("id", "") == showing
-		_hint.text = ("E: keep talking" if target.get("kind", "") == "talk" else "E: close") if same else ""
+		var talking: bool = target.get("kind", "") == "talk"
+		_hint.text = (("E: goodbye" if _talk_end else "E: keep talking") if talking else "E: close") if same else ""
 	if not target.is_empty() and controls.use_pressed:
 		use(target)
 	_update_panel(delta)
@@ -142,14 +144,21 @@ func _do(t: Dictionary) -> void:
 	match t["kind"]:
 		"talk":
 			var c: Dictionary = Town.CAST[t["id"]]
+			if showing == t["id"] and _talk_end:
+				# That was their last line (playtest 4: "dialogue doesn't end"): goodbye
+				_close()
+				talk.restart(t["id"])
+				return
 			var round_line: String = welcome.talk_line(t["id"]) if welcome != null else ""
 			if round_line != "":
 				_show(t["id"], "%s, %s" % [c["name"], c["role"]], round_line, t["pos"])
+				_talk_end = true
 				sfx.play("tick", -6.0)
 				return
 			var shut := _closed_line(world.resident_place(t["id"]), c["where"])
 			if shut != "":
 				_show(t["id"], "%s, %s" % [c["name"], c["role"]], shut, t["pos"])
+				_talk_end = true
 				sfx.play("tick", -6.0)
 				return
 			var done: bool = errand.step == errand.Step.DONE
@@ -158,6 +167,7 @@ func _do(t: Dictionary) -> void:
 			var n: int = talk.lines_for(t["id"], done, on).size()
 			var k: int = talk.said_count(t["id"], n)
 			_show(t["id"], "%s, %s   (%d/%d)" % [c["name"], c["role"], k, n], line, t["pos"])
+			_talk_end = k == n   # their last line: the next E says goodbye
 			sfx.play("tick", -6.0)
 		"read":
 			if showing == t["id"]:
@@ -194,6 +204,7 @@ func _closed_line(here: String, own: String) -> String:
 
 
 func _show(id: String, who: String, text: String, at: Vector3, seconds := -1.0) -> void:
+	_talk_end = false
 	showing = id
 	last_text = text
 	_who.text = who

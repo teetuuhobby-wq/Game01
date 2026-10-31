@@ -33,7 +33,7 @@ const WELCOME_ROUND := true      # false: the game starts straight with Mira's e
 const ROUND_HOUR := 11.5         # the clock stands still at this time during the round (11.5 = 11:30, everything open)
 
 # --- Neighbours ---
-const NOTICE_DISTANCE := 2.5     # neighbours stop and look at you when you're this close (metres)
+const NOTICE_DISTANCE := 2.5     # neighbours standing about glance at you when you're this close (metres)
 
 # --- The market street ---
 const MARKET_WALKERS := 150      # people strolling and shopping along the market street

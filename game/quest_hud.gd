@@ -102,9 +102,9 @@ func _make_ui() -> void:
 	keys.anchor_top = 1.0
 	keys.anchor_bottom = 1.0
 	keys.offset_top = -34
-	keys.text = "Click, then mouse: look    WASD / arrows: walk    Shift: run    E: use    Wheel or + -: zoom (all the way in = your eyes)    Z X: turn    T: an hour later    F2: something felt off    F3: info    F4: sounds    F5: mood    F6: quality    Esc: free mouse / quit"
+	keys.text = "Click, then mouse: look    WASD: walk    Shift: run    E: use    Wheel: zoom (all the way in = your eyes)    Z X: turn    T: an hour later    F2: felt off    F3: info    F4: sounds    F5: mood    F6: quality    Esc: menu"
 	if OS.has_feature("template"):
-		keys.text = keys.text.replace("    F2: something felt off    F3: info", "")   # a shared build doesn't record playtests
+		keys.text = keys.text.replace("    F2: felt off    F3: info", "")   # a shared build doesn't record playtests
 	_tip = _label(layer, Vector2(0, 0), 18)
 	_tip.anchor_left = 1.0
 	_tip.anchor_right = 1.0

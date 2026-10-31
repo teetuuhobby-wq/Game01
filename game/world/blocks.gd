@@ -159,7 +159,7 @@ var noise := FastNoiseLite.new()
 var city: Node3D
 
 
-var player: Node3D            # you (set by main.gd); neighbours stop to look at you
+var player: Node3D            # you (set by main.gd); neighbours glance at you
 
 
 var camera: Camera3D          # set by main.gd: people right in front of it are hidden

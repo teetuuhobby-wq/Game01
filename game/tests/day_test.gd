@@ -214,6 +214,7 @@ func _check_places() -> void:
 	var sabeth: Node3D = world.cast_nodes["sabeth"]
 	_interact.use({"kind": "talk", "id": "sabeth", "pos": sabeth.position})
 	var early: String = _interact.last_text
+	_interact._close()   # hours later: that conversation is long over (another E right away would say goodbye)
 	day_view.jump_to(12.0)
 	_interact.use({"kind": "talk", "id": "sabeth", "pos": sabeth.position})
 	var later: String = _interact.last_text

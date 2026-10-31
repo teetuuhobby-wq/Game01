@@ -4,7 +4,7 @@
 
 **Where they live in the code:** looks and lines in `game/town_data.gd` (edit freely), where they stand in `game/world/facilities.gd` and `outer_places.gd`, their props and habits in `game/world/cast.gd`, their walks through the day in `game/world/town_life.gd` (all on `main` since 2026-10-28).
 
-**How talking works:** press **E** near someone. Each press gives the next line, round and round. Some have lines only *before* Mira's errand is done; once it's done, everyone first says their "after" line (news travels), then their usual ones.
+**How talking works:** press **E** near someone. Each press gives the next line; after their last one the hint says "E: goodbye", the next E ends the conversation, and talking again starts from the top. Some have lines only *before* Mira's errand is done; once it's done, everyone first says their "after" line (news travels), then their usual ones.
 
 | | Who | Where | Look (you can spot them by) | Personality | Habit |
 |---|---|---|---|---|---|

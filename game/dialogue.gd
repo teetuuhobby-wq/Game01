@@ -1,6 +1,7 @@
 extends RefCounted
 ## TALKING, as plain rules (no pictures): which line each resident says next.
-## Each press of E gives the next line, round and round. Before Mira's errand is done
+## Each press of E gives the next line; after the last one the conversation ends
+## (interact.gd closes it) and the next one starts from the top. Before Mira's errand is done
 ## some say their "before" lines first; once it's done, everyone starts again with
 ## their "after" lines (news travels), then the rest.
 
@@ -19,6 +20,11 @@ func lines_for(id: String, errand_done: bool, errand_on := true) -> Array:
 		out.append_array(c.get("after" if errand_done else "before", []))
 	out.append_array(c["lines"])
 	return out
+
+
+## The conversation is over (you said goodbye): next time they start from the top.
+func restart(id: String) -> void:
+	_said[id] = 0
 
 
 ## Which line (1..n) a resident said last, for showing "2/4".

@@ -34,6 +34,7 @@ var _stuck_time := 0.0
 var _stuck_noted := false
 var _cam_history: Array = []    # [time, distance] for the last half second
 var _last_cam_event := -10.0
+var _last_zoom := -10.0   # when you last zoomed (camera_jump ignores your own zooming)
 var _slow_time := 0.0
 var _last_slow_event := -30.0
 
@@ -136,6 +137,13 @@ func _auto_flags(delta: float) -> void:
 	else:
 		_stuck_time = 0.0
 		_stuck_noted = false
+	# The camera jumping in behind you: not in first person (the camera is at your eyes, so
+	# its distance means nothing) and not when you zoomed in yourself (playtest 4: dozens of
+	# false alarms)
+	if controls.zoom_steps != 0.0:
+		_last_zoom = _time
+	if camera.first_person > 0.0 or _time - _last_zoom < 1.0:
+		_cam_history.clear()
 	_cam_history.append([_time, camera.distance])
 	while _cam_history.size() > 1 and _cam_history[0][0] < _time - 0.5:
 		_cam_history.pop_front()

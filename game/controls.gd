@@ -2,7 +2,7 @@ extends Node
 ## CONTROLS: reads your keys and mouse once per frame into one simple snapshot that
 ## the player, camera and errand all use. Playtests record these snapshots, and a
 ## replay feeds them back in, so Claude can watch a session again exactly.
-## Mouse look starts when you click in the window; Esc frees the mouse again.
+## Mouse look starts when you click in the window; Esc opens the menu (game_menu.gd), which frees it.
 
 const T := preload("res://tuning.gd")
 

@@ -20,6 +20,7 @@
 | Errand | `errand.gd` | Mira's job: the valve and the rain-catcher. Waits (`active` false) while the morning round runs, until `begin()`. |
 | The morning round | `welcome.gd` | The first walk round the town (Pip's deliveries), stop by stop from `ROUND` in `town_data.gd`; hands over to the errand at Bram's, then the evening. Hears what you use from `interact.gd`. On only in normal play (`main.tscn`, `WELCOME_ROUND` in `tuning.gd`); tests call `start_round()` themselves. |
 | Shared builds | `export_presets.cfg`, `tools/export_build.ps1` | Exported games (OS feature `template`) can't write their own files: saves go to `user://`, --shots to `user://shots`; they don't record playtests and hide F2/F3. Recordings in `audio/` are exported as they are (`importer="keep"`). **Free any node you make only to borrow its mesh or looks** (a leftover crashed release builds on quitting). |
+| The Esc menu | `game_menu.gd` | Pauses the game (it and `sfx.gd` keep running): Resume, Volume (the master bus, saved in `user://options.cfg`), Quality, Quit. Gets Esc only when no F4/F5 panel took it. |
 | The guide on screen | `quest_hud.gd` | The goal line, what someone said, the prompt, the progress bar, the key hints and the gold marker with its edge arrow. Shared by the round and the errand; whoever is guiding sets it. |
 | Playtest tools | `recorder.gd`, `replay.gd`, `bot.gd` | Recording every session (with its start time), replaying it exactly (from that time), and the test bot. |
 | Tuning | `tuning.gd` | Numbers the user can safely change. |

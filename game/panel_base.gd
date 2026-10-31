@@ -86,8 +86,8 @@ func set_open(on: bool) -> void:
 	if on:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif was_open and not any and controls.mouse_was_captured:
-		# The last panel closed: back to mouse look, so the next Esc only frees the
-		# mouse again (with the mouse free, Esc quits the game)
+		# The last panel closed: back to mouse look, as it was before the panel opened
+		# (the next Esc then opens the Esc menu, game_menu.gd)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 

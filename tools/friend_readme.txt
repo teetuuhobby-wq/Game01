@@ -22,7 +22,7 @@ CONTROLS
   T                         jump an hour ahead (after the round)
   F4 / F5                   sound and light settings (have a play)
   F6                        low / high quality
-  Esc                       frees the mouse; Esc again quits
+  Esc                       menu: pause, volume, quality, quit
 
 Your settings are saved in your own user folder, not next to the game.
 Sounds: CC0 recordings from Kenney and Freesound (see "Sound credits.txt").

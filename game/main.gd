@@ -18,6 +18,7 @@ var errand: Node
 var welcome: Node     # the morning round (welcome.gd), null when it's off
 var hud: Node         # the guide on screen (quest_hud.gd): goal line, speech, gold marker
 var interact: Node    # E: talk, read, sit, look (interact.gd)
+var menu: CanvasLayer # the Esc menu (game_menu.gd)
 var recorder: Node
 var day_view: Node    # the time of day (day_view.gd; the clock itself is day.gd)
 var _shots := false
@@ -67,6 +68,9 @@ func _ready() -> void:
 	board.sfx = sfx
 	board.controls = controls
 	add_child(board)
+	menu = preload("res://game_menu.gd").new()   # Esc: pause, volume, quality, quit
+	add_child(menu)
+	menu.setup(controls, quality, sfx)
 	world.stomped.connect(_on_stomp)
 	day_view = preload("res://day_view.gd").new()
 	add_child(day_view)
@@ -141,15 +145,6 @@ func start_round() -> void:
 	add_child(welcome)
 	welcome.setup(world, player, hud, errand, day_view)
 	interact.welcome = welcome
-
-
-## Esc frees the mouse; Esc again (with the mouse free) quits.
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("quit"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		else:
-			get_tree().quit()
 
 
 func _on_stomp(at: Vector3) -> void:
