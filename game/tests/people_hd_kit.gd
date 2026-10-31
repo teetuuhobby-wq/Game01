@@ -100,6 +100,8 @@ func build(c: Dictionary, style: String) -> Node3D:
 	if look.get("dress", false):
 		_box(bx0, bx1, 1, legs, bz0, bz1, pants)
 		_box(bx0, bx1, 1, 2, bz0, bz1, pants.darkened(0.18))             # a darker hem (no flare: it read as a lampshade)
+		if legs >= 5:
+			_box(bx0, bx1, 3, 4, bz0, bz1, pants.lightened(0.18))        # a stripe, so a long skirt isn't one plain block
 		for z in [bz0 + 1, bz1 - 2]:
 			_box(bx0 + 1, bx1 + 1, 0, 1, z, z + 1, pants.darkened(0.5))  # shoes peeking out
 	else:
@@ -149,7 +151,7 @@ func build(c: Dictionary, style: String) -> Node3D:
 		_:
 			node.add_child(_mesh_from(body.merged(head, true), U, shift))
 			if detail == "p":
-				node.add_child(_painted_face(shift))
+				node.add_child(_painted_face(shift, head))
 	_props(node, c, s, neck, shift)
 	node.scale = Vector3.ONE * float(s["scale"]) * (0.72 if c.get("kid", false) else 1.0)
 	return node
@@ -184,7 +186,8 @@ func _head(s: Dictionary, base: int, look: Dictionary, skin: Color, hair: Color,
 	var hc: Color = look.get("scarf_colour", Color(0.85, 0.30, 0.25)) if look.get("hair", "short") == "scarf" else hair
 	_a.merge({"x0": x0, "x1": x1, "fx": fx, "z0": z0, "z1": z1, "base": base, "top": top, "hw": hw, "hh": hh,
 			"eyes": eyes, "eye_y": eye_y, "mouth_y": mouth_y, "m": m, "brow": brow, "mouth": mouth,
-			"hair_colour": hc, "bald": look.get("hair", "short") == "bald"}, true)
+			"hair_colour": hc, "bald": look.get("hair", "short") == "bald", "long": look.get("hair", "short") == "long",
+			"beard": look.get("beard", false)}, true)
 	if draw_face:
 		for ez in eyes:
 			_box(fx, x1, eye_y, eye_y + 2, ez, ez + 2, pupil)
@@ -311,21 +314,37 @@ func _refine(f: Dictionary, body_too: bool) -> Dictionary:
 			var bk := Vector3i(F, ey + 5, z0 + cc)
 			if a["bald"] or _is_skin(f, bk, skin):
 				f[bk] = a["brow"]
-	# A curved smile: the middle, and its two ends a step up
+	# A curved smile: a flat bottom with its corners a step up, then a row of skin, then a
+	# tiny nose (right on top of the corners, the nose turned the smile into a pout)
 	var m: Array = a["m"]
-	var my: int = a["mouth_y"] * 2 + 1
-	for z in range(m[0] * 2, m[1] * 2):
+	var my: int = a["mouth_y"] * 2
+	for z in range(m[0] * 2 - 1, m[1] * 2 + 1):
 		f[Vector3i(F, my, z)] = a["mouth"]
-	f[Vector3i(F, my + 1, m[0] * 2 - 1)] = a["mouth"]
-	f[Vector3i(F, my + 1, m[1] * 2)] = a["mouth"]
-	# A tiny nose, sticking out above the smile
+	f[Vector3i(F, my + 1, m[0] * 2 - 2)] = a["mouth"]
+	f[Vector3i(F, my + 1, m[1] * 2 + 1)] = a["mouth"]
 	var nz: int = m[0] * 2 + (m[1] - m[0]) - 1
 	for z in range(nz, nz + 2):
-		f[Vector3i(F + 1, my + 2, z)] = skin.darkened(0.05)
+		f[Vector3i(F + 1, my + 3, z)] = skin.darkened(0.05)
 	# Blush either side
 	var pink := skin.lerp(Color(0.95, 0.45, 0.45), 0.35)
 	for z in [hz0 + 1, hz0 + 2, hz1 - 2, hz1 - 1]:
 		f[Vector3i(F, my + 2, z)] = pink
+	# The swept fringe stops above the brows (it made Tamsin look one-browed): only its
+	# outer end curls down past the eye
+	var sweep_y: int = a["top"] * 2 - 2
+	for z in range(hz0 + 2, hz1 + 1):
+		for y in [sweep_y, sweep_y + 1]:
+			var k := Vector3i(F, y, z)
+			if f.get(k, null) is Color and _is_hair(f[k], hc):
+				f[k] = skin
+	for ez: int in a["eyes"]:
+		for cc in 4:
+			f[Vector3i(F, ey + 5, ez * 2 + cc)] = a["brow"]
+	# Long hair also falls down beside the face, to the jaw
+	if a.get("long", false):
+		for y in range(hy0 + 3, hy1):
+			for z in [hz0, hz1]:
+				f[Vector3i(F, y, z)] = hc
 	# A ragged fringe edge: every other block of its lowest row shows skin
 	for z in range(hz0, hz1 + 1):
 		for y in range(hy0, hy1):
@@ -333,6 +352,15 @@ func _refine(f: Dictionary, body_too: bool) -> Dictionary:
 			if f.get(k, null) is Color and _is_hair(f[k], hc) and _is_skin(f, Vector3i(F, y - 1, z), skin) and z % 2 == 0:
 				f[k] = skin
 	return f
+
+
+## True if the block behind this pixel of the painted face is hair (or beard).
+func _hair_behind(head: Dictionary, px: int, py: int) -> bool:
+	var a := _a
+	var z: int = a["z1"] - 1 - px / PX
+	var y: int = a["top"] - py / PX
+	var c = head.get(Vector3i(a["fx"], y, z), null)
+	return c is Color and ((c as Color).is_equal_approx(a["hair_colour"]) or (c as Color).is_equal_approx(a["hair"]))
 
 
 func _is_skin(f: Dictionary, k: Vector3i, skin: Color) -> bool:
@@ -348,7 +376,7 @@ func _is_hair(c: Color, hc: Color) -> bool:
 ## The face drawn as a small picture (PX pixels a block) on a card just in front of the
 ## 10 cm head: eyes with an iris, a pupil and two highlights, arched brows, a curved
 ## smile, blush. Where nothing is drawn the card is see-through (the blocks show).
-func _painted_face(shift: float) -> MeshInstance3D:
+func _painted_face(shift: float, head: Dictionary) -> MeshInstance3D:
 	var a := _a
 	var w: int = a["hw"] * PX
 	var h: int = a["hh"] * PX
@@ -390,23 +418,24 @@ func _painted_face(shift: float) -> MeshInstance3D:
 			var arch := int(round(2.0 - absf(i - 5.5) * 0.35))
 			for t in 2:
 				var by := ety - 4 - arch + t
-				if by >= 0:
+				if by >= 0 and not _hair_behind(head, bx, by):   # not painted over the fringe
 					img.set_pixel(bx, by, a["brow"])
-	# A curved smile
+	# A curved smile (lighter on a beard, where the lip colour disappeared)
 	var m: Array = a["m"]
 	var mcx: float = px_x.call((m[0] + m[1]) / 2.0)
 	var mcy: int = px_y.call(a["mouth_y"] + 0.5)
+	var lip: Color = skin.darkened(0.12) if a["beard"] else a["mouth"]
 	for i in range(-7, 8):
 		var y := mcy - int(round(i * i * 0.07))
 		for t in 2:
-			img.set_pixel(int(mcx) + i, y + t, a["mouth"])
-	# Blush, solid (the card only shows or hides each pixel)
+			img.set_pixel(int(mcx) + i, y + t, lip)
+	# Blush, solid (the card only shows or hides each pixel), not on a beard
 	var pink := skin.lerp(Color(0.95, 0.45, 0.45), 0.35)
 	for side in [a["z0"] + 0.5, a["z1"] - 0.5]:
 		var bx: int = px_x.call(side)
 		for py in range(mcy - 6, mcy - 2):
 			for px in range(bx - 5, bx + 5):
-				if px >= 0 and px < w:
+				if px >= 0 and px < w and not _hair_behind(head, px, py):
 					img.set_pixel(px, py, pink)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = ImageTexture.create_from_image(img)
