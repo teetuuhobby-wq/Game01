@@ -60,8 +60,7 @@ func build(c: Dictionary, style: String) -> Node3D:
 	# Legs and shoes (a skirt for a dress)
 	if look.get("dress", false):
 		_box(bx0, bx1, 1, legs, bz0, bz1, pants)
-		_box(bx0 - 1, bx1 + 1, 1, 3, bz0 - 1, bz1 + 1, pants)            # the hem flares out
-		_box(bx0 - 1, bx1 + 1, 1, 2, bz0 - 1, bz1 + 1, pants.darkened(0.18))
+		_box(bx0, bx1, 1, 2, bz0, bz1, pants.darkened(0.18))             # a darker hem (no flare: it read as a lampshade)
 		for z in [bz0 + 1, bz1 - 2]:
 			_box(bx0 + 1, bx1 + 1, 0, 1, z, z + 1, pants.darkened(0.5))  # shoes peeking out
 	else:
@@ -86,13 +85,15 @@ func build(c: Dictionary, style: String) -> Node3D:
 		_box(-1, 1, legs + 1, neck, z0, z0 + s["arm_w"], shirt.darkened(0.06))
 		_box(-1, 1, legs + 1, legs + 2, z0, z0 + s["arm_w"], shirt.lightened(0.12))
 		_box(-1, 1, legs - 1, legs + 1, z0, z0 + s["arm_w"], skin)
-	# Apron: a layer over the front, with straps
+	# Apron: a bib lying on the front (over the belly where there is one), centred, its
+	# hem below the belt, and straps over the shoulders
 	if look.get("apron", false):
-		var front := bx1 + (1 if look.get("belly", false) else 0)
-		_box(front, front + 1, legs - 3, neck - 2, bz0 + 1, bz1 - 1, white)
-		_cell(front, neck - 2, bz0 + 1, white)
-		_box(bx1 - 1, bx1, neck - 1, neck, bz0 + 1, bz0 + 2, white)
-		_box(bx1 - 1, bx1, neck - 1, neck, bz1 - 2, bz1 - 1, white)
+		var belly: bool = look.get("belly", false)
+		for y in range(legs - 3, neck - 1):
+			var ax := bx1 + (1 if belly and y > legs and y < neck - 2 else 0)
+			_box(ax, ax + 1, y, y + 1, bz0 + 1, bz1 - 1, white)
+		for z in [bz0 + 1, bz1 - 2]:
+			_box(bx0, bx1 + 1, neck - 1, neck, z, z + 1, white)
 	_head(s, neck, look, skin, hair)
 	var node := Node3D.new()
 	node.add_child(_mesh())
@@ -116,38 +117,38 @@ func _head(s: Dictionary, base: int, look: Dictionary, skin: Color, hair: Color)
 	var cute := hh >= 8
 	_box(x0, x1, base, base + hh, z0, z1, skin.darkened(0.07))   # sides a touch darker than the face
 	_box(fx, x1, base, base + hh, z0, z1, skin)
-	var dark := Color(0.13, 0.10, 0.09)
-	var brow := hair.darkened(0.25) if look.get("hair", "short") != "bald" else skin.darkened(0.35)
+	# Eyes: 2 x 2, dark brown (not black, so they don't merge with dark hair), each with
+	# a sparkle on the same side (mirrored sparkles looked cross-eyed); brows lighter than
+	# the hair; a closed mouth, low on the face (higher up it read as a moustache)
+	var pupil := Color(0.20, 0.13, 0.10)
+	var sparkle := Color(0.95, 0.96, 1.0)
+	var mouth := Color(0.50, 0.24, 0.22)
+	var brow := hair.lerp(skin, 0.45) if look.get("hair", "short") != "bald" else skin.darkened(0.25)
+	var eye_y := base + (3 if cute else 2)
+	for ez in [-3, 1]:
+		_box(fx, x1, eye_y, eye_y + 2, ez, ez + 2, pupil)
+		_cell(fx, eye_y + 1, ez + 1, sparkle)
+		_box(fx, x1, eye_y + 2, eye_y + 3, ez, ez + 2, brow)
+	var mouth_y := base + (1 if cute else 0)
+	_box(fx, x1, mouth_y, mouth_y + 1, -1, 1, mouth)
 	if cute:
-		# Big eyes, 2 x 2 with a sparkle; blush; a small mouth; brows
-		for ez in [-3, 1]:
-			_box(fx, x1, base + 3, base + 5, ez, ez + 2, dark)
-			_cell(fx, base + 4, ez + (1 if ez < 0 else 0), Color(0.92, 0.94, 1.0))
-		_cell(fx, base + 2, -4, skin.lerp(Color(0.95, 0.45, 0.45), 0.35))
+		_cell(fx, base + 2, -4, skin.lerp(Color(0.95, 0.45, 0.45), 0.35))   # blush
 		_cell(fx, base + 2, 3, skin.lerp(Color(0.95, 0.45, 0.45), 0.35))
-		_box(fx, x1, base + 1, base + 2, -1, 1, skin.darkened(0.35))
-		_box(fx, x1, base + 5, base + 6, -3, -1, brow)
-		_box(fx, x1, base + 5, base + 6, 1, 3, brow)
 	else:
-		# Eyes (a white and a dark pupil, so they read against dark hair too), brows,
-		# a nose that sticks out, a mouth
-		_cell(fx, base + 3, -3, Color(0.93, 0.93, 0.90))
-		_cell(fx, base + 3, -2, dark)
-		_cell(fx, base + 3, 1, dark)
-		_cell(fx, base + 3, 2, Color(0.93, 0.93, 0.90))
-		_box(fx, x1, base + 4, base + 5, -3, -1, brow)
-		_box(fx, x1, base + 4, base + 5, 1, 3, brow)
-		_box(x1, x1 + 1, base + 2, base + 3, -1, 1, skin.darkened(0.04))
-		_box(fx, x1, base + 1, base + 2, -1, 1, skin.darkened(0.3))
-	# Ears
+		_box(x1, x1 + 1, base + 1, base + 2, -1, 1, skin.darkened(0.04))     # a nose that sticks out
+	# Ears (small)
 	for ez in [z0 - 1, z1]:
-		_box(-1, 0, base + 2, base + 4, ez, ez + 1, skin.darkened(0.12))
-	# Beard: the chin and jaw, and a moustache over the mouth
+		_box(-1, 0, base + 2, base + 3, ez, ez + 1, skin.darkened(0.12))
+	# Beard: filled in round the jaw and chin, the closed mouth showing through it
 	if look.get("beard", false):
-		_box(fx - 1, x1, base, base + 1, z0, z1, hair)
+		var beard_top := base + (2 if cute else 1)
+		_box(fx - 1, x1, base, beard_top, z0, z1, hair)
 		for z in [z0, z1 - 1]:
-			_box(x0 + 1, x1, base, base + 3, z, z + 1, hair)
-		_box(fx, x1, base + 1, base + 2, -2, 2, hair.darkened(0.15))
+			_box(x0 + 1, x1, base, beard_top + 1, z, z + 1, hair)
+		_box(fx, x1, mouth_y, mouth_y + 1, -1, 1, mouth)
+		if not cute:
+			_cell(fx, base + 1, -2, hair.darkened(0.1))                       # a moustache either side of the nose
+			_cell(fx, base + 1, 1, hair.darkened(0.1))
 	# Hair
 	var style: String = look.get("hair", "short")
 	var hc: Color = look.get("scarf_colour", Color(0.85, 0.30, 0.25)) if style == "scarf" else hair
@@ -161,10 +162,9 @@ func _head(s: Dictionary, base: int, look: Dictionary, skin: Color, hair: Color)
 			_box(x0, x0 + 1, base + 1, top, z0, z1, hc)                          # the back
 			for z in [z0, z1 - 1]:
 				_box(x0, x1 - 1, base + 2, top, z, z + 1, hc)                     # the sides
-			_box(fx, x1, top - (1 if cute else 0), top + 1, z0, z1, hc)          # a fringe
+			_box(fx, x1, top, top + 1, z0, z1, hc)                               # a fringe
 			if cute:
-				_cell(fx, top - 1, -1, skin)                                       # a parting
-				_cell(fx, top - 1, 0, skin)
+				_box(fx, x1, top - 1, top, z0, 1, hc)                              # swept to one side
 			if style == "long":
 				_box(x0, x0 + 1, base - 5, base + 1, z0 + 1, z1 - 1, hc)         # down the back
 			elif style == "bun":
