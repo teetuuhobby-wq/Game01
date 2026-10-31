@@ -28,3 +28,6 @@ audio_originals/
 
 # Builds to share (tools/export_build.ps1)
 builds/
+
+# The user's reference images (big; small copies go in art/reference/ when used)
+Character_Reference/
