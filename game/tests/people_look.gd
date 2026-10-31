@@ -1,7 +1,8 @@
 extends "res://main.gd"
-# THE CHARACTER LOOK TEST (playtest 4): Dorran, Tamsin and Pip three ways, in the real
-# town at 14:00:  A today's (20 cm blocks), B double detail (10 cm, today's proportions),
-# C double detail, cuter (a bigger head, a shorter body). Needs a real GPU; run hidden:
+# THE CHARACTER LOOK TEST (playtest 4): Dorran, Tamsin and Pip in a few versions, in the
+# real town at 14:00 (see tests/people_hd_kit.gd): A today's (20 cm blocks), B double detail,
+# C cute (big head), D and E cute with smaller heads. The versions to compare: STYLES
+# (or --styles A,B,C after "--"). Needs a real GPU; run hidden:
 #   tools/godot_offscreen.ps1 game --fixed-fps 30 res://tests/people_look.tscn '--' --no-record --hour 14 --freeze-clock
 # Shots (shots/NN_look_*.png), each taken three times from exactly the same camera:
 #   bar_X     across the tavern's bar, through your eyes (where playtest 4's flag came from)
@@ -14,7 +15,8 @@ extends "res://main.gd"
 const Kit := preload("res://tests/people_hd_kit.gd")
 const Town := preload("res://town_data.gd")
 const IDS := ["dorran", "tamsin", "pip"]
-const STYLES := ["A", "B", "C"]
+const EYES := {"A": 1.5, "B": 1.45, "C": 1.25, "D": 1.45, "E": 1.52}   # eye height (m) for the close-ups
+var STYLES := ["C", "D", "E"]
 
 var _kit: Kit
 var _cam: Camera3D
@@ -28,6 +30,9 @@ func _ready() -> void:
 	_cam.far = 1500.0
 	world.city.add_child(_cam)   # it rides along on the walking city, like everyone on it
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(shot_dir()))   # (not --shots: the game's own start-up shots would move the camera)
+	var si := OS.get_cmdline_user_args().find("--styles")
+	if si >= 0 and si + 1 < OS.get_cmdline_user_args().size():
+		STYLES = Array(OS.get_cmdline_user_args()[si + 1].split(","))
 	if "--fps" in OS.get_cmdline_user_args():
 		await _fps()
 	else:
@@ -134,7 +139,7 @@ func _shots_run() -> void:
 		# 2. Each face up close, from talking distance (1.3 m), at their eye height
 		for k in IDS.size():
 			var n: Node3D = row[k]
-			var eye := (1.55 if style != "C" else 1.5) * n.scale.y
+			var eye: float = EYES[style] * (0.72 if Town.CAST[IDS[k]].get("kid", false) else 1.0)
 			_look(n.position - across * 1.8 + Vector3(0, eye, 0), n.position + Vector3(0, eye - 0.12, 0))
 			_cam.fov = 40.0
 			await _shot("face_%s_%s" % [IDS[k], style])
@@ -182,13 +187,15 @@ func _fps() -> void:
 		if mi != null:
 			people.append([mi, mi.mesh])
 	# Random looks for the crowd in B and C (the same variety as today's)
-	var hd := {"B": [], "C": []}
+	var hd := {}
+	for st in STYLES:
+		hd[st] = []
 	for i in 32:
 		var p: MeshInstance3D = world._random_person()
 		var c := {"shirt": p.get_meta("shirt"), "bottom": p.get_meta("bottom"), "hair": p.get_meta("hair"),
 				"skin": p.get_meta("skin"), "look": p.get_meta("look", {})}
 		p.free()
-		for st in ["B", "C"]:
+		for st in STYLES.filter(func(x: String) -> bool: return x != "A"):
 			var n := _kit.build(c, st)
 			var m := (n.get_child(0) as MeshInstance3D).mesh
 			n.free()
