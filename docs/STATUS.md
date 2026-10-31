@@ -1,5 +1,7 @@
 # STATUS: start here
 
+> ⚠️ **This is an experiment branch (`experiment/people-hd`). Its docs are an older copy.** The up-to-date docs live on `main`: run `git show main:docs/STATUS.md` (or switch to `main`) before trusting anything here, and update docs on `main` only.
+
 **New session? Read this first**, then `docs/TASTE.md`, `docs/GAME.md` and the end of `docs/DECISIONS.md` (as `CLAUDE.md` says). For the user's own words and reactions, read `docs/history/` (session 05 is the latest: `session-05-home-pc-round-and-reviews.md`).
 
 _Last updated: 2026-10-29, home PC (session 05). Details of each session are in the sections below and in `docs/history/`._
