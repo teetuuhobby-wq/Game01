@@ -15,8 +15,8 @@ extends "res://main.gd"
 const Kit := preload("res://tests/people_hd_kit.gd")
 const Town := preload("res://town_data.gd")
 const IDS := ["dorran", "tamsin", "pip"]
-const EYES := {"A": 1.5, "B": 1.45, "C": 1.25, "D": 1.45, "E": 1.52}   # eye height (m) for the close-ups
-var STYLES := ["C", "D", "E"]
+const EYES := {"A": 1.5, "B": 1.45, "C": 1.25, "D": 1.45, "E": 1.52}   # eye height (m) for the close-ups, by shape (the first letter)
+var STYLES := ["D", "C5", "D5", "E5", "D5h", "Dp"]
 
 var _kit: Kit
 var _cam: Camera3D
@@ -139,7 +139,7 @@ func _shots_run() -> void:
 		# 2. Each face up close, from talking distance (1.3 m), at their eye height
 		for k in IDS.size():
 			var n: Node3D = row[k]
-			var eye: float = EYES[style] * (0.72 if Town.CAST[IDS[k]].get("kid", false) else 1.0)
+			var eye: float = EYES[style.substr(0, 1)] * (0.72 if Town.CAST[IDS[k]].get("kid", false) else 1.0)
 			_look(n.position - across * 1.8 + Vector3(0, eye, 0), n.position + Vector3(0, eye - 0.12, 0))
 			_cam.fov = 40.0
 			await _shot("face_%s_%s" % [IDS[k], style])
@@ -196,20 +196,35 @@ func _fps() -> void:
 				"skin": p.get_meta("skin"), "look": p.get_meta("look", {})}
 		p.free()
 		for st in STYLES.filter(func(x: String) -> bool: return x != "A"):
-			var n := _kit.build(c, st)
-			var m := (n.get_child(0) as MeshInstance3D).mesh
-			n.free()
-			hd[st].append(m)
+			hd[st].append(_kit.build(c, st))   # kept whole: a fine head or a painted face is a part of its own
 	var spots := {
 		"market street": [_street(50.0, -0.6), _street_dir(50.0)],
 		"plaza": [world.you_spot, Vector3(1, 0, 0)],
 	}
 	camera.make_current()
+	var extras := []   # the extra parts (fine heads, painted faces) added for the last version
 	for style in STYLES:
+		for x in extras:
+			x.queue_free()
+		extras.clear()
 		var faces := 0
 		for k in people.size():
 			var mi: MeshInstance3D = people[k][0]
-			mi.mesh = people[k][1] if style == "A" else hd[style][k % 32]
+			if style == "A":
+				mi.mesh = people[k][1]
+				mi.position.z = 0.0
+			else:
+				var t: Node3D = hd[style][k % 32]
+				var body := t.get_child(0) as MeshInstance3D
+				mi.mesh = body.mesh
+				mi.position.z = body.position.z
+				for i in range(1, t.get_child_count()):
+					var part := t.get_child(i).duplicate() as Node3D
+					mi.get_parent().add_child(part)
+					extras.append(part)
+					var pm := part as MeshInstance3D
+					if pm != null and pm.mesh is ArrayMesh:
+						faces += pm.mesh.surface_get_array_len(0) / 4
 			faces += mi.mesh.surface_get_array_len(0) / 4 if mi.mesh.get_surface_count() > 0 else 0
 		for n in spots:
 			for zoom in [-0.1, 0.35, 0.7]:

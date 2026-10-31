@@ -1,23 +1,32 @@
 extends RefCounted
 ## THE CHARACTER LOOK TEST's people (playtest 4: "increase the resolution of the
 ## characters"): the same residents as world/people.gd builds, from the same data
-## (town_data.gd CAST: colours, look, items), but from 10 cm blocks instead of 20 cm.
-## Body shapes:
-##   "B" double detail: today's proportions (legs, body and head a third each)
-##   "C" double detail, cuter: shorter body and a big head (8 x 8), like Town to City's people
-##   "D" C's face on a smaller head (7 x 7) and a longer body (the user: "C looks better,
-##       but the head is too big")
-##   "E" the same 7 x 7 head on a longer body again (closer to B's proportions)
+## (town_data.gd CAST: colours, look, items), at finer resolutions.
+## A style is a body shape, then (optionally) a way of adding detail:
+##   shapes (10 cm blocks):
+##     "B" today's proportions (legs, body and head a third each)
+##     "C" cute: a short body and a big head (8 x 8), like Town to City's people
+##     "D" C's face on a smaller head (7 x 7) and a longer body ("the head is too big")
+##     "E" the same 7 x 7 head on a longer body again
+##   detail ("C5", "D5h", "Dp"...):
+##     ""   10 cm blocks
+##     "5"  5 cm blocks everywhere: rounded heads and bodies, eyes with an iris and two
+##          highlights, thin brows with a gap above the eyes, a curved smile, a tiny nose,
+##          a fringe with a ragged edge and strands
+##     "5h" the same 5 cm head on the 10 cm body (detail where you look)
+##     "p"  the 10 cm head with the face painted on as a small sharp picture (8 pixels a block)
 ## C, D and E have the cute face: big eyes with a sparkle, blush, a little smile.
 ## Odd widths (7) have a true centre block; their meshes shift half a block so the
 ## person stays centred.
 ## A look test only (tests/people_look.gd): if the user picks one, it moves into people.gd.
-## A person faces +x, feet at 0, like world/people.gd. Right hand is +z.
+## A person faces +x, feet at 0, like world/people.gd. Right hand is +z (the viewer's left).
 
 const U := 0.1   # block size, metres (today's people: 0.2)
+const PX := 8    # pixels per block on a painted face
 
 var world: Node3D   # world.gd, for its cube mesher
 var _cells := {}    # Vector3i -> Color: later colours paint over earlier ones
+var _a := {}        # where things are on the last person built (in blocks): head, face, eyes...
 
 
 func _init(w: Node3D) -> void:
@@ -26,10 +35,10 @@ func _init(w: Node3D) -> void:
 
 ## Proportions per shape (in 10 cm blocks). Head: h tall, w wide (z), d deep (x).
 ## scale: the whole person (E is a little taller than the others, so shrinks to fit).
-func _shape(style: String, look: Dictionary) -> Dictionary:
+func _shape(shape: String, look: Dictionary) -> Dictionary:
 	var short_legs: bool = look.get("legs", 3) == 2
 	var tall: bool = look.get("torso", 3) == 4
-	match style:
+	match shape:
 		"C":
 			return {"legs": 3 if short_legs else 4, "torso": 6 if tall else 5,
 					"body_w": 6, "body_d": 4, "head_h": 8, "head_w": 8, "head_d": 6, "arm_w": 2, "scale": 1.0}
@@ -65,11 +74,13 @@ func _mid(w: int, n: int) -> Array:
 	return [start, start + n]
 
 
-## A resident (a CAST entry) in shape "B", "C", "D" or "E": body, clothes, face, hair, props.
+## A resident (a CAST entry) in a style like "D", "D5", "D5h" or "Dp" (see the top).
 func build(c: Dictionary, style: String) -> Node3D:
+	var shape := style.substr(0, 1)
+	var detail := style.substr(1)
 	_cells = {}
 	var look: Dictionary = c.get("look", {})
-	var s := _shape(style, look)
+	var s := _shape(shape, look)
 	var shirt: Color = c["shirt"]
 	var pants: Color = c["bottom"]
 	var hair: Color = c["hair"]
@@ -85,7 +96,6 @@ func build(c: Dictionary, style: String) -> Node3D:
 	var bx1 := bd / 2
 	var white := Color(0.95, 0.94, 0.88)
 	var mid1: Array = _mid(bw, 1)   # the body's centre: one block (odd) or two (even)
-	var mid3: Array = _mid(bw, 3)
 	# Legs and shoes (a skirt for a dress)
 	if look.get("dress", false):
 		_box(bx0, bx1, 1, legs, bz0, bz1, pants)
@@ -123,17 +133,31 @@ func build(c: Dictionary, style: String) -> Node3D:
 			_box(ax, ax + 1, y, y + 1, bz0 + 1, bz1 - 1, white)
 		for z in [bz0 + 1, bz1 - 2]:
 			_box(bx0, bx1 + 1, neck - 1, neck, z, z + 1, white)
-	_head(s, neck, look, skin, hair)
+	_a = {"torso": [bx0, bx1, legs, neck, bz0, bz1], "skin": skin, "hair": hair}
+	var body := _cells
+	_cells = {}
+	_head(s, neck, look, skin, hair, detail == "")   # the finer styles draw the face themselves
+	var head := _cells
 	var node := Node3D.new()
 	var shift := -U * 0.5 if bw % 2 == 1 else 0.0   # odd widths: back to the middle
-	node.add_child(_mesh(shift))
+	match detail:
+		"5":
+			node.add_child(_mesh_from(_refine(_upscale(body.merged(head, true)), true), U * 0.5, shift))
+		"5h":
+			node.add_child(_mesh_from(body, U, shift))
+			node.add_child(_mesh_from(_refine(_upscale(head), false), U * 0.5, shift))
+		_:
+			node.add_child(_mesh_from(body.merged(head, true), U, shift))
+			if detail == "p":
+				node.add_child(_painted_face(shift))
 	_props(node, c, s, neck, shift)
 	node.scale = Vector3.ONE * float(s["scale"]) * (0.72 if c.get("kid", false) else 1.0)
 	return node
 
 
-## The head: a face on the front (+x), ears, hair.
-func _head(s: Dictionary, base: int, look: Dictionary, skin: Color, hair: Color) -> void:
+## The head: a face on the front (+x), ears, hair. draw_face false: no eyes, brows,
+## mouth or blush (a finer style adds its own).
+func _head(s: Dictionary, base: int, look: Dictionary, skin: Color, hair: Color, draw_face: bool) -> void:
 	var hh: int = s["head_h"]
 	var hw: int = s["head_w"]
 	var hd: int = s["head_d"]
@@ -155,21 +179,27 @@ func _head(s: Dictionary, base: int, look: Dictionary, skin: Color, hair: Color)
 	var brow := hair.lerp(skin, 0.45) if look.get("hair", "short") != "bald" else skin.darkened(0.25)
 	var eye_y := base + (3 if cute else 2)
 	var eyes := [-2, 1] if hw % 2 == 1 else [-3, 1]   # odd: one block of nose between them
-	for ez in eyes:
-		_box(fx, x1, eye_y, eye_y + 2, ez, ez + 2, pupil)
-		_cell(fx, eye_y + 1, ez + 1, sparkle)
-		_box(fx, x1, eye_y + 2, eye_y + 3, ez, ez + 2, brow)
-	# The mouth: a little smile (the middle, its two ends a row up), or a closed line on B
 	var mouth_y := base + (1 if cute else 0)
 	var m: Array = _mid(hw, 1)
-	if cute:
-		_box(fx, x1, mouth_y, mouth_y + 1, m[0], m[1], mouth)
-		_cell(fx, mouth_y + 1, m[0] - 1, mouth)
-		_cell(fx, mouth_y + 1, m[1], mouth)
-		_cell(fx, base + 2, z0, skin.lerp(Color(0.95, 0.45, 0.45), 0.35))   # blush
-		_cell(fx, base + 2, z1 - 1, skin.lerp(Color(0.95, 0.45, 0.45), 0.35))
-	else:
-		_box(fx, x1, mouth_y, mouth_y + 1, -1, 1, mouth)
+	var hc: Color = look.get("scarf_colour", Color(0.85, 0.30, 0.25)) if look.get("hair", "short") == "scarf" else hair
+	_a.merge({"x0": x0, "x1": x1, "fx": fx, "z0": z0, "z1": z1, "base": base, "top": top, "hw": hw, "hh": hh,
+			"eyes": eyes, "eye_y": eye_y, "mouth_y": mouth_y, "m": m, "brow": brow, "mouth": mouth,
+			"hair_colour": hc, "bald": look.get("hair", "short") == "bald"}, true)
+	if draw_face:
+		for ez in eyes:
+			_box(fx, x1, eye_y, eye_y + 2, ez, ez + 2, pupil)
+			_cell(fx, eye_y + 1, ez + 1, sparkle)
+			_box(fx, x1, eye_y + 2, eye_y + 3, ez, ez + 2, brow)
+		# The mouth: a little smile (the middle, its two ends a row up), or a closed line on B
+		if cute:
+			_box(fx, x1, mouth_y, mouth_y + 1, m[0], m[1], mouth)
+			_cell(fx, mouth_y + 1, m[0] - 1, mouth)
+			_cell(fx, mouth_y + 1, m[1], mouth)
+			_cell(fx, base + 2, z0, skin.lerp(Color(0.95, 0.45, 0.45), 0.35))   # blush
+			_cell(fx, base + 2, z1 - 1, skin.lerp(Color(0.95, 0.45, 0.45), 0.35))
+		else:
+			_box(fx, x1, mouth_y, mouth_y + 1, -1, 1, mouth)
+	if not cute:
 		_box(x1, x1 + 1, base + 1, base + 2, -1, 1, skin.darkened(0.04))     # a nose that sticks out
 	# Ears (small)
 	for ez in [z0 - 1, z1]:
@@ -180,17 +210,16 @@ func _head(s: Dictionary, base: int, look: Dictionary, skin: Color, hair: Color)
 		_box(fx - 1, x1, base, beard_top, z0, z1, hair)
 		for z in [z0, z1 - 1]:
 			_box(x0 + 1, x1, base, beard_top + 1, z, z + 1, hair)
-		if cute:
+		if draw_face and cute:
 			_box(fx, x1, mouth_y, mouth_y + 1, m[0], m[1], mouth)
 			_cell(fx, mouth_y + 1, m[0] - 1, mouth)
 			_cell(fx, mouth_y + 1, m[1], mouth)
-		else:
+		elif draw_face:
 			_box(fx, x1, mouth_y, mouth_y + 1, -1, 1, mouth)
 			_cell(fx, base + 1, -2, hair.darkened(0.1))                       # a moustache either side of the nose
 			_cell(fx, base + 1, 1, hair.darkened(0.1))
 	# Hair
 	var style: String = look.get("hair", "short")
-	var hc: Color = look.get("scarf_colour", Color(0.85, 0.30, 0.25)) if style == "scarf" else hair
 	match style:
 		"bald":
 			_box(x0, x0 + 1, base + 1, base + 4, z0, z1, hair)                 # a ring round the back
@@ -213,6 +242,187 @@ func _head(s: Dictionary, base: int, look: Dictionary, skin: Color, hair: Color)
 				for z in [z0, z1 - 1]:
 					_box(fx, x1, base + 1, top, z, z + 1, hc)                     # framing the face
 
+
+# ---------------------------------------------------------------- 5 cm detail
+
+## Each 10 cm block as eight 5 cm ones.
+func _upscale(cells: Dictionary) -> Dictionary:
+	var fine := {}
+	for k: Vector3i in cells:
+		for d in [Vector3i(0, 0, 0), Vector3i(1, 0, 0), Vector3i(0, 1, 0), Vector3i(1, 1, 0),
+				Vector3i(0, 0, 1), Vector3i(1, 0, 1), Vector3i(0, 1, 1), Vector3i(1, 1, 1)]:
+			fine[k * 2 + d] = cells[k]
+	return fine
+
+
+## The 5 cm finish (in 5 cm blocks): rounded edges on the head (and the body), a finer
+## face, and texture in the hair.
+func _refine(f: Dictionary, body_too: bool) -> Dictionary:
+	var a := _a
+	var skin: Color = a["skin"]
+	# Rounded head: the four upright edges and the rim of the top come off
+	var hx0: int = a["x0"] * 2
+	var hx1: int = a["x1"] * 2 - 1
+	var hz0: int = a["z0"] * 2
+	var hz1: int = a["z1"] * 2 - 1
+	var hy0: int = a["base"] * 2
+	var hy1: int = a["top"] * 2 + 1
+	for y in range(hy0, hy1 + 1):
+		for x in [hx0, hx1]:
+			for z in [hz0, hz1]:
+				f.erase(Vector3i(x, y, z))
+	for x in range(hx0, hx1 + 1):
+		for z in range(hz0, hz1 + 1):
+			if x == hx0 or x == hx1 or z == hz0 or z == hz1:
+				f.erase(Vector3i(x, hy1, z))
+	if body_too:
+		var t: Array = a["torso"]   # [bx0, bx1, legs, neck, bz0, bz1]
+		for y in range(t[2] * 2, t[3] * 2):
+			for x in [t[0] * 2, t[1] * 2 - 1]:
+				for z in [t[4] * 2, t[5] * 2 - 1]:
+					f.erase(Vector3i(x, y, z))
+	# Texture in the hair: every third block a shade darker
+	var hc: Color = a["hair_colour"]
+	for k: Vector3i in f.keys():
+		if f[k] == hc and (k.x + k.y + k.z) % 3 == 0:
+			f[k] = hc.darkened(0.12)
+	# The face, on its front layer
+	var F: int = a["fx"] * 2 + 1
+	var dark := Color(0.12, 0.08, 0.07)
+	var iris := Color(0.42, 0.26, 0.16)
+	var iris_lit := Color(0.62, 0.42, 0.26)
+	var white := Color(0.97, 0.97, 1.0)
+	var ey: int = a["eye_y"] * 2
+	for ez: int in a["eyes"]:
+		var z0 := ez * 2
+		# rows bottom to top; columns from -z to +z (the sparkle on +z, the viewer's left)
+		var rows := [[null, dark, dark, null],
+				[dark, iris_lit, iris, dark],
+				[dark, iris, white, dark],
+				[dark, dark, dark, dark]]
+		for r in 4:
+			for cc in 4:
+				if rows[r][cc] != null:
+					f[Vector3i(F, ey + r, z0 + cc)] = rows[r][cc]
+				else:
+					f[Vector3i(F, ey + r, z0 + cc)] = skin
+		# A thin brow with a gap of skin above the eye (not where the fringe sweeps over)
+		for cc in 4:
+			var bk := Vector3i(F, ey + 5, z0 + cc)
+			if a["bald"] or _is_skin(f, bk, skin):
+				f[bk] = a["brow"]
+	# A curved smile: the middle, and its two ends a step up
+	var m: Array = a["m"]
+	var my: int = a["mouth_y"] * 2 + 1
+	for z in range(m[0] * 2, m[1] * 2):
+		f[Vector3i(F, my, z)] = a["mouth"]
+	f[Vector3i(F, my + 1, m[0] * 2 - 1)] = a["mouth"]
+	f[Vector3i(F, my + 1, m[1] * 2)] = a["mouth"]
+	# A tiny nose, sticking out above the smile
+	var nz: int = m[0] * 2 + (m[1] - m[0]) - 1
+	for z in range(nz, nz + 2):
+		f[Vector3i(F + 1, my + 2, z)] = skin.darkened(0.05)
+	# Blush either side
+	var pink := skin.lerp(Color(0.95, 0.45, 0.45), 0.35)
+	for z in [hz0 + 1, hz0 + 2, hz1 - 2, hz1 - 1]:
+		f[Vector3i(F, my + 2, z)] = pink
+	# A ragged fringe edge: every other block of its lowest row shows skin
+	for z in range(hz0, hz1 + 1):
+		for y in range(hy0, hy1):
+			var k := Vector3i(F, y, z)
+			if f.get(k, null) is Color and _is_hair(f[k], hc) and _is_skin(f, Vector3i(F, y - 1, z), skin) and z % 2 == 0:
+				f[k] = skin
+	return f
+
+
+func _is_skin(f: Dictionary, k: Vector3i, skin: Color) -> bool:
+	return f.get(k, null) is Color and (f[k] as Color).is_equal_approx(skin)
+
+
+func _is_hair(c: Color, hc: Color) -> bool:
+	return c.is_equal_approx(hc) or c.is_equal_approx(hc.darkened(0.12))
+
+
+# ---------------------------------------------------------------- the painted face
+
+## The face drawn as a small picture (PX pixels a block) on a card just in front of the
+## 10 cm head: eyes with an iris, a pupil and two highlights, arched brows, a curved
+## smile, blush. Where nothing is drawn the card is see-through (the blocks show).
+func _painted_face(shift: float) -> MeshInstance3D:
+	var a := _a
+	var w: int = a["hw"] * PX
+	var h: int = a["hh"] * PX
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var skin: Color = a["skin"]
+	# Picture x from the viewer's left (+z), y from the top
+	var px_x := func(z: float) -> int: return int(round((a["z1"] - z) * PX))
+	var px_y := func(y: float) -> int: return int(round((a["top"] + 1 - y) * PX))
+	var dark := Color(0.12, 0.08, 0.07)
+	for ez: int in a["eyes"]:
+		var ex: int = px_x.call(ez + 2.0)   # the eye's left edge, as seen
+		var ety: int = px_y.call(a["eye_y"] + 2.0)
+		var cx := ex + 8.0
+		var cy := ety + 8.5
+		for py in range(ety, ety + 16):
+			for px in range(ex, ex + 16):
+				var dx := (px + 0.5 - cx)
+				var dy := (py + 0.5 - cy)
+				var outer := (dx * dx) / (6.5 * 6.5) + (dy * dy) / (7.5 * 7.5)
+				if outer > 1.0:
+					continue
+				var c := dark
+				var inner := (dx * dx) / (4.8 * 4.8) + (dy * dy) / (5.8 * 5.8)
+				if inner <= 1.0:
+					c = Color(0.30, 0.18, 0.11).lerp(Color(0.66, 0.46, 0.28), clampf((dy + 5.0) / 10.0, 0.0, 1.0))
+				var pupil := (dx * dx) / (2.2 * 2.2) + (dy * dy) / (2.8 * 2.8)
+				if pupil <= 1.0:
+					c = dark
+				img.set_pixel(px, py, c)
+		# Two highlights, on the viewer's left
+		for d in [Vector2i(3, 3), Vector2i(4, 3), Vector2i(3, 4), Vector2i(4, 4), Vector2i(5, 4), Vector2i(4, 5)]:
+			img.set_pixel(ex + d.x, ety + d.y, Color(1, 1, 1))
+		for d in [Vector2i(10, 11), Vector2i(11, 11), Vector2i(10, 12)]:
+			img.set_pixel(ex + d.x, ety + d.y, Color(0.95, 0.95, 1.0))
+		# An arched brow above, with a gap of skin
+		for i in 12:
+			var bx := ex + 2 + i
+			var arch := int(round(2.0 - absf(i - 5.5) * 0.35))
+			for t in 2:
+				var by := ety - 4 - arch + t
+				if by >= 0:
+					img.set_pixel(bx, by, a["brow"])
+	# A curved smile
+	var m: Array = a["m"]
+	var mcx: float = px_x.call((m[0] + m[1]) / 2.0)
+	var mcy: int = px_y.call(a["mouth_y"] + 0.5)
+	for i in range(-7, 8):
+		var y := mcy - int(round(i * i * 0.07))
+		for t in 2:
+			img.set_pixel(int(mcx) + i, y + t, a["mouth"])
+	# Blush, solid (the card only shows or hides each pixel)
+	var pink := skin.lerp(Color(0.95, 0.45, 0.45), 0.35)
+	for side in [a["z0"] + 0.5, a["z1"] - 0.5]:
+		var bx: int = px_x.call(side)
+		for py in range(mcy - 6, mcy - 2):
+			for px in range(bx - 5, bx + 5):
+				if px >= 0 and px < w:
+					img.set_pixel(px, py, pink)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = ImageTexture.create_from_image(img)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	var q := QuadMesh.new()
+	q.size = Vector2(a["hw"] * U, a["hh"] * U)
+	var mi := MeshInstance3D.new()
+	mi.mesh = q
+	mi.material_override = mat
+	mi.rotation.y = PI / 2.0   # facing +x, the picture's left on +z
+	mi.position = Vector3(a["x1"] * U + 0.003, (a["base"] + a["hh"] / 2.0) * U, (a["z0"] + a["hw"] / 2.0) * U + shift)
+	return mi
+
+
+# ---------------------------------------------------------------- props and meshes
 
 ## What they carry or wear, from their items (only the ones the look test needs).
 func _props(node: Node3D, c: Dictionary, s: Dictionary, neck: int, shift: float) -> void:
@@ -248,16 +458,16 @@ func _props(node: Node3D, c: Dictionary, s: Dictionary, neck: int, shift: float)
 					_box(s["body_d"] / 2, s["body_d"] / 2 + 2, legs + 1 + i, legs + 2 + i, t[0], t[1],
 							Color(0.97, 0.97, 0.95) if i % 2 == 0 else Color(0.62, 0.86, 0.90))
 	if not _cells.is_empty():
-		node.add_child(_mesh(shift))
+		node.add_child(_mesh_from(_cells, U, shift))
 
 
-## The blocks so far as one mesh; shift (metres, along z) puts an odd width back in the middle.
-func _mesh(shift := 0.0) -> MeshInstance3D:
+## Blocks (size metres) as one mesh; shift (metres, along z) puts an odd width back in the middle.
+func _mesh_from(cells: Dictionary, size: float, shift := 0.0) -> MeshInstance3D:
 	var pts := PackedVector3Array()
 	var cols := PackedColorArray()
-	for k: Vector3i in _cells:
-		pts.append((Vector3(k) + Vector3(0.5, 0.5, 0.5)) * U)
-		cols.append(_cells[k])
-	var mi: MeshInstance3D = world._mi(world._cubes(pts, cols, U, true))
+	for k: Vector3i in cells:
+		pts.append((Vector3(k) + Vector3(0.5, 0.5, 0.5)) * size)
+		cols.append(cells[k])
+	var mi: MeshInstance3D = world._mi(world._cubes(pts, cols, size, true))
 	mi.position.z = shift
 	return mi
