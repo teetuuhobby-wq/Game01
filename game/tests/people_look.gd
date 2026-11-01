@@ -15,8 +15,16 @@ extends "res://main.gd"
 const Kit := preload("res://tests/people_hd_kit.gd")
 const Town := preload("res://town_data.gd")
 const IDS := ["dorran", "tamsin", "pip"]
-const EYES := {"A": 1.5, "B": 1.45, "C": 1.25, "D": 1.45, "E": 1.52}   # eye height (m) for the close-ups, by shape (the first letter)
+const EYES := {"A": 1.5, "B": 1.45, "C": 1.25, "D": 1.45, "E": 1.52,   # eye height (m) for the close-ups, by shape (the first letter)
+		"VV": 1.4, "KK": 1.3, "KN": 1.45}
+## The packs' look-alikes for our three (tests/pack_people.gd): who plays whom
+const CASTING := {
+	"VV": {"dorran": "TVS_VoxelVillage_PubLandlord.fbx", "tamsin": "TVS_VoxelVillage_Barmaid.fbx", "pip": "TVS_VoxelVillage_YoungMan.fbx"},
+	"KK": {"dorran": "Barbarian.glb", "tamsin": "Mage.glb", "pip": "Rogue.glb"},
+	"KN": {"dorran": "character-k.glb", "tamsin": "character-n.glb", "pip": "character-b.glb"},
+}
 var STYLES := ["D", "C5", "D5", "E5", "D5h", "Dp"]
+var _packs: RefCounted   # tests/pack_people.gd
 
 var _kit: Kit
 var _cam: Camera3D
@@ -35,12 +43,18 @@ func _ready() -> void:
 		STYLES = Array(OS.get_cmdline_user_args()[si + 1].split(","))
 	if "--fps" in OS.get_cmdline_user_args():
 		await _fps()
+	elif "--packs" in OS.get_cmdline_user_args():
+		await _packs_lineup()
 	else:
 		await _shots_run()
 	get_tree().quit()
 
 
 func _version(id: String, style: String) -> Node3D:
+	if CASTING.has(style):
+		if _packs == null:
+			_packs = preload("res://tests/pack_people.gd").new()
+		return _packs.build(style, CASTING[style][id], 1.25 if Town.CAST[id].get("kid", false) else 1.75)
 	return world._make_character(Town.CAST[id]) if style == "A" else _kit.build(Town.CAST[id], style)
 
 
@@ -51,10 +65,10 @@ func _shot(label: String) -> void:
 
 ## Like _shot, but the market crowd keeps out of the way near `spot` (on the city): the
 ## people right in front of the lens would otherwise block the view.
-func _shot_clear(label: String, spot: Vector3) -> void:
+func _shot_clear(label: String, spot: Vector3, radius := 3.5) -> void:
 	for i in 40:
 		for e in world.market_people + world.market_idlers:
-			e["here"] = e["node"].position.distance_to(spot) > 3.5
+			e["here"] = e["node"].position.distance_to(spot) > radius
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	_save_shot("look_" + label)
@@ -139,7 +153,7 @@ func _shots_run() -> void:
 		# 2. Each face up close, from talking distance (1.3 m), at their eye height
 		for k in IDS.size():
 			var n: Node3D = row[k]
-			var eye: float = EYES[style.substr(0, 1)] * (0.72 if Town.CAST[IDS[k]].get("kid", false) else 1.0)
+			var eye: float = float(EYES.get(style, EYES.get(style.substr(0, 1), 1.45))) * (0.72 if Town.CAST[IDS[k]].get("kid", false) else 1.0)
 			_look(n.position - across * 1.8 + Vector3(0, eye, 0), n.position + Vector3(0, eye - 0.12, 0))
 			_cam.fov = 40.0
 			await _shot("face_%s_%s" % [IDS[k], style])
@@ -174,6 +188,36 @@ func _shots_run() -> void:
 			for n in line[st]:
 				n.visible = st == style
 		await _shot_clear("diorama_" + style, _street(s0, 1.2))
+
+
+## --packs: everyone in each of the three free packs, six at a time, standing in the
+## market street at 1.75 m (kids are made smaller later), idling (pack_lineup_<pack>_<n>).
+func _packs_lineup() -> void:
+	var packs := preload("res://tests/pack_people.gd").new()
+	for i in 60:
+		await get_tree().process_frame
+	for l in find_children("*", "CanvasLayer", true, false):
+		l.visible = false
+	errand._bubble_until = 0.0
+	world._crowd.clear()
+	var s0 := 30.0
+	var along := _street_dir(s0)
+	var across := Vector3(-along.z, 0, along.x)
+	var mid := _street(s0, 1.2)
+	for pack in ["VV", "KK", "KN"]:
+		var files: Array = packs.PACKS[pack]["files"]
+		for start in range(0, files.size(), 6):
+			var row := []
+			var group: Array = files.slice(start, start + 6)
+			for k in group.size():
+				var n: Node3D = packs.build(pack, group[k], 1.75, not "--still" in OS.get_cmdline_user_args())
+				_place(n, mid + along * (k - (group.size() - 1) / 2.0) * 1.15, -across)
+				row.append(n)
+			_look(mid - across * 7.0 + Vector3(0, 1.2, 0), mid + Vector3(0, 0.9, 0))
+			_cam.fov = 50.0
+			await _shot_clear("pack_%s_%d" % [pack, start / 6 + 1], mid - across * 3.5, 6.0)   # the whole view between
+			for n in row:
+				n.queue_free()
 
 
 ## Everyone in town at A, B and C: frames per second at busy spots, frame cap off.
